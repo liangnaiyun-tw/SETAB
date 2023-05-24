@@ -8,6 +8,12 @@ import Main from "./layout/Main";
 import RightSidebar from "./layout/RightSidebar";
 import ViewDrawer from "./layout/ViewDrawer";
 
+// Roboto font
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+
 function App() {
   const [positionFirst, setPositionFirst] = useState({ positionFirstX: 0 });
   const [positionSecond, setPositionSecond] = useState({ positionSecondX: 0 });
