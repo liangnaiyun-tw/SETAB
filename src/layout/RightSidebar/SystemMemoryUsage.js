@@ -6,7 +6,7 @@ import { PieChart } from "./PieChart";
 
 function SystemMemoryUsage() {
   const dispatch = useDispatch();
-  const history = useSelector(state => state.tab.tabs);
+  const tabs = useSelector(state => state.tab.tabs);
 
   useEffect(() => {
     const event = dispatch(fetchTabs());
@@ -18,7 +18,7 @@ function SystemMemoryUsage() {
   return (
     <div className="SystemMemoryUsage">
       <PieChart></PieChart>
-      {history.map((task) => {
+      {tabs.map((task) => {
         return (
           <div key={task.tabId} className="tabTask">
             <ul>

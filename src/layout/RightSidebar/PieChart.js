@@ -1,34 +1,16 @@
 import { Pie } from "react-chartjs-2";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { useSelector } from "react-redux";
+import { interpolateColorByIndex } from "../../utils/interpolateColor";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
-
-
-function interpolateColor(index, totalLength) {
-  let g;
-  let r;
-  let b = 70;
-
-  if (index < totalLength / 2) {
-    g = 255;
-    r = Math.round((index / (totalLength / 2 - 1)) * 255);
-  } else {
-    g = Math.round(((totalLength - 1 - index) / (totalLength / 2 - 1)) * 255);
-    r = 255;
-  }
-
-  let color = "rgba(" + r + ", " + g + ", " + b + ", ";
-  return color;
-}
 
 function PieChart() {
   const tabs = useSelector(state => state.tab.tabs);
 
   const totalMemory = tabs.map(tab => tab.privateMemory).reduce((sum, value) => sum + value, 0);
-
   const backgroundColors = tabs.map((tab, index) => {
-    return interpolateColor(index, tabs.length) + '1)';
+    return "rgba(" + interpolateColorByIndex(index, tabs.length).join(", ") + ', 1)';
   });
   const borderColors = tabs.map(tab => {
     return 'rgb(255,255, 255)';
