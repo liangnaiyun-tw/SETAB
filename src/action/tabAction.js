@@ -17,7 +17,7 @@ function getMemory(processes, thunkAPI) {
           id: processes[id].id,
           pid: processes[id].osProcessId,
           tabId: task.tabId,
-          tabName: task.title,
+          tabName: task.title.startsWith("分頁：") ? task.title.substring(3) : task.title.substring(5),
           privateMemory: processes[id].privateMemory,
         });
       }
@@ -25,7 +25,7 @@ function getMemory(processes, thunkAPI) {
   });
 
   tabTasks.sort(function (a, b) {
-    return a.privateMemory <= b.privateMemory;
+    return a.privateMemory - b.privateMemory;
   });
 
   console.log(tabTasks);
