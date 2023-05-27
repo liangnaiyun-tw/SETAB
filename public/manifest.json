@@ -8,6 +8,8 @@
   },
   "options_page": "index.html",
   "permissions": [
-    "processes"
+    "processes",
+    "tabs",
+    "activeTab"
   ]
 }
