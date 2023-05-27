@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Provider } from "react-redux";
+import { tabStore } from "./store/tabStore";
 import "./App.css";
 
 import Draggable from "react-draggable";
@@ -38,34 +40,36 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <LeftSidebar cssLeftSidebar="leftSidebar" styleLeftSidebar={styleLeftSidebar} />
-      <Draggable
-        defaultPosition={{ x: 0, y: 0 }}
-        position={{ x: positionFirst.positionFirstX }}
-        onDrag={onDragFirst}
-      >
-        <div>
-          <ViewDrawer cssDrawer="drawerFirst" cssHandle="handleFirst" />
-        </div>
-      </Draggable>
+    <Provider store={tabStore}>
+      <div className="app">
+        <LeftSidebar cssLeftSidebar="leftSidebar" styleLeftSidebar={styleLeftSidebar} />
+        <Draggable
+          defaultPosition={{ x: 0, y: 0 }}
+          position={{ x: positionFirst.positionFirstX }}
+          onDrag={onDragFirst}
+        >
+          <div>
+            <ViewDrawer cssDrawer="drawerFirst" cssHandle="handleFirst" />
+          </div>
+        </Draggable>
 
-      <Main cssMain="main" styleMain={styleMain} />
+        <Main cssMain="main" styleMain={styleMain} />
 
-      <Draggable
-        defaultPosition={{ x: 0, y: 0 }}
-        position={{ x: positionSecond.positionSecondX }}
-        onDrag={onDragSecond}
-      >
-        <div>
-          <ViewDrawer cssDrawer="drawerSecond" cssHandle="handleSecond" />
-        </div>
-      </Draggable>
-      <RightSidebar
-        cssRightSidebar="rightSidebar"
-        styleRightSidebar={styleRightSidebar}
-      />
-    </div>
+        <Draggable
+          defaultPosition={{ x: 0, y: 0 }}
+          position={{ x: positionSecond.positionSecondX }}
+          onDrag={onDragSecond}
+        >
+          <div>
+            <ViewDrawer cssDrawer="drawerSecond" cssHandle="handleSecond" />
+          </div>
+        </Draggable>
+        <RightSidebar
+          cssRightSidebar="rightSidebar"
+          styleRightSidebar={styleRightSidebar}
+        />
+      </div>
+    </Provider>
   );
 }
 
