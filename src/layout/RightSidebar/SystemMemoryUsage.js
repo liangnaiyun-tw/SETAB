@@ -1,8 +1,11 @@
+import './SystemMemoryUsage.css';
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTabs } from "../../action/tabAction";
 import { useEffect } from "react";
 import { PieChart } from "./PieChart";
-import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
+import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { interpolateColorByIndex } from '../../utils/interpolateColor';
+import CircleIcon from '@mui/icons-material/Circle';
 
 
 function SystemMemoryUsage() {
@@ -20,31 +23,18 @@ function SystemMemoryUsage() {
     <div className="SystemMemoryUsage">
       <PieChart></PieChart>
 
-      <List>
-        {tabs.slice().reverse().map(tab => {
+      <List className="tab-list">
+        {tabs.slice().reverse().map((tab, index) => {
           return (
-            <ListItem className="tabs-list" key={tab.tabName}>
-              <ListItemButton className="tab-item">
-                <ListItemText primary={tab.tabName} className="tag-text"></ListItemText>
-              </ListItemButton>
-            </ListItem>
+            <ListItemButton className="tab-item" key={tab.tabName}>
+              <ListItemIcon className="tab-item-button">
+                <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
+              </ListItemIcon>
+              <ListItemText primary={tab.tabName} className="tab-text"></ListItemText>
+            </ListItemButton>
           );
         })}
       </List>
-
-      {tabs.map((task) => {
-        return (
-          <div key={task.tabId} className="tabTask">
-            <ul>
-              <li>Id: {task.id}</li>
-              <li>Pid: {task.pid}</li>
-              <li>Tab Id: {task.tabId}</li>
-              <li>Tab Name: {task.tabName}</li>
-              <li>Private Memory: {task.privateMemory}</li>
-            </ul>
-          </div>
-        );
-      })}
     </div>
   );
 }
