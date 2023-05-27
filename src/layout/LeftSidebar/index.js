@@ -41,11 +41,11 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                         <Typography variant="h1" color="white" component="div">
 
                             <Box sx={{ flexGrow: 1 }}>
-                                <Grid container >
-                                    <Grid item xs={10}>
-                                        < img src={setab_logo} alt="setab_logo" width="100%" />
+                                <Grid container style={{ display: 'flex', alignItems: 'center' }}>
+                                    <Grid item xs={9}>
+                                        < img src={setab_logo} alt="setab_logo" width="100%" style={{ maxHeight: '67px', maxWidth: '240px' }} />
                                     </Grid>
-                                    <Grid item xs={2} style={{ lineHeight: '60px' }}>
+                                    <Grid item xs={3} style={{ lineHeight: '60px' }}>
 
                                         <IconButton
                                             onClick={handleClick}
@@ -55,7 +55,7 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                                             aria-haspopup="true"
                                             aria-expanded={open ? 'true' : undefined}
                                         >
-                                            <Avatar sx={{ width: 32, height: 32 }}><AddIcon></AddIcon></Avatar>
+                                            <Avatar sx={{ width: 36, height: 36 }} style={{background: '#363636'}}><AddIcon></AddIcon></Avatar>
                                         </IconButton>
                                         <Menu
                                             anchorEl={anchorEl}
