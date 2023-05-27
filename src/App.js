@@ -28,7 +28,7 @@ function App() {
   };
 
   const styleLeftSidebar = {
-    backgroundColor: "aqua",
+    backgroundColor: "#202020",
     width: positionFirst.positionFirstX + 500,
   };
   const styleMain = {
