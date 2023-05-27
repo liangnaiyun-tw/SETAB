@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTabs } from "../../action/tabAction";
 import { useEffect } from "react";
+import { PieChart } from "./PieChart";
 
 
 function SystemMemoryUsage() {
@@ -16,6 +17,7 @@ function SystemMemoryUsage() {
 
   return (
     <div className="SystemMemoryUsage">
+      <PieChart></PieChart>
       {history.map((task) => {
         return (
           <div key={task.tabId} className="tabTask">

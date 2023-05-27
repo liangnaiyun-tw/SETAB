@@ -6,38 +6,30 @@ const updateTabs = createAction('updateTabs');
 
 function getMemory(processes, thunkAPI) {
   console.log(Date.now());
-  let tabTasks = Object.keys(processes).map((id) => {
-    if (processes[id].tasks[0].tabId !== undefined
-      && ((processes[id].tasks[0].title.startsWith("分頁") || processes[id].tasks[0].title.startsWith("Tab")))) {
-      return processes[id];
-    } else {
-      return undefined;
-    }
-  }).filter((task) => task !== undefined);
 
-  console.log(tabTasks);
+  let tabTasks = []
 
-  let newHistory = [];
-  tabTasks.forEach((task) => {
-    task.tasks.forEach((subTask) => {
-      chrome.processes.getProcessIdForTab(subTask.tabId)
-        .then((id) => {
-          console.log(subTask.tabId);
-          console.log(id);
-        })
-        .catch((err) => {
-          console.error(err);
+  Object.keys(processes).forEach((id) => {
+    processes[id].tasks.forEach((task) => {
+      if (task.tabId !== undefined
+        && (task.title.startsWith("分頁") || task.title.startsWith("Tab"))) {
+        tabTasks.push({
+          id: processes[id].id,
+          pid: processes[id].osProcessId,
+          tabId: task.tabId,
+          tabName: task.title,
+          privateMemory: processes[id].privateMemory,
         });
-      newHistory.push({
-        id: task.id,
-        pid: task.osProcessId,
-        tabId: subTask.tabId,
-        tabName: subTask.title,
-        privateMemory: task.privateMemory,
-      });
+      }
     });
   });
-  thunkAPI.dispatch(updateTabs(newHistory));
+
+  tabTasks.sort(function (a, b) {
+    return a.privateMemory <= b.privateMemory;
+  });
+
+  console.log(tabTasks);
+  thunkAPI.dispatch(updateTabs(tabTasks));
 }
 
 const fetchTabs = createAsyncThunk('fetchTabs', async (id, thunkAPI) => {
