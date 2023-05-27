@@ -1,0 +1,12 @@
+.PieChart {
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%;
+  position: relative;
+}
+
+.PieChart canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}

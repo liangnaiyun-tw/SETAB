@@ -1,3 +1,4 @@
+import "./PieChart.css";
 import { Pie } from "react-chartjs-2";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { useSelector } from "react-redux";

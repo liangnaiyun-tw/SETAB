@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchTabs } from "../../action/tabAction";
 import { useEffect } from "react";
 import { PieChart } from "./PieChart";
+import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
 
 function SystemMemoryUsage() {
@@ -18,6 +19,19 @@ function SystemMemoryUsage() {
   return (
     <div className="SystemMemoryUsage">
       <PieChart></PieChart>
+
+      <List>
+        {tabs.slice().reverse().map(tab => {
+          return (
+            <ListItem className="tabs-list" key={tab.tabName}>
+              <ListItemButton className="tab-item">
+                <ListItemText primary={tab.tabName} className="tag-text"></ListItemText>
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
+      </List>
+
       {tabs.map((task) => {
         return (
           <div key={task.tabId} className="tabTask">

@@ -35,7 +35,7 @@ function App() {
     backgroundColor: "beige",
   };
   const styleRightSidebar = {
-    backgroundColor: "aquamarine",
+    backgroundColor: 'rgba(108, 101, 133, 1)',
     width: 500 - positionSecond.positionSecondX,
   };
 
