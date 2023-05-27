@@ -1,9 +1,8 @@
-import './SystemMemoryUsage.css';
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTabs } from "../../action/tabAction";
 import { useEffect } from "react";
 import { PieChart } from "./PieChart";
-import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import { interpolateColorByIndex } from '../../utils/interpolateColor';
 import CircleIcon from '@mui/icons-material/Circle';
 

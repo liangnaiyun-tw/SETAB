@@ -14,7 +14,7 @@ function PieChart() {
     return "rgba(" + interpolateColorByIndex(index, tabs.length).join(", ") + ', 1)';
   });
   const borderColors = tabs.map(tab => {
-    return 'rgb(255,255, 255)';
+    return 'rgb(255, 255, 255)';
   });
 
 
@@ -31,7 +31,7 @@ function PieChart() {
   };
 
   function clickEvent(event, elements) {
-    console.log(elements);
+
   }
 
   return (
@@ -48,6 +48,23 @@ function PieChart() {
                   const tab = tabs[dataIndex];
                   const label = tab.tabName;
                   const value = (context.formattedValue * 100).toFixed(1);
+
+                  const maxLabelLength = 15;
+                  if (label.length > maxLabelLength) {
+                    const words = label.split("");
+                    let line = "";
+                    const wrappedLabel = words.reduce((result, letter) => {
+                      if (line.length + 1 <= maxLabelLength) {
+                        line += letter;
+                      } else {
+                        result.push(line);
+                        line = letter;
+                      }
+                      return result;
+                    }, []);
+                    wrappedLabel.push(line + `: ${value}%`);
+                    return wrappedLabel;
+                  }
                   return `${label}: ${value}%`;
                 },
               },
