@@ -23,6 +23,7 @@ const Board = ({
   containerHeight,
   withScrollableColumns
 }) => {
+  console.log('board initial', initial)
   const [columns, setColumns] = useState(initial);
 
   const [ordered, setOrdered] = useState(Object.keys(initial));

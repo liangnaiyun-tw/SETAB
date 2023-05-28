@@ -19,7 +19,7 @@ import Box from '@mui/material/Box';
 import AddIcon from '@mui/icons-material/Add';
 import Grid from '@mui/material/Grid';
 import MenuList from './MenuList';
-
+import SearchBar from './SearchBar';
 
 
 
@@ -55,7 +55,7 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                                             aria-haspopup="true"
                                             aria-expanded={open ? 'true' : undefined}
                                         >
-                                            <Avatar sx={{ width: 36, height: 36 }} style={{background: '#363636'}}><AddIcon></AddIcon></Avatar>
+                                            <Avatar sx={{ width: 36, height: 36 }} style={{ background: '#363636' }}><AddIcon></AddIcon></Avatar>
                                         </IconButton>
                                         <Menu
                                             anchorEl={anchorEl}
@@ -128,6 +128,8 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                         </Typography>
                     </Toolbar>
                 </AppBar>
+                <Divider light />
+                <SearchBar />
                 <Divider light />
                 <MenuList></MenuList>
             </div>
