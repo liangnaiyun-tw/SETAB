@@ -6,9 +6,8 @@ import { interpolateColorByIndex } from "../../utils/interpolateColor";
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
-function PieChart() {
-  const state = useSelector(state => state.tab);
-  const tabs = state.workspaces[state.currentWorkspaceId]?.groups[state.currentGroupId] || [];
+function PieChart(props) {
+  const tabs = props.tabs;
 
   const totalMemory = tabs.map(tab => tab.privateMemory).reduce((sum, value) => sum + value, 0);
   const backgroundColors = tabs.map((tab, index) => {

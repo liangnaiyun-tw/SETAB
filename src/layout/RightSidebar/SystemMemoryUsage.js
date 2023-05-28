@@ -11,7 +11,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 function SystemMemoryUsage() {
   const dispatch = useDispatch();
   const state = useSelector(state => state.tab);
-  const tabs = state.workspaces[state.currentWorkspaceId]?.groups[state.currentGroupId] || [];
+  const tabs = state.workspaces[state.currentWorkspaceId]?.groups[state.currentGroupId]?.tabs || [];
 
   useEffect(() => {
     const event = dispatch(fetchTabs());
@@ -24,7 +24,7 @@ function SystemMemoryUsage() {
     <div className="SystemMemoryUsage">
       <div id="system-memeory-usage-title">Current Memory Usage</div>
 
-      <PieChart></PieChart>
+      <PieChart tabs={tabs}></PieChart>
 
       <List className="tab-list">
         {tabs.length === 0
@@ -35,7 +35,7 @@ function SystemMemoryUsage() {
                 <ListItemIcon className="tab-item-button">
                   <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
                 </ListItemIcon>
-                <div>
+                <div className='tab-item-text'>
                   <ListItemText
                     primary={tab.tabName}
                     primaryTypographyProps={{
