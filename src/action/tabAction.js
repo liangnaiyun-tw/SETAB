@@ -24,7 +24,6 @@ async function getMemory(processes, thunkAPI) {
       let pid = await chrome.processes.getProcessIdForTab(tab.id);
       let process = await chrome.processes.getProcessInfo(pid, true);
       process = Object.values(process)[0];
-      console.log(tab);
       return {
         tabName: tab.title,
         tabURL: tab.url ? tab.url : tab.pendingUrl,

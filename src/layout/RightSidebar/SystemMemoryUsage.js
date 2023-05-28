@@ -7,6 +7,7 @@ import { List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material"
 import { interpolateColorByIndex } from '../../utils/interpolateColor';
 import CircleIcon from '@mui/icons-material/Circle';
 
+/*global chrome*/
 
 function SystemMemoryUsage() {
   const dispatch = useDispatch();
@@ -20,6 +21,17 @@ function SystemMemoryUsage() {
     }
   }, [dispatch]);
 
+  function clickOnOpenedTab(event, tabName) {
+    console.log(tabName);
+    chrome.tabs.query({ currentWindow: true, title: tabName })
+      .then((tabs) => {
+        chrome.tabs.highlight({ tabs: tabs[0].index });
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+
   return (
     <div className="SystemMemoryUsage">
       <div id="system-memeory-usage-title">Current Memory Usage</div>
@@ -31,7 +43,7 @@ function SystemMemoryUsage() {
           ? <div id="no-tab-message">No Tabs</div>
           : tabs.slice().reverse().map((tab, index) => {
             return (
-              <ListItemButton className="tab-item" key={tab.tabName}>
+              <ListItemButton className="tab-item" key={tab.tabName} onClick={(event) => clickOnOpenedTab(event, tab.tabName)}>
                 <ListItemIcon className="tab-item-button">
                   <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
                 </ListItemIcon>
