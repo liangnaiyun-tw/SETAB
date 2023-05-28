@@ -3,6 +3,7 @@ import { Pie } from "react-chartjs-2";
 import { ArcElement, Chart as ChartJS, Legend, Title, Tooltip } from "chart.js";
 import { useSelector } from "react-redux";
 import { interpolateColorByIndex } from "../../utils/interpolateColor";
+import { useState } from "react";
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
@@ -30,8 +31,13 @@ function PieChart(props) {
     ],
   };
 
-  function clickEvent(event, elements) {
-    console.log(elements);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  function modalClickEvent(event, elements) {
+    // if (elements.length > 0) {
+
+    // }
   }
 
   return (
@@ -39,7 +45,7 @@ function PieChart(props) {
       <Pie
         data={data}
         options={{
-          onClick: clickEvent,
+          onClick: modalClickEvent,
           plugins: {
             tooltip: {
               callbacks: {

@@ -62,10 +62,8 @@ const initState = {
 const tabReducer = createReducer(initState, (builder) => {
   builder
     .addCase(updateTabs, (state, action) => {
-      const { workspaceId, groupId, tabs } = action.payload;
-      state.groups[groupId].tabs = [
-        ...tabs
-      ];
+      const { groupId, tabs } = action.payload;
+      state.groups[groupId].tabs = tabs;
       return state;
     })
     .addCase(insertTabs, (state, action) => {
@@ -73,11 +71,13 @@ const tabReducer = createReducer(initState, (builder) => {
 
       if (!state.workspaces[workspaceId]) {
         state.workspaces[workspaceId] = {
-          groups: [
-            groupId
-          ],
+          groups: []
         };
       }
+      if (!state.workspaces[workspaceId].groups.includes(groupId)) {
+        state.workspaces[workspaceId].groups.push(groupId);
+      }
+
       if (!state.groups[groupId]) {
         state.groups[groupId] = {
           tabs: [],

@@ -9,40 +9,36 @@ const insertTabs = createAction('insertTabs');
 
 const switchGroup = createAction('switchGroup');
 
+let isGetMemoryRunning = false;
 async function getMemory(processes, thunkAPI) {
+  if (isGetMemoryRunning) return;
+  isGetMemoryRunning = true;
+
   console.log(Date.now());
 
   const currentState = thunkAPI.getState();
 
-  let tabTasks = [];
-  for (let id of Object.keys(processes)) {
-    for (let task of processes[id].tasks) {
-      if (
-        task.tabId !== undefined &&
-        (task.title.startsWith("分頁") || task.title.startsWith("Tab"))) {
-
-        let tabTask = {
-          tabName: task.title.startsWith("分頁：")
-            ? task.title.substring(3)
-            : task.title.substring(5),
-          privateMemory: processes[id].privateMemory,
-        };
-
-        try {
-          const tab = await chrome.tabs.get(task.tabId);
-          tabTask.tabURL = tab.url !== undefined ? tab.url : tab.pendingUrl;
-        } catch (err) {
-          console.error(err);
-        }
-        tabTasks.push(tabTask);
-      }
+  let tabsInCurrentWindow = await chrome.tabs.query({ currentWindow: true });
+  let tabTasks = await Promise.allSettled(Object.values(tabsInCurrentWindow).map(async (tab) => {
+    try {
+      let pid = await chrome.processes.getProcessIdForTab(tab.id);
+      let process = await chrome.processes.getProcessInfo(pid, true);
+      process = Object.values(process)[0];
+      return {
+        tabName: tab.title,
+        tabURL: tab.url ? tab.url : tab.pendingUrl,
+        tabIconURL: tab.favIconUrl,
+        privateMemory: process.privateMemory,
+      };
+    } catch (err) {
+      return null;
     }
-  }
-
+  }));
+  tabTasks = tabTasks.map(tab => tab.value).filter(tab => tab != null);
+  console.log(tabTasks);
   tabTasks.sort(function (a, b) {
     return a.privateMemory - b.privateMemory;
   });
-  console.log(tabTasks);
 
   let workspaceId = "unsaved";
   let groupId = currentState.tab.currentGroupId;
@@ -64,12 +60,15 @@ async function getMemory(processes, thunkAPI) {
     workspaceId,
     groupId
   }));
+
+  isGetMemoryRunning = false;
 }
 
-const fetchTabs = createAsyncThunk('fetchTabs', async (id, thunkAPI) => {
-  chrome.processes.onUpdatedWithMemory.addListener((processes) => { getMemory(processes, thunkAPI) });
+const fetchTabs = createAsyncThunk('fetchTabs', async (_, thunkAPI) => {
+  const processesListener = (processes) => { getMemory(processes, thunkAPI) };
+  chrome.processes.onUpdatedWithMemory.addListener(processesListener);
   return () => {
-    chrome.processes.onUpdatedWithMemory.removeListener((processes) => getMemory(processes, thunkAPI));
+    chrome.processes.onUpdatedWithMemory.removeListener(processesListener);
   }
 });
 

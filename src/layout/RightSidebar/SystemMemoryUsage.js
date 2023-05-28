@@ -18,7 +18,7 @@ function SystemMemoryUsage() {
     return () => {
       event();
     }
-  }, [dispatch]);
+  }, []);
 
   return (
     <div className="SystemMemoryUsage">
