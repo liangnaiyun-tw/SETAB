@@ -18,7 +18,7 @@ function SystemMemoryUsage() {
     return () => {
       event();
     }
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="SystemMemoryUsage">
@@ -28,7 +28,7 @@ function SystemMemoryUsage() {
 
       <List className="tab-list">
         {tabs.length === 0
-          ? <div>No Tabs Yet</div>
+          ? <div id="no-tab-message">No Tabs</div>
           : tabs.slice().reverse().map((tab, index) => {
             return (
               <ListItemButton className="tab-item" key={tab.tabName}>

@@ -1,9 +1,9 @@
 import "./PieChart.css";
 import { Pie } from "react-chartjs-2";
 import { ArcElement, Chart as ChartJS, Legend, Title, Tooltip } from "chart.js";
-import { useSelector } from "react-redux";
 import { interpolateColorByIndex } from "../../utils/interpolateColor";
 import { useState } from "react";
+import { GroupModal } from "./GroupModal";
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
@@ -35,9 +35,12 @@ function PieChart(props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   function modalClickEvent(event, elements) {
-    // if (elements.length > 0) {
-
-    // }
+    if (elements.length > 0) {
+      const dataIndex = elements[0].index;
+      const tab = tabs[dataIndex];
+      setSelectedItem(tab);
+      setModalOpen(true);
+    }
   }
 
   return (
@@ -78,6 +81,12 @@ function PieChart(props) {
           },
         }}
       />
+
+      <GroupModal
+        modalOpen={modalOpen}
+        setModalOpen={setModalOpen}
+        selectedItem={selectedItem}
+      ></GroupModal>
     </div>
   );
 }
