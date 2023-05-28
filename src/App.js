@@ -7,6 +7,7 @@ import LeftSidebar from "./layout/LeftSidebar";
 import Main from "./layout/Main";
 import RightSidebar from "./layout/RightSidebar";
 import ViewDrawer from "./layout/ViewDrawer";
+import styled from "@xstyled/styled-components";
 
 // Roboto font
 import '@fontsource/roboto/300.css';
@@ -24,6 +25,11 @@ function App() {
   const onDragSecond = (e, data) => {
     setPositionSecond({ positionSecondX: data.x });
   };
+
+  const Container = styled.div`
+    overflow-x: scroll;
+    display: grid;
+  `;
 
   const styleLeftSidebar = {
     backgroundColor: "#202020",
@@ -49,9 +55,9 @@ function App() {
           <ViewDrawer cssDrawer="drawerFirst" cssHandle="handleFirst" />
         </div>
       </Draggable>
-
-      <Main cssMain="main" styleMain={styleMain} />
-
+      <Container>
+        <Main cssMain="main" styleMain={styleMain} />
+      </Container>
       <Draggable
         defaultPosition={{ x: 0, y: 0 }}
         position={{ x: positionSecond.positionSecondX }}
