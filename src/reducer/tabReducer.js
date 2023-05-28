@@ -8,41 +8,53 @@ const initState = {
   currentGroupId: "",
   workspaces: {
     unsaved: {
-      groups: {
-        "group-1": {
-          tabs: [
-            {
-              tabName: "javascript - Where is redux store saved? - Stack Overflow",
-              tabURL: "https://stackoverflow.com/questions/38329193/where-is-redux-store-saved",
-              privateMemory: 38912000
-            }
-          ]
-        }
-      },
+      groups: [
+        "group-1"
+      ]
     },
     workspace1: {
-      groups: {
-        "group-2": {
-          tabs: [
-            {
-              tabName: "javascript - Where is redux store saved? - Stack Overflow",
-              tabURL: "https://stackoverflow.com/questions/38329193/",
-              privateMemory: 42736000
-            }
-          ]
-        }
-      }
+      groups: [
+        "group-2"
+      ]
     },
     workspace2: {
-      groups: {
-        "parent-group": {
-          groups: {
-            "child-group": {
-              tabs: [],
-            }
-          }
+      groups: [
+        "parent-group"
+      ]
+    }
+  },
+  groups: {
+    "group-1": {
+      tabs: [
+        {
+          tabName: "javascript - Where is redux store saved? - Stack Overflow",
+          tabURL: "https://stackoverflow.com/questions/38329193/where-is-redux-store-saved",
+          privateMemory: 38912000
+        },
+      ]
+    },
+    "group-2": {
+      tabs: [
+        {
+          tabName: "javascript - Where is redux store saved? - Stack Overflow",
+          tabURL: "https://stackoverflow.com/questions/38329193/",
+          privateMemory: 42736000
         }
-      }
+      ]
+    },
+    "parent-group": {
+      groups: [
+        "child-group"
+      ]
+    },
+    "child-group": {
+      tabs: [
+        {
+          tabName: "Open AI",
+          tabURL: "https://chat.openai.com/?model=text-davinci-002-render-sha",
+          privateMemory: 12641280
+        }
+      ],
     }
   }
 };
@@ -51,7 +63,7 @@ const tabReducer = createReducer(initState, (builder) => {
   builder
     .addCase(updateTabs, (state, action) => {
       const { workspaceId, groupId, tabs } = action.payload;
-      state.workspaces[workspaceId].groups[groupId].tabs = [
+      state.groups[groupId].tabs = [
         ...tabs
       ];
       return state;
@@ -61,16 +73,18 @@ const tabReducer = createReducer(initState, (builder) => {
 
       if (!state.workspaces[workspaceId]) {
         state.workspaces[workspaceId] = {
-          groups: {},
+          groups: [
+            groupId
+          ],
         };
       }
-      if (!state.workspaces[workspaceId].groups[groupId]) {
-        state.workspaces[workspaceId].groups[groupId] = {
+      if (!state.groups[groupId]) {
+        state.groups[groupId] = {
           tabs: [],
         };
       }
 
-      state.workspaces[workspaceId].groups[groupId].tabs.push(...tabs);
+      state.groups[groupId].tabs.push(...tabs);
       return state;
     })
     .addCase(switchGroup, (state, action) => {

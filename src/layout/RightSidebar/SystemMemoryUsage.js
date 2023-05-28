@@ -11,7 +11,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 function SystemMemoryUsage() {
   const dispatch = useDispatch();
   const state = useSelector(state => state.tab);
-  const tabs = state.workspaces[state.currentWorkspaceId]?.groups[state.currentGroupId]?.tabs || [];
+  const tabs = state.groups[state.currentGroupId]?.tabs || [];
 
   useEffect(() => {
     const event = dispatch(fetchTabs());
