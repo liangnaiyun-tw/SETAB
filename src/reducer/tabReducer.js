@@ -30,7 +30,7 @@ const initState = {
           tabName: "javascript - Where is redux store saved? - Stack Overflow",
           tabURL: "https://stackoverflow.com/questions/38329193/where-is-redux-store-saved",
           tabIconURL: "https://developer.chrome.com/images/meta/favicon-32x32.png",
-          privateMemory: 38912000
+          privateMemory: 38912000,
         },
       ]
     },

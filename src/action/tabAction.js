@@ -14,7 +14,6 @@ async function getMemory(processes, thunkAPI) {
   if (isGetMemoryRunning) return;
   isGetMemoryRunning = true;
 
-  console.log(Date.now());
 
   const currentState = thunkAPI.getState();
 
@@ -29,6 +28,7 @@ async function getMemory(processes, thunkAPI) {
         tabURL: tab.url ? tab.url : tab.pendingUrl,
         tabIconURL: tab.favIconUrl,
         privateMemory: process.privateMemory,
+        windowIndex: tab.index,
       };
     } catch (err) {
       console.error(err);
@@ -36,7 +36,6 @@ async function getMemory(processes, thunkAPI) {
     }
   }));
   tabTasks = tabTasks.map(tab => tab.value).filter(tab => tab != null);
-  console.log(tabTasks);
   tabTasks.sort(function (a, b) {
     return a.privateMemory - b.privateMemory;
   });
