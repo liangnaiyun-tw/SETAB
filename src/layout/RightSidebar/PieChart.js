@@ -1,14 +1,14 @@
 import "./PieChart.css";
 import { Pie } from "react-chartjs-2";
-import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
+import { ArcElement, Chart as ChartJS, Legend, Title, Tooltip } from "chart.js";
 import { useSelector } from "react-redux";
 import { interpolateColorByIndex } from "../../utils/interpolateColor";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
 function PieChart() {
   const state = useSelector(state => state.tab);
-  const tabs = state.workspaces[state.currentWorkspaceId].groups[state.currentGroupId];
+  const tabs = state.workspaces[state.currentWorkspaceId]?.groups[state.currentGroupId] || [];
 
   const totalMemory = tabs.map(tab => tab.privateMemory).reduce((sum, value) => sum + value, 0);
   const backgroundColors = tabs.map((tab, index) => {
@@ -32,7 +32,7 @@ function PieChart() {
   };
 
   function clickEvent(event, elements) {
-
+    console.log(elements);
   }
 
   return (

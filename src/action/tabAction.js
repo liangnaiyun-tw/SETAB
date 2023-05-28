@@ -1,7 +1,9 @@
 import { createAction, createAsyncThunk } from "@reduxjs/toolkit";
-import { createHash256Str } from "../utils/hash";
+import { createHash32Str } from "../utils/hash";
 
 /*global chrome*/
+
+const updateTabs = createAction('updateTabs');
 
 const insertTabs = createAction('insertTabs');
 
@@ -9,6 +11,8 @@ const switchGroup = createAction('switchGroup');
 
 async function getMemory(processes, thunkAPI) {
   console.log(Date.now());
+
+  const currentState = thunkAPI.getState();
 
   let tabTasks = [];
   for (let id of Object.keys(processes)) {
@@ -38,15 +42,24 @@ async function getMemory(processes, thunkAPI) {
   tabTasks.sort(function (a, b) {
     return a.privateMemory - b.privateMemory;
   });
+  console.log(tabTasks);
 
   let workspaceId = "unsaved";
-  let groupId = "group-" + createHash256Str();
-  console.log(tabTasks);
-  thunkAPI.dispatch(insertTabs({
-    workspaceId,
-    groupId,
-    tabs: tabTasks
-  }));
+  let groupId = currentState.tab.currentGroupId;
+  if (groupId === "") {
+    groupId = "group-" + createHash32Str();
+    thunkAPI.dispatch(insertTabs({
+      workspaceId,
+      groupId,
+      tabs: tabTasks
+    }));
+  } else {
+    thunkAPI.dispatch(updateTabs({
+      workspaceId,
+      groupId,
+      tabs: tabTasks
+    }));
+  }
   thunkAPI.dispatch(switchGroup({
     workspaceId,
     groupId
@@ -61,4 +74,4 @@ const fetchTabs = createAsyncThunk('fetchTabs', async (id, thunkAPI) => {
 });
 
 
-export { insertTabs, switchGroup, fetchTabs };
+export { updateTabs, insertTabs, switchGroup, fetchTabs };

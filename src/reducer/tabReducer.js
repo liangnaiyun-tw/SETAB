@@ -1,11 +1,11 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { insertTabs, switchGroup } from "../action/tabAction";
+import { insertTabs, switchGroup, updateTabs } from "../action/tabAction";
 
 
 const initState = {
   /*These are fake data*/
   currentWorkspaceId: "unsaved",
-  currentGroupId: "group-1",
+  currentGroupId: "",
   workspaces: {
     unsaved: {
       groups: {
@@ -34,6 +34,15 @@ const initState = {
 
 const tabReducer = createReducer(initState, (builder) => {
   builder
+    .addCase(updateTabs, (state, action) => {
+      const { workspaceId, groupId, tabs } = action.payload;
+
+      state.workspaces[workspaceId].groups[groupId] = [
+        ...tabs
+      ];
+
+      return state;
+    })
     .addCase(insertTabs, (state, action) => {
       const { workspaceId, groupId, tabs } = action.payload;
 

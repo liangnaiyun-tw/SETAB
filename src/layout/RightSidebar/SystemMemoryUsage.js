@@ -1,3 +1,4 @@
+import './SystemMemoryUsage.css';
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTabs } from "../../action/tabAction";
 import { useEffect } from "react";
@@ -10,7 +11,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 function SystemMemoryUsage() {
   const dispatch = useDispatch();
   const state = useSelector(state => state.tab);
-  const tabs = state.workspaces[state.currentWorkspaceId].groups[state.currentGroupId];
+  const tabs = state.workspaces[state.currentWorkspaceId]?.groups[state.currentGroupId] || [];
 
   useEffect(() => {
     const event = dispatch(fetchTabs());
@@ -21,19 +22,32 @@ function SystemMemoryUsage() {
 
   return (
     <div className="SystemMemoryUsage">
+      <div id="system-memeory-usage-title">Current Memory Usage</div>
+
       <PieChart></PieChart>
 
       <List className="tab-list">
-        {tabs.slice().reverse().map((tab, index) => {
-          return (
-            <ListItemButton className="tab-item" key={tab.tabName}>
-              <ListItemIcon className="tab-item-button">
-                <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
-              </ListItemIcon>
-              <ListItemText primary={tab.tabName} className="tab-text"></ListItemText>
-            </ListItemButton>
-          );
-        })}
+        {tabs.length === 0
+          ? <div>No Tabs Yet</div>
+          : tabs.slice().reverse().map((tab, index) => {
+            return (
+              <ListItemButton className="tab-item" key={tab.tabName}>
+                <ListItemIcon className="tab-item-button">
+                  <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
+                </ListItemIcon>
+                <div>
+                  <ListItemText
+                    primary={tab.tabName}
+                    primaryTypographyProps={{
+                      style: { whiteSpace: "normal" }
+                    }}
+                    className="tab-text">
+                  </ListItemText>
+                  {`${state.currentWorkspaceId}/${state.currentGroupId}`}
+                </div>
+              </ListItemButton>
+            );
+          })}
       </List>
     </div>
   );
