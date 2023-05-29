@@ -135,7 +135,7 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
 
 })
 export const createTab = createAsyncThunk('firestore/createTab', async (tab, thunkAPI) => {
-    
+
     const user = thunkAPI.getState().auth.user;
 
     const newTab = {

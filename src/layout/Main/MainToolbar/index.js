@@ -25,7 +25,5 @@ export default function MainToolbar() {
                 <MainTab />
             </Box>
         </>
-
-
     );
 }
