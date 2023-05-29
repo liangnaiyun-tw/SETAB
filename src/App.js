@@ -1,6 +1,4 @@
-import React, { useState } from "react";
-import { Provider } from "react-redux";
-import { tabStore } from "./store/tabStore";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 
 // firebase

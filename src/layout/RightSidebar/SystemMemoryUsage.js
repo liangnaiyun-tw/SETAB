@@ -7,13 +7,14 @@ import { interpolateColorByIndex } from '../../utils/interpolateColor';
 import CircleIcon from '@mui/icons-material/Circle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { createRandomUUID } from '../../utils/hash';
-import { fetchTabs } from '../../reducer/tabSlice';
+import { fetchTabs } from '../../features/tabs/tabSlice';
 
 /*global chrome*/
 
 function SystemMemoryUsage() {
   const dispatch = useDispatch();
   const state = useSelector(state => state.tab);
+  console.log(state);
   const tabs = state.groups[state.currentGroupId]?.tabs || [];
 
   useEffect(() => {

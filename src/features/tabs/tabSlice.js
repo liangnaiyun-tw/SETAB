@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { createRandomUUID } from "../utils/hash";
+import { createRandomUUID } from "../../utils/hash";
 
 /*global chrome*/
 
@@ -169,7 +169,6 @@ const tabSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchTabs, (state, action) => {
-        console.log(action);
         return state;
       });
   }
