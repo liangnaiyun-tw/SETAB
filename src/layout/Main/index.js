@@ -10,9 +10,12 @@ function handleClick(event) {
   event.preventDefault();
   console.info('You clicked a breadcrumb.');
 }
+import MainToolbar from "./MainToolbar";
+import { connect } from 'react-redux'
 
 const Main = ({ cssMain, styleMain, token }) => {
   return (
+    <>
     <div className={cssMain} style={styleMain}>
       <div role="presentation" onClick={handleClick}>
         <Breadcrumbs aria-label="breadcrumb" className="Breadcrumbs">
@@ -29,8 +32,9 @@ const Main = ({ cssMain, styleMain, token }) => {
           <Typography color="text.primary">SubGroup</Typography>
         </Breadcrumbs>
       </div>
-      <MainTab token={token} />
+      <<MainToolbar />Tab token={token} />
     </div>
+    </>
   );
 };
 

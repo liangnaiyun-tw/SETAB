@@ -24,7 +24,7 @@ import GroupModal from "../Component/GroupModal/GroupModal";
 import Login from "../Component/Login/Login";
 import "./index.css";
 import { useSelector } from "react-redux";
-
+import SearchBar from './SearchBar';
 
 
 
@@ -136,6 +136,8 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                         </Typography>
                     </Toolbar>
                 </AppBar>
+                <Divider light />
+                <SearchBar />
                 <Divider light />
                 <MenuList></MenuList>
                 <div className="loginBlock">
