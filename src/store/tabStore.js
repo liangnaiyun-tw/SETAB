@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { tabReducer } from "../reducer/tabReducer";
+import tabSlice from "../reducer/tabSlice";
 
 const tabStore = configureStore({
   reducer: {
-    tab: tabReducer
+    tab: tabSlice
   }
 });
 

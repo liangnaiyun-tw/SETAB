@@ -1,9 +1,7 @@
-function createHash32Str() {
-  let hash = "";
-  for (let i = 1; i <= 8; ++i) {
-    hash += Math.floor(Math.random() * 16).toString(16);
-  }
-  return hash;
+import { v4 as uuidv4 } from 'uuid';
+
+function createRandomUUID() {
+  return uuidv4();
 }
 
-export { createHash32Str };
+export { createRandomUUID };

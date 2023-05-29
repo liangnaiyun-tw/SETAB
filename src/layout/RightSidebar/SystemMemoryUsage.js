@@ -1,13 +1,13 @@
 import './SystemMemoryUsage.css';
 import { useDispatch, useSelector } from "react-redux";
-import { fetchTabs } from "../../action/tabAction";
 import { useEffect } from "react";
 import { PieChart } from "./PieChart";
 import { IconButton, List, ListItem, ListItemButton, Typography } from "@mui/material";
 import { interpolateColorByIndex } from '../../utils/interpolateColor';
 import CircleIcon from '@mui/icons-material/Circle';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { createHash32Str } from '../../utils/hash';
+import { createRandomUUID } from '../../utils/hash';
+import { fetchTabs } from '../../reducer/tabSlice';
 
 /*global chrome*/
 
@@ -51,7 +51,7 @@ function SystemMemoryUsage() {
           ? <div id="no-tab-message">No Tabs</div>
           : tabs.slice().reverse().map((tab, index) => {
             return (
-              <ListItem key={`${tab.tabName}-${createHash32Str()}`} sx={{ columnGap: "3%" }}>
+              <ListItem key={`${tab.tabName}-${createRandomUUID()}`} sx={{ columnGap: "3%" }}>
                 <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
                 <ListItemButton className="tab-item" onClick={(event) => clickOnOpenedTab(event, tab.windowIndex)}>
                   <div className='tab-item-text'>
