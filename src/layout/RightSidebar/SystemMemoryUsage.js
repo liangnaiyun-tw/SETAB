@@ -1,69 +1,75 @@
-import { useEffect, useState } from "react";
+import './SystemMemoryUsage.css';
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { PieChart } from "./PieChart";
+import { IconButton, List, ListItem, ListItemButton, Typography } from "@mui/material";
+import { interpolateColorByIndex } from '../../utils/interpolateColor';
+import CircleIcon from '@mui/icons-material/Circle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { createRandomUUID } from '../../utils/hash';
+import { fetchTabs } from '../../reducer/tabSlice';
 
 /*global chrome*/
 
 function SystemMemoryUsage() {
-  const [history, setHistory] = useState([]);
+  const dispatch = useDispatch();
+  const state = useSelector(state => state.tab);
+  const tabs = state.groups[state.currentGroupId]?.tabs || [];
 
-  function getMemory(processes) {
-    console.log(Date.now());
-    let tabTasks = Object.keys(processes).map((id) => {
-      if (processes[id].tasks[0].tabId !== undefined) {
-        return processes[id];
-      } else {
-        return undefined;
-      }
-    }).filter((task) => task !== undefined);
+  useEffect(() => {
+    const event = dispatch(fetchTabs());
+    return () => {
+      event();
+    }
+  }, [dispatch]);
 
-    console.log(tabTasks);
-
-    let newHistory = [];
-    tabTasks.forEach((task) => {
-      task.tasks.forEach((subTask) => {
-        chrome.processes.getProcessIdForTab(subTask.tabId)
-          .then((id) => {
-            console.log(subTask.tabId);
-            console.log(id);
-          });
-        newHistory.push({
-          id: task.id,
-          parentPid: task.osProcessId,
-          pid: task.osProcessId,
-          tabId: subTask.tabId,
-          tabName: subTask.title,
-          jsMemoryAllocated: task.jsMemoryAllocated,
-          jsMemoryUsed: task.jsMemoryUsed,
-          privateMemory: task.privateMemory,
-        });
+  function clickOnOpenedTab(event, windowIndex) {
+    chrome.tabs.highlight({ tabs: windowIndex })
+      .catch((err) => {
+        console.error(err);
       });
-    });
-    setHistory(newHistory);
   }
 
-  // useEffect(() => {
-  //   chrome.processes.onUpdatedWithMemory.addListener(getMemory);
-  //   return () => {
-  //     chrome.processes.onUpdatedWithMemory.removeListener(getMemory);
-  //   };
-  // }, []);
+  function closeTab(event, windowIndex) {
+    chrome.tabs.query({ currentWindow: true, index: windowIndex })
+      .then((tabs) => {
+        chrome.tabs.remove(tabs[0].id);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+  }
 
   return (
     <div className="SystemMemoryUsage">
-      {history.map((task) => {
-        return (
-          <div key={task.tabId} className="tabTask">
-            <ul>
-              <li>Id: {task.id}</li>
-              <li>Pid: {task.pid}</li>
-              <li>Tab Id: {task.tabId}</li>
-              <li>Tab Name: {task.tabName}</li>
-              <li>Javascript Memory Allocated: {task.jsMemoryAllocated}</li>
-              <li>Javascript Memory Used: {task.jsMemoryUsed}</li>
-              <li>Private Memory: {task.privateMemory}</li>
-            </ul>
-          </div>
-        );
-      })}
+      <div id="system-memeory-usage-title">Current Memory Usage</div>
+
+      <PieChart tabs={tabs}></PieChart>
+
+      <List className="tab-list">
+        {tabs.length === 0
+          ? <div id="no-tab-message">No Tabs</div>
+          : tabs.slice().reverse().map((tab, index) => {
+            return (
+              <ListItem key={`${tab.tabName}-${createRandomUUID()}`} sx={{ columnGap: "3%" }}>
+                <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
+                <ListItemButton className="tab-item" onClick={(event) => clickOnOpenedTab(event, tab.windowIndex)}>
+                  <div className='tab-item-text'>
+                    <Typography variant='body1'>
+                      {tab.tabName}
+                    </Typography>
+                    <div>
+                      {`${state.currentWorkspaceId}/${state.currentGroupId}`}
+                    </div>
+                  </div>
+                </ListItemButton>
+                <IconButton onClick={(event) => closeTab(event, tab.windowIndex)}>
+                  <DeleteIcon></DeleteIcon>
+                </IconButton>
+              </ListItem>
+            );
+          })}
+      </List>
     </div>
   );
 }
