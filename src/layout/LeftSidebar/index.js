@@ -20,6 +20,11 @@ import AddIcon from '@mui/icons-material/Add';
 import Grid from '@mui/material/Grid';
 import MenuList from './MenuList';
 
+import GroupModal from "../Component/GroupModal/GroupModal";
+import Login from "../Component/Login/Login";
+import "./index.css";
+import { useSelector } from "react-redux";
+
 
 
 
@@ -32,6 +37,9 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
     const handleClose = () => {
         setAnchorEl(null);
     };
+
+    const { user } = useSelector((store) => store.auth)
+
     return (
         <>
 
@@ -55,7 +63,7 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                                             aria-haspopup="true"
                                             aria-expanded={open ? 'true' : undefined}
                                         >
-                                            <Avatar sx={{ width: 36, height: 36 }} style={{background: '#363636'}}><AddIcon></AddIcon></Avatar>
+                                            <Avatar sx={{ width: 36, height: 36 }} style={{ background: '#363636' }}><AddIcon></AddIcon></Avatar>
                                         </IconButton>
                                         <Menu
                                             anchorEl={anchorEl}
@@ -130,6 +138,17 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                 </AppBar>
                 <Divider light />
                 <MenuList></MenuList>
+                <div className="loginBlock">
+                    {user === undefined || user === null ?
+                        <>
+                            <Login />
+                        </> :
+                        <>
+                            <img className="userImage" src={user?.photoURL} alt="" />
+                            <span className="userDisplayName">&nbsp; {user?.displayName}</span>
+                        </>
+                    }
+                </div>
             </div>
         </>
     );

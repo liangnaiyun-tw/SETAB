@@ -1,0 +1,48 @@
+.NoteCard{
+    background-color: #F2F6FB;
+    border-radius: 25px;
+    overflow: hidden; 
+
+    min-width: 0;
+    max-width: 100%;
+    height: 25vh;
+    padding: 1rem;
+    cursor: pointer;
+    
+    transition: all .3s linear;
+
+    &:hover{
+        background-color: #d0d3d7;
+    }
+
+    &:hover > .Preview {
+        transform: translateY(-10px);
+    }
+}
+
+
+
+
+.Preview {
+    border-radius: 25px;
+    width: 100%;
+    max-height: auto;
+    transition: transform .3s ease-in-out;
+}
+
+.LastAccess {
+    text-indent: .5rem;
+    color: gray;
+}
+
+.Title {
+    overflow: hidden; 
+    display: flex;
+    align-items: center;
+}
+
+.Name {
+    text-overflow: ellipsis;
+    overflow: hidden; 
+    white-space: nowrap;
+}
