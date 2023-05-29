@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
+
+// firebase
+import app from "./shared/Firebase";
 
 import Draggable from "react-draggable";
 
@@ -14,7 +17,17 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
+// redux
+import { useDispatch, useSelector } from "react-redux";
+import { initLogin } from "./features/firebase/auth/authSlice";
+import { loadStructureByUser } from "./features/firebase/firestore/firestoreSlice";
+
+
+app();
+
 function App() {
+
+  const { user } = useSelector((store) => store.auth) ;
   const [positionFirst, setPositionFirst] = useState({ positionFirstX: 0 });
   const [positionSecond, setPositionSecond] = useState({ positionSecondX: 0 });
 
@@ -36,36 +49,58 @@ function App() {
     backgroundColor: "aquamarine",
     width: 500 - positionSecond.positionSecondX,
   };
+  const styleFooter = {
+    height: "5vh",
+    backgroundColor: "#7E1717",
+    textAlign: "center",
+    lineHeight: "5vh",
+    color: "white"
+  };
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+      dispatch(initLogin());
+  }, [])
+
+  useEffect(() => {
+    dispatch(loadStructureByUser());
+  }, [user])
 
   return (
-    <div className="app">
-      <LeftSidebar cssLeftSidebar="leftSidebar" styleLeftSidebar={styleLeftSidebar} />
-      <Draggable
-        defaultPosition={{ x: 0, y: 0 }}
-        position={{ x: positionFirst.positionFirstX }}
-        onDrag={onDragFirst}
-      >
-        <div>
-          <ViewDrawer cssDrawer="drawerFirst" cssHandle="handleFirst" />
-        </div>
-      </Draggable>
+    <>
+      <div className="app">
+        <LeftSidebar cssLeftSidebar="leftSidebar" styleLeftSidebar={styleLeftSidebar}/>
+        <Draggable
+          defaultPosition={{ x: 0, y: 0 }}
+          position={{ x: positionFirst.positionFirstX }}
+          onDrag={onDragFirst}
+        >
+          <div>
+            <ViewDrawer cssDrawer="drawerFirst" cssHandle="handleFirst" />
+          </div>
+        </Draggable>
 
-      <Main cssMain="main" styleMain={styleMain} />
+        <Main cssMain="main" styleMain={styleMain}/>
 
-      <Draggable
-        defaultPosition={{ x: 0, y: 0 }}
-        position={{ x: positionSecond.positionSecondX }}
-        onDrag={onDragSecond}
-      >
-        <div>
-          <ViewDrawer cssDrawer="drawerSecond" cssHandle="handleSecond" />
-        </div>
-      </Draggable>
-      <RightSidebar
-        cssRightSidebar="rightSidebar"
-        styleRightSidebar={styleRightSidebar}
-      />
-    </div>
+        <Draggable
+          defaultPosition={{ x: 0, y: 0 }}
+          position={{ x: positionSecond.positionSecondX }}
+          onDrag={onDragSecond}
+        >
+          <div>
+            <ViewDrawer cssDrawer="drawerSecond" cssHandle="handleSecond" />
+          </div>
+        </Draggable>
+        <RightSidebar
+          cssRightSidebar="rightSidebar"
+          styleRightSidebar={styleRightSidebar}
+        />
+      </div>
+      <div style={styleFooter}>
+        Copyright © 2023 SETab Team.
+      </div>
+    </>
   );
 }
 

@@ -40,12 +40,12 @@ function SystemMemoryUsage() {
     setHistory(newHistory);
   }
 
-  useEffect(() => {
-    chrome.processes.onUpdatedWithMemory.addListener(getMemory);
-    return () => {
-      chrome.processes.onUpdatedWithMemory.removeListener(getMemory);
-    };
-  }, []);
+  // useEffect(() => {
+  //   chrome.processes.onUpdatedWithMemory.addListener(getMemory);
+  //   return () => {
+  //     chrome.processes.onUpdatedWithMemory.removeListener(getMemory);
+  //   };
+  // }, []);
 
   return (
     <div className="SystemMemoryUsage">

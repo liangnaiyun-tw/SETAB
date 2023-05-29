@@ -1,0 +1,56 @@
+.note {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 1rem;
+    row-gap: 1rem;
+    overflow: scroll;
+    max-height: 80vh;
+    padding: 10px;
+  }
+
+  .note::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .buttonGroup {
+      display: flex;
+      justify-content: space-between;
+  }
+  
+  .Edit {
+    /* height: max-content; */
+    height: 86vh;
+    /* margin: 0px;
+    padding: 0px;*/
+    overflow: hidden;
+  }
+  
+  .BackSpace {
+    height: 1vh;
+    max-width: 5%;
+    background-color: rgb(231, 228, 255);
+    transition: transform 1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    padding: 1rem;
+  
+    border-radius: 25px;
+  
+    &:hover {
+      transform: translateX(-10px);
+    }
+  }
+  
+  @media (max-width: 1024px) {
+    .note {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .note {
+      grid-template-columns: 1fr;
+    }
+  }
+  
