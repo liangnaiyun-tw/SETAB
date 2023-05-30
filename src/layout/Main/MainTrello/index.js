@@ -1,9 +1,7 @@
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import MainCard from './MainCard';
 import { useState } from 'react';
-import Box from '@mui/material/Box';
-import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react';
 
 export default function MainTrello() {
 

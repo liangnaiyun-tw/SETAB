@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 
 // firebase
@@ -52,7 +52,7 @@ function App() {
     backgroundColor: "beige",
   };
   const styleRightSidebar = {
-    backgroundColor: "aquamarine",
+    backgroundColor: 'rgba(108, 101, 133, 1)',
     width: 500 - positionSecond.positionSecondX,
   };
   const styleFooter = {

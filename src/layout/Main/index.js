@@ -18,25 +18,25 @@ function handleClick(event) {
 const Main = ({ cssMain, styleMain, token }) => {
   return (
     <>
-    <div className={cssMain} style={styleMain}>
-      <div role="presentation" onClick={handleClick}>
-        <Breadcrumbs aria-label="breadcrumb" className="Breadcrumbs">
-          <Link underline="hover" color="inherit" href="/">
-            Workspace
-          </Link>
-          <Link
-            underline="hover"
-            color="inherit"
-            href="/material-ui/getting-started/installation/"
-          >
-            Group
-          </Link>
-          <Typography color="text.primary">SubGroup</Typography>
-        </Breadcrumbs>
+      <div className={cssMain} style={styleMain}>
+        <div role="presentation" onClick={handleClick}>
+          <Breadcrumbs aria-label="breadcrumb" className="Breadcrumbs">
+            <Link underline="hover" color="inherit" href="/">
+              Workspace
+            </Link>
+            <Link
+              underline="hover"
+              color="inherit"
+              href="/material-ui/getting-started/installation/"
+            >
+              Group
+            </Link>
+            <Typography color="text.primary">SubGroup</Typography>
+          </Breadcrumbs>
+        </div>
+        <MainToolbar />
+        <MainTab token={token} />
       </div>
-      {/* <MainToolbar /> */}
-      <MainTab token={token} />
-    </div>
     </>
   );
 };

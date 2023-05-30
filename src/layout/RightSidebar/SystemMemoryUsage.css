@@ -1,0 +1,24 @@
+#system-memeory-usage-title {
+  text-align: center;
+  font-size: 30;
+  font-weight: bold;
+}
+
+#no-tab-message {
+  text-align: center;
+  font-size: 30;
+  font-weight: bold;
+}
+
+.tab-item-text {
+  white-space: pre-wrap;
+  /* CSS3 */
+  white-space: -moz-pre-wrap;
+  /* Firefox */
+  white-space: -pre-wrap;
+  /* Opera <7 */
+  white-space: -o-pre-wrap;
+  /* Opera 7 */
+  word-wrap: break-word;
+  /* IE */
+}

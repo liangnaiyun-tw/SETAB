@@ -6,9 +6,11 @@
   "icons": {
     "16": "favicon.ico"
   },
-  "action": { },
+  "action": {},
   "options_page": "index.html",
   "permissions": [
-    "processes"
+    "processes",
+    "tabs",
+    "activeTab"
   ]
 }
