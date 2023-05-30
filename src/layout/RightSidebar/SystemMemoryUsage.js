@@ -8,6 +8,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { createRandomUUID } from '../../utils/hash';
 import { fetchTabs } from '../../features/chromeTabs/chromeTabSlice';
+import { getFullGroupNameById } from '../../utils/tabs';
 
 /*global chrome*/
 
@@ -23,21 +24,18 @@ function SystemMemoryUsage() {
     }
   }, [dispatch]);
 
-  function clickOnOpenedTab(event, windowIndex) {
-    chrome.tabs.highlight({ tabs: windowIndex })
+  function clickOnOpenedTab(event, windowId, windowIndex) {
+    chrome.tabs.highlight({ windowId: windowId, tabs: windowIndex })
       .catch((err) => {
         console.error(err);
       });
   }
 
-  function closeTab(event, windowIndex) {
-    chrome.tabs.query({ currentWindow: true, index: windowIndex })
-      .then((tabs) => {
-        chrome.tabs.remove(tabs[0].id);
-      })
+  function closeTab(event, tabId) {
+    chrome.tabs.remove(tabId)
       .catch((err) => {
         console.error(err);
-      })
+      });
   }
 
   return (
@@ -53,17 +51,17 @@ function SystemMemoryUsage() {
             return (
               <ListItem key={`${tab.title}-${createRandomUUID()}`} sx={{ columnGap: "3%" }}>
                 <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
-                <ListItemButton className="tab-item" onClick={(event) => clickOnOpenedTab(event, tab.windowIndex)}>
+                <ListItemButton className="tab-item" onClick={(event) => clickOnOpenedTab(event, tab.windowId, tab.windowIndex)}>
                   <div className='tab-item-text'>
                     <Typography variant='body1'>
                       {tab.title}
                     </Typography>
                     <div>
-                      {`Unsaved`}
+                      {getFullGroupNameById(tab.group)}
                     </div>
                   </div>
                 </ListItemButton>
-                <IconButton onClick={(event) => closeTab(event, tab.windowIndex)}>
+                <IconButton onClick={(event) => closeTab(event, tab.tabId)}>
                   <DeleteIcon></DeleteIcon>
                 </IconButton>
               </ListItem>

@@ -4,31 +4,51 @@ import { ArcElement, Chart as ChartJS, Legend, Title, Tooltip } from "chart.js";
 import { interpolateColorByIndex } from "../../utils/interpolateColor";
 import { useState } from "react";
 import { GroupModal } from "./GroupModal";
+import { getGroupNameChain } from "../../utils/tabs";
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
 function PieChart(props) {
   const tabs = props.tabs;
 
-  const totalMemory = tabs.map(tab => tab.privateMemory).reduce((sum, value) => sum + value, 0);
-  const backgroundColors = tabs.map((tab, index) => {
-    return "rgba(" + interpolateColorByIndex(index, tabs.length).join(", ") + ', 1)';
+  let totalMemory = 0;
+  const workspaces = [];
+  tabs.forEach((tab) => {
+    totalMemory += tab.privateMemory;
+    let groupNameChain = getGroupNameChain(tab.group);
+    if (!workspaces.find((workspace) => workspace.name === groupNameChain[0])) {
+      workspaces.push({
+        name: groupNameChain[0],
+        tabs: [],
+        totalMemory: 0,
+        chartLevel: 1,
+      });
+    }
+    workspaces.find((workspace) => workspace.name === groupNameChain[0]).totalMemory += tab.privateMemory;
+    workspaces.find((workspace) => workspace.name === groupNameChain[0]).tabs.push(tab);
   });
-  const borderColors = tabs.map(tab => {
-    return 'rgb(255, 255, 255)';
+  workspaces.sort(function (a, b) {
+    return a.totalMemory - b.totalMemory;
   });
+  console.log("WORKSPACES");
+  console.log(workspaces);
 
+  const backgroundColors = [];
+  const borderColors = [];
+  workspaces.forEach((workspace, index) => {
+    backgroundColors.push("rgba(" + interpolateColorByIndex(index, workspaces.length).join(", ") + ', 1)');
+    borderColors.push('rgb(255, 255, 255)');
+  });
 
   const data = {
     datasets: [
       {
-        label: 'memory usage',
-        data: tabs.map((tab) => tab.privateMemory / totalMemory),
+        data: workspaces.map((workspace) => workspace.totalMemory / totalMemory),
         borderWidth: 2,
         backgroundColor: backgroundColors,
         borderColor: borderColors,
-      },
-    ],
+      }
+    ]
   };
 
 
@@ -37,8 +57,8 @@ function PieChart(props) {
   function modalClickEvent(event, elements) {
     if (elements.length > 0) {
       const dataIndex = elements[0].index;
-      const tab = tabs[dataIndex];
-      setSelectedItem(tab);
+      const workspace = workspaces[dataIndex];
+      setSelectedItem(workspace);
       setModalOpen(true);
     }
   }
@@ -54,8 +74,8 @@ function PieChart(props) {
               callbacks: {
                 label: (context) => {
                   const dataIndex = context.dataIndex;
-                  const tab = tabs[dataIndex];
-                  const label = tab.title;
+                  const workspace = workspaces[dataIndex];
+                  const label = workspace.name;
                   const value = (context.formattedValue * 100).toFixed(1);
 
                   const maxLabelLength = 15;

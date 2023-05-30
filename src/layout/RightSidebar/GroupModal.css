@@ -1,4 +1,9 @@
-.tab-modal-title {
+.modal-title {
   display: flex;
   column-gap: 2%;
+}
+
+#modal-pie-chart {
+  width: 15% !important;
+  height: auto !important;
 }

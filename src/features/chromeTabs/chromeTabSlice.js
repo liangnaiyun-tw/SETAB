@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { updateUnsavedWorkspace } from "../firebase/firestore/firestoreSlice";
 
 /*global chrome*/
 
@@ -9,21 +10,35 @@ const initState = {
 
 async function getMemory(processes, thunkAPI) {
   if (thunkAPI.getState().chromeTabs.isLoading) return;
-  console.log("SETTING TRUE");
   thunkAPI.dispatch(chromeTabSlice.actions.setFetchLoadingStatus(true));
 
-  let tabsInCurrentWindow = await chrome.tabs.query({});
-  let tabTasks = await Promise.allSettled(Object.values(tabsInCurrentWindow).map(async (tab) => {
+  let tabsInWindows = await chrome.tabs.query({});
+  let tabTasks = await Promise.allSettled(Object.values(tabsInWindows).map(async (tab) => {
     try {
       let pid = await chrome.processes.getProcessIdForTab(tab.id);
       let process = await chrome.processes.getProcessInfo(pid, true);
       process = Object.values(process)[0];
+      let tabInFirebase = thunkAPI.getState().firestore.tabs.find((tabInformation) => {
+        if (tabInformation.alias === tab.title || tabInformation.title === tab.title) {
+          for (let i = 0; i < tabInformation.tabId.length; ++i) {
+            if (tab.windowId === tabInformation.windowId[i] && tab.id === tabInformation.tabId[i]) {
+              return true;
+            }
+          }
+        }
+        return false;
+      });
+
       return {
+        id: tabInFirebase ? tabInFirebase.id : "",
         alias: tab.title,
         title: tab.title,
         status: "complete",
+        group: tabInFirebase ? tabInFirebase.group : "Unsaved",
+        tabId: tab.id,
+        windowId: tab.windowId,
         tabUrl: tab.url ? tab.url : tab.pendingUrl,
-        tabIconURL: tab.favIconUrl,
+        tabIconUrl: tab.favIconUrl,
         privateMemory: process.privateMemory,
         windowIndex: tab.index,
       };
@@ -36,16 +51,19 @@ async function getMemory(processes, thunkAPI) {
   tabTasks.sort(function (a, b) {
     return a.privateMemory - b.privateMemory;
   });
+  console.log(tabTasks);
 
   thunkAPI.dispatch(updateTabs({
     tabs: tabTasks
   }));
+  thunkAPI.dispatch(updateUnsavedWorkspace({
+    tabs: tabTasks.filter((tab) => tab.group === "Unsaved")
+  }));
 
-  console.log("SETTING FALSE");
   thunkAPI.dispatch(chromeTabSlice.actions.setFetchLoadingStatus(false));
 }
 
-const fetchTabs = createAsyncThunk('fetchTabs', async (_, thunkAPI) => {
+const fetchTabs = createAsyncThunk('chromeTabs/fetchTabs', async (_, thunkAPI) => {
   const processesListener = (processes) => { getMemory(processes, thunkAPI) };
   chrome.processes.onUpdatedWithMemory.addListener(processesListener);
   return () => {
@@ -54,7 +72,7 @@ const fetchTabs = createAsyncThunk('fetchTabs', async (_, thunkAPI) => {
 });
 
 const chromeTabSlice = createSlice({
-  name: "chromeTab",
+  name: "chromeTabs",
   initialState: initState,
   reducers: {
     setFetchLoadingStatus: (state, action) => {

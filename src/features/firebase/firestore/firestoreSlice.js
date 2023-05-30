@@ -18,16 +18,97 @@ const UNSAVED_WORKSPACE = "Unsaved";
 const unSaveWorkSpace = {
     googleDriveFolderId: "",     // unused
     groups: [],                  // unused
-    id: "",
+    id: uuidv4(),
     name: UNSAVED_WORKSPACE,
+    tabs: [],
     note: [],                    // unused
     user: ""                     // unused
 }
 
+// const initialState = {
+//     workspaces: [unSaveWorkSpace],
+//     groups: [],
+//     tabs: [],
+//     historys: [],
+//     currentWorkspace: "",
+//     currentGroup: "",
+// }
+
+/*Fake Data*/
 const initialState = {
-    workspaces: [unSaveWorkSpace],
-    groups: [],
-    tabs: [],
+    workspaces: [unSaveWorkSpace,
+        {
+            id: "cd363797-b823-4714-aebc-606c1b27f434",
+            name: "Test Workspace",
+            googleDriveFolderId: "",
+            groups: [
+                "d35c907e-7757-4185-90ec-695680557414"
+            ],
+            notes: [],
+            uid: ""
+        }
+    ],
+    groups: [
+        {
+            id: "d35c907e-7757-4185-90ec-695680557414",
+            name: "Test Group",
+            googleDriveFolderId: "",
+            groups: [
+                "2aec38cd-c8f9-49c5-8aa9-88331f5076bb"
+            ],
+            histories: [],
+            notes: [],
+            tabs: [
+                "72c7b6b7-2706-419c-9e09-ab33ac092942",
+            ],
+            uid: "",
+            workspace: "cd363797-b823-4714-aebc-606c1b27f434"
+        },
+        {
+            id: "2aec38cd-c8f9-49c5-8aa9-88331f5076bb",
+            name: "Dependency Injection",
+            groups: [],
+            histories: [],
+            notes: [],
+            tabs: [
+                "1e72e6a4-7a98-4444-9681-bdd48f2e2197"
+            ],
+            uid: "",
+            workspace: "cd363797-b823-4714-aebc-606c1b27f434"
+        }
+    ],
+    tabs: [
+        {
+            id: "72c7b6b7-2706-419c-9e09-ab33ac092942",
+            title: "SETab - Cloud Firestore - Firebase 控制台",
+            alias: "SETab - Cloud Firestore - Firebase 控制台",
+            group: "d35c907e-7757-4185-90ec-695680557414",
+            status: "complete",
+            tabIconUrl: "https://www.gstatic.com/mobilesdk/160503_mobilesdk/logo/favicon.ico",
+            uid: "",
+            windowId: [
+                424336777
+            ],
+            tabId: [
+                424336904
+            ]
+        },
+        {
+            id: "1e72e6a4-7a98-4444-9681-bdd48f2e2197",
+            title: "API reference - Chrome Developers",
+            alias: "API reference - Chrome Developers",
+            group: "2aec38cd-c8f9-49c5-8aa9-88331f5076bb",
+            status: "complete",
+            tabIconUrl: "https://developer.chrome.com/images/meta/favicon-32x32.png",
+            uid: "",
+            windowId: [
+                424336777
+            ],
+            tabId: [
+                424336851
+            ]
+        }
+    ],
     historys: [],
     currentWorkspace: "",
     currentGroup: "",
@@ -159,6 +240,9 @@ const firestoreSlice = createSlice({
             state.workspaces = action.payload.workspaces;
             state.groups = action.payload.groups;
             state.tabs = action.payload.tabs;
+        },
+        updateUnsavedWorkspace: (state, action) => {
+            state.workspaces.find((workspace) => workspace.name === UNSAVED_WORKSPACE).tabs = action.payload.tabs;
         }
     },
     extraReducers: (builder) => {
@@ -190,5 +274,5 @@ const firestoreSlice = createSlice({
     }
 })
 
-export const { addAllStructure } = firestoreSlice.actions
+export const { addAllStructure, updateUnsavedWorkspace } = firestoreSlice.actions
 export default firestoreSlice.reducer
