@@ -49,7 +49,7 @@ function SystemMemoryUsage() {
           ? <div id="no-tab-message">No Tabs</div>
           : tabs.slice().reverse().map((tab, index) => {
             return (
-              <ListItem key={`${tab.title}-${createRandomUUID()}`} sx={{ columnGap: "3%" }}>
+              <ListItem key={`${tab.title}-${tab.windowId}-${tab.tabId}`} sx={{ columnGap: "3%" }}>
                 <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
                 <ListItemButton className="tab-item" onClick={(event) => clickOnOpenedTab(event, tab.windowId, tab.windowIndex)}>
                   <div className='tab-item-text'>

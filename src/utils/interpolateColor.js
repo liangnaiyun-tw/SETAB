@@ -1,8 +1,11 @@
 
 function interpolateColorByIndex(index, totalLength) {
+  if (totalLength === 1) return [255, 0, 70];
+
   let g;
   let r;
   let b = 70;
+
 
   if (index < totalLength / 2) {
     g = 255;

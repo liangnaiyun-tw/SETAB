@@ -51,7 +51,6 @@ function PieChart(props) {
     ]
   };
 
-
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   function modalClickEvent(event, elements) {
@@ -106,6 +105,7 @@ function PieChart(props) {
         modalOpen={modalOpen}
         setModalOpen={setModalOpen}
         selectedItem={selectedItem}
+        setSelectedItem={setSelectedItem}
       ></GroupModal>
     </div>
   );

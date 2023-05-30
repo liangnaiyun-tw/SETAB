@@ -2,7 +2,10 @@ import { Pie } from 'react-chartjs-2';
 import { interpolateColorByIndex } from '../../utils/interpolateColor';
 import { getGroupNameChain } from '../../utils/tabs';
 import './GroupModal.css';
-import { Box, Modal, Typography } from "@mui/material";
+import { Box, IconButton, Modal, Typography } from "@mui/material";
+import CircleIcon from '@mui/icons-material/Circle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { createRandomUUID } from '../../utils/hash';
 
 function GroupModal(props) {
   const modalOpen = props.modalOpen;
@@ -108,8 +111,45 @@ function GroupModal(props) {
         </div>
 
         <div className='modal-item-list'>
+          <Typography variant='h5'>Groups</Typography>
           <ul>
-            <li className='modal-item'></li>
+            {items.filter((item) => item.name).slice().reverse().map((group, index) => {
+              return (
+                <li className='modal-group-item' key={`${group.name}-${createRandomUUID()}`}>
+                  <div className='modal-list-content'>
+                    <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(items.length - 1 - index, items.length).join(", ") + ", 1)" }}></CircleIcon>
+                    <Typography variant='h6'>{group.name}</Typography>
+                    <div>Memory Usage: {(group.totalMemory / totalMemory * 100).toFixed(1)}%</div>
+                  </div>
+
+                  <div className='modal-delete-button-container'>
+                    <IconButton>
+                      <DeleteIcon></DeleteIcon>
+                    </IconButton>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <Typography variant='h5'>Tabs</Typography>
+          <ul>
+            {items.filter((item) => !item.name).slice().reverse().map((tab, index) => {
+              return (
+                <li className='modal-tab-item' key={`${tab.title}-${tab.windowId}-${tab.tabId}`}>
+                  <div className='modal-list-content'>
+                    <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(items.length - 1 - index, items.length).join(", ") + ", 1)" }}></CircleIcon>
+                    <Typography variant='h6'>{tab.alias}</Typography>
+                    <div>Memory Usage: {(tab.totalMemory / totalMemory * 100).toFixed(1)}%</div>
+                  </div>
+
+                  <div className='modal-delete-button-container'>
+                    <IconButton>
+                      <DeleteIcon></DeleteIcon>
+                    </IconButton>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </>
@@ -145,21 +185,26 @@ function GroupModal(props) {
   return (
     <Modal
       open={modalOpen}
-      onClose={() => props.setModalOpen(false)}
+      onClose={() => {
+        props.setModalOpen(false);
+        props.setSelectedItem(null);
+      }}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-      <Box sx={{
-        position: 'absolute',
-        width: '80%',
-        height: '80%',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        bgcolor: 'beige',
-        boxShadow: 24,
-        p: 4
-      }}>
+      <Box
+        id='modal-box'
+        sx={{
+          position: 'absolute',
+          width: '80%',
+          height: '80%',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          bgcolor: 'beige',
+          boxShadow: 24,
+          p: 4
+        }}>
         {selectedItem && (
           <div className="tab-modal-content">
             {renderItem}

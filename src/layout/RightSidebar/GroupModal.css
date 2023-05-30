@@ -1,3 +1,7 @@
+#modal-box {
+  overflow-y: auto;
+}
+
 .modal-title {
   display: flex;
   column-gap: 2%;
@@ -6,4 +10,22 @@
 #modal-pie-chart {
   width: 15% !important;
   height: auto !important;
+}
+
+.modal-group-item,
+.modal-tab-item {
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  column-gap: 2%;
+  margin-bottom: 1%;
+}
+
+.modal-list-content {
+  display: flex;
+  align-items: center;
+  column-gap: 2%;
+  width: 90%;
+  border: 2px solid darkgray;
+  border-radius: 0.5rem;
 }
