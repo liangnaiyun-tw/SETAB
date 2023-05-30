@@ -55,7 +55,7 @@ function PieChart(props) {
                 label: (context) => {
                   const dataIndex = context.dataIndex;
                   const tab = tabs[dataIndex];
-                  const label = tab.tabName;
+                  const label = tab.title;
                   const value = (context.formattedValue * 100).toFixed(1);
 
                   const maxLabelLength = 15;

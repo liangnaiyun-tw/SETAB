@@ -18,7 +18,7 @@ function GroupModal(props) {
             ? <img src={selectedItem.tabIconURL} alt="tab icon"></img>
             : <></>}
           <Typography variant="h6">
-            {selectedItem.tabName}
+            {selectedItem.title}
           </Typography>
         </div>
 
@@ -26,7 +26,7 @@ function GroupModal(props) {
           <ul>
             <li>
               <Typography variant='subtitle1'>
-                URL: {selectedItem.tabURL}
+                URL: {selectedItem.tabUrl}
               </Typography>
             </li>
             <li>

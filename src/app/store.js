@@ -2,11 +2,11 @@ import { configureStore } from '@reduxjs/toolkit';
 import noteReducer from '../features/note/noteSlice';
 import authReducer from '../features/firebase/auth/authSlice';
 import firestoreReducer from '../features/firebase/firestore/firestoreSlice';
-import tabReducer from '../features/tabs/tabSlice';
+import chromeTabReducer from '../features/chromeTabs/chromeTabSlice';
 
 const store = configureStore({
   reducer: {
-    tab: tabReducer,
+    chromeTabs: chromeTabReducer,
     note: noteReducer,
     auth: authReducer,
     firestore: firestoreReducer

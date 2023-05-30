@@ -135,7 +135,7 @@ const CreateNewNoteModal = ({ token, onPickNewNote }) => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose}>Cancel</Button>
-                    <Button onClick={() => {handleDialogClose(); handleFileCreate();}}>Create</Button>
+                    <Button onClick={() => { handleDialogClose(); handleFileCreate(); }}>Create</Button>
                 </DialogActions>
             </Dialog>
         </div>

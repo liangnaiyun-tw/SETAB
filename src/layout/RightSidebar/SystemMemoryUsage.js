@@ -7,15 +7,14 @@ import { interpolateColorByIndex } from '../../utils/interpolateColor';
 import CircleIcon from '@mui/icons-material/Circle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { createRandomUUID } from '../../utils/hash';
-import { fetchTabs } from '../../features/tabs/tabSlice';
+import { fetchTabs } from '../../features/chromeTabs/chromeTabSlice';
 
 /*global chrome*/
 
 function SystemMemoryUsage() {
   const dispatch = useDispatch();
-  const state = useSelector(state => state.tab);
-  console.log(state);
-  const tabs = state.groups[state.currentGroupId]?.tabs || [];
+  const state = useSelector(state => state.chromeTabs);
+  const tabs = state.fetchTabs;
 
   useEffect(() => {
     const event = dispatch(fetchTabs());
@@ -52,15 +51,15 @@ function SystemMemoryUsage() {
           ? <div id="no-tab-message">No Tabs</div>
           : tabs.slice().reverse().map((tab, index) => {
             return (
-              <ListItem key={`${tab.tabName}-${createRandomUUID()}`} sx={{ columnGap: "3%" }}>
+              <ListItem key={`${tab.title}-${createRandomUUID()}`} sx={{ columnGap: "3%" }}>
                 <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
                 <ListItemButton className="tab-item" onClick={(event) => clickOnOpenedTab(event, tab.windowIndex)}>
                   <div className='tab-item-text'>
                     <Typography variant='body1'>
-                      {tab.tabName}
+                      {tab.title}
                     </Typography>
                     <div>
-                      {`${state.currentWorkspaceId}/${state.currentGroupId}`}
+                      {`Unsaved`}
                     </div>
                   </div>
                 </ListItemButton>

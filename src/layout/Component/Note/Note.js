@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import BackspaceIcon from '@mui/icons-material/Backspace';
 import CreateNewNoteModal from '../CreateNewNoteModal/CreateNewNoteModa';
 import { Button, Skeleton } from '@mui/material';
@@ -20,7 +20,7 @@ export default function Note() {
 
     useEffect(() => {
         dispatch(getNotes(accessToken));
-    }, [])
+    }, [accessToken, dispatch])
 
     const onEdit = (alternateLink) => {
         dispatch(handleEdit(alternateLink));
