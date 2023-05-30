@@ -6,12 +6,14 @@ import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 
+
+import MainToolbar from "./MainToolbar";
+import { connect } from 'react-redux'
+
 function handleClick(event) {
   event.preventDefault();
   console.info('You clicked a breadcrumb.');
 }
-import MainToolbar from "./MainToolbar";
-import { connect } from 'react-redux'
 
 const Main = ({ cssMain, styleMain, token }) => {
   return (
@@ -32,7 +34,8 @@ const Main = ({ cssMain, styleMain, token }) => {
           <Typography color="text.primary">SubGroup</Typography>
         </Breadcrumbs>
       </div>
-      <<MainToolbar />Tab token={token} />
+      {/* <MainToolbar /> */}
+      <MainTab token={token} />
     </div>
     </>
   );

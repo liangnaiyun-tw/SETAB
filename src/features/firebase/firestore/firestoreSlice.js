@@ -12,6 +12,7 @@ import {
 import app from "../../../shared/Firebase"
 
 import { v4 as uuidv4 } from "uuid";
+import axios from 'axios';
 
 
 const db = getFirestore(app());
@@ -23,7 +24,7 @@ const unSaveWorkSpace = {
     id: "",
     name: UNSAVED_WORKSPACE,
     note: [],                    // unused
-    user: ""                     // unused
+    uid: ""                     // unused
 }
 
 const initialState = {
@@ -31,6 +32,7 @@ const initialState = {
     groups: [],
     tabs: [],
     historys: [],
+    rootDirectory: "",
     currentWorkspace: "",
     currentGroup: "",
 }
@@ -40,19 +42,38 @@ export const loadStructureByUser = createAsyncThunk('firestore/loadStructureByUs
     const user = thunkAPI.getState().auth.user;
     const accessToken = thunkAPI.getState().auth.accessToken;
 
-    // TODO: create root directory
 
+
+    // user
     const userQuery = query(
         collection(db, "users"),
         where("uid", "==", user.uid)
     );
     const userQuerySnapshot = await getDocs(userQuery);
+    let userInDB = null;
+    // set new user
     if (userQuerySnapshot.docs.length === 0) {
+        console.log("create new user")
+
+        const rootFolderData = {
+            "name": "SETab-Root",
+            "mimeType": "application/vnd.google-apps.folder",
+        }
+
+        const response = await axios.post("https://www.googleapis.com/drive/v3/files", {
+            ...rootFolderData
+        }, {
+            headers: {
+                Authorization: "Bearer " + accessToken
+            }
+        })
+        const folder = response.data;
+
 
         const newUser = {
             displayName: user.displayName,
             photoUrl: user.photoURL,
-            googleDriveRootFolderID: "",
+            googleDriveRootFolderID: folder.id,
             uid: user.uid,
             workspaces: []
         }
@@ -60,7 +81,13 @@ export const loadStructureByUser = createAsyncThunk('firestore/loadStructureByUs
         await addDoc(collection(db, "users"), {
             ...newUser,
         });
+
+        userInDB = newUser;
+    } else {
+        userInDB = userQuerySnapshot.docs[0].data();
     }
+
+    thunkAPI.dispatch(setRootDirectory(userInDB.googleDriveRootFolderID));
 
     // workspace
     const workspaceQuery = query(
@@ -95,23 +122,58 @@ export const loadStructureByUser = createAsyncThunk('firestore/loadStructureByUs
         tabs.push(doc.data());
     })
 
-    thunkAPI.dispatch(addAllStructure({ workspaces, groups, tabs }));
+    thunkAPI.dispatch(addAllStructure({ workspaces, groups, tabs, userInDB }));
 
 })
 export const createWorkSpace = createAsyncThunk('firestore/createWorkSpace', async (workspace, thunkAPI) => {
 
-    const user = thunkAPI.getState().auth.user;
-    const accessToken = thunkAPI.getState().auth.accessToken;
+    try {
+        const user = thunkAPI.getState().auth.user;
+        const accessToken = thunkAPI.getState().auth.accessToken;
+    
+    
+    
+        // create directory
+        const workspaceFolderData = {
+            "name": workspace.name,
+            "mimeType": "application/vnd.google-apps.folder",
+            "parents": [thunkAPI.getState().firestore.rootDirectory]
+        }
+        const response = await axios.post("https://www.googleapis.com/drive/v3/files", {
+            ...workspaceFolderData
+        }, {
+            headers: {
+                Authorization: "Bearer " + accessToken
+            }
+        })
+        const folder = response.data;
+    
+    
+        // add workspace to firebase
+        const newWorkSpace = {
+            ...workspace, id: uuidv4(), googleDriveFolderId: folder.id, uid: user.uid
+        }
+        await addDoc(collection(db, "workspaces"), {
+            ...newWorkSpace,
+        });
+    
+        // update user
+        const userQuery = query(collection(db, "users"), where("uid", "==", user.uid))
+        const userQuerySnapshot = await getDocs(userQuery);
+        const data = userQuerySnapshot.docs[0].data();
+        await updateDoc(userQuerySnapshot.docs[0].ref, {
+          ...data,
+          workspaces: [... data.workspaces, newWorkSpace.id],
+        });
 
-    // TODO: create directory
+        // set current workspace to created workspace
+        thunkAPI.dispatch(setCurrentWorkspace(newWorkSpace.id));
 
-    const newWorkSpace = {
-        ...workspace, id: uuidv4(), googleDriveFolderId: "", uid: user.uid
+        return "create workspace sucessfully";
+    } catch (e) {
+        return e.response;
     }
-
-    return await addDoc(collection(db, "workspaces"), {
-        ...newWorkSpace,
-    });
+    
 
 })
 export const createGroup = createAsyncThunk('firestore/createGroup', async (group, thunkAPI) => {
@@ -135,7 +197,7 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
 
 })
 export const createTab = createAsyncThunk('firestore/createTab', async (tab, thunkAPI) => {
-    
+
     const user = thunkAPI.getState().auth.user;
 
     const newTab = {
@@ -157,10 +219,17 @@ const firestoreSlice = createSlice({
     initialState,
     reducers: {
         addAllStructure: (state, action) => {
-            console.log(action.payload);
-            state.workspaces = action.payload.workspaces;
-            state.groups = action.payload.groups;
-            state.tabs = action.payload.tabs;
+            const {workspaces, groups, tabs, userInDB} = action.payload;
+            state.workspaces = workspaces;
+            state.groups = groups;
+            state.tabs = tabs;
+            state.user = userInDB;
+        },
+        setCurrentWorkspace: (state, action) => {
+            state.currentWorkspace = action.payload;
+        },
+        setRootDirectory: (state, action) => {
+            state.rootDirectory = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -192,5 +261,5 @@ const firestoreSlice = createSlice({
     }
 })
 
-export const { addAllStructure } = firestoreSlice.actions
+export const { addAllStructure, setCurrentWorkspace, setRootDirectory } = firestoreSlice.actions
 export default firestoreSlice.reducer

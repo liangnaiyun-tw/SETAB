@@ -41,7 +41,7 @@ export default function Note() {
                                 Note List
                             </Button>
                             <Button variant="outlined" color="error" href={editingUrl} target="_blank" endIcon={<OutboundIcon />}>
-                                New Page
+                                Edit in new tab
                             </Button>
                         </div>
 

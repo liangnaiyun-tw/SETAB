@@ -7,6 +7,9 @@ import Box from '@mui/material/Box';
 import "./MainTab.css";
 import Note from '../Note/Note';
 import Structure from '../Structure/Structure'
+import Board from '../../Main/dnd/board/Board'
+import { generateQuoteMap } from "../../Main/dnd/mockData"
+import styled from "@xstyled/styled-components";
 
 
 function TabPanel(props) {
@@ -49,6 +52,14 @@ export default function BasicTabs({ token }) {
         setValue(newValue);
     };
 
+    const Container = styled.div`
+
+    `;
+
+    const data = {
+        medium: generateQuoteMap(100),
+        large: generateQuoteMap(500)
+    };
 
     return (
         <Box sx={{ width: '100%' }}>
@@ -60,13 +71,15 @@ export default function BasicTabs({ token }) {
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
-                Info
+                <Container>
+                    <Board initial={data.medium} withScrollableColumns />
+                </Container>
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <Structure />
             </TabPanel>
             <TabPanel value={value} index={2}>
-                <Note token={token}/>
+                <Note token={token} />
             </TabPanel>
         </Box>
 

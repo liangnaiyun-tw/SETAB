@@ -5,7 +5,7 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { styled } from '@mui/material/styles';
 import MuiGrid from '@mui/material/Grid';
-import { Dialog, Button, Modal, Box, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
+import { Dialog, Button, Modal, Box, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Divider } from "@mui/material";
 
 const Grid = styled(MuiGrid)(({ theme }) => ({
     width: '100%',
@@ -28,13 +28,16 @@ const style = {
     p: 4,
 };
 
-
-
-
 const CreateNewNoteModal = ({ token, onPickNewNote }) => {
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
 
     const [openDialog, setOpenDialog] = useState(false);
     const handleDialogOpen = () => setOpenDialog(true);
@@ -42,10 +45,6 @@ const CreateNewNoteModal = ({ token, onPickNewNote }) => {
 
     const handleClickDialogOpen = () => {
         setOpenDialog(true);
-    };
-
-    const handleClickOpen = () => {
-        setOpen(true);
     };
 
     const [openPicker, data, authResponse] = useDrivePicker();
@@ -81,9 +80,8 @@ const CreateNewNoteModal = ({ token, onPickNewNote }) => {
     return (
         <div>
             <div className='AddNote' onClick={handleOpen}>
-                +
+                <div className="plusIcon">+</div>
             </div>
-            {/* <Button onClick={handleOpen}>Open modal</Button> */}
             <Modal
                 open={open}
                 onClose={handleClose}
@@ -92,31 +90,24 @@ const CreateNewNoteModal = ({ token, onPickNewNote }) => {
                 className="CreateNoteModal"
             >
                 <Box sx={style}>
-
-                    <Grid container>
+                    <Grid container className="SelectCreateMethod">
                         <Grid item xs>
                             <Button variant="outlined" startIcon={<NoteAddIcon />} onClick={() => { handleClose(); handleDialogOpen(); }} >
                                 create new file
                             </Button>
                         </Grid>
+                        <Divider orientation="vertical" flexItem>
+                            |
+                        </Divider>
                         <Grid item xs>
                             <Button variant="outlined" startIcon={<CloudDownloadIcon />} onClick={() => { handleClose(); handleOpenPicker(); }}>
                                 import exist file
                             </Button>
                         </Grid>
                     </Grid>
-
-                    {/* <Typography id="modal-modal-title" variant="h6" component="h2">
-                        Text in a modal
-                    </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                    </Typography> */}
                 </Box>
             </Modal>
-            {
 
-            }
             <Dialog open={openDialog} onClose={handleDialogClose}>
                 <DialogTitle>Create new File</DialogTitle>
                 <DialogContent>
@@ -135,7 +126,7 @@ const CreateNewNoteModal = ({ token, onPickNewNote }) => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose}>Cancel</Button>
-                    <Button onClick={() => {handleDialogClose(); handleFileCreate();}}>Create</Button>
+                    <Button onClick={() => { handleDialogClose(); handleFileCreate(); }}>Create</Button>
                 </DialogActions>
             </Dialog>
         </div>

@@ -1,10 +1,9 @@
 const Workspace = {
     googleDriveFolderId: "",
-    user: "",
+    uid: "",
     name: "",
     groups: [],
     id: "",
-    histories: [],
     notes: []
 }
 

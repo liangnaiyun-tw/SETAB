@@ -4,21 +4,34 @@
   height: 25vh;
   padding: 1rem;
 
-  line-height: 25vh;
-  text-align: center;
-  font-size: larger;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   border-radius: 25px;
   border: rgb(100, 100, 123) 3px dashed;
-  transition: background-color 0.3s ease-in-out, font-size 0.3s ease-in-out,
-    color 0.3s ease-in-out;
+  transition: background-color 0.3s ease-in-out;
   cursor: pointer;
 
   &:hover {
     background-color: rgb(165, 184, 210);
+  }
+
+  &:hover .plusIcon {
     font-size: xx-large;
     color: ghostwhite;
   }
+}
+
+.plusIcon {
+  height: min-content;
+  width: min-content;
+  cursor: pointer;
+  text-align: center;
+  font-size: larger;
+  transition:  font-size 0.3s ease-in-out,
+  color 0.3s ease-in-out;;
 }
 
 .SelectCreateMethod{
