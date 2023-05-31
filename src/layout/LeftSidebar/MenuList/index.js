@@ -1,15 +1,15 @@
 
 
-import * as React from 'react';
-import { useEffect, useState } from 'react';
 import { UncontrolledTreeEnvironment, Tree, StaticTreeDataProvider } from 'react-complex-tree';
 import 'react-complex-tree/lib/style-modern.css';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentWorkspace } from '../../../features/firebase/firestore/firestoreSlice';
 
+import React, { useEffect, useState } from "react";
+
 
 export default function MenuList() {
-
+    // To retrieve the workspaces of the current user.
     const { workspaces } = useSelector((store) => store.firestore);
 
     const [items, setItems] = useState({
@@ -35,7 +35,7 @@ export default function MenuList() {
     useEffect(() => {
         setItems((prev) => {
             prev.root.children = workspaces.map(workspace => workspace.name);
-            
+
             for (let i = 0; i < workspaces.length; i++) {
                 prev[workspaces[i].name] = {
                     index: workspaces[i].name,
@@ -87,7 +87,7 @@ export default function MenuList() {
                 onDrop={(items, target) => { onDrop(items, target) }}
                 onFocusItem={(item, treeId) => {
                     dispatch(setCurrentWorkspace(item.workspaceId));
-                }}  
+                }}
             >
                 <Tree treeId="tree-1" rootItem="root" treeLabel="Tree Example" />
             </UncontrolledTreeEnvironment>
