@@ -20,7 +20,6 @@ import AddIcon from '@mui/icons-material/Add';
 import Grid from '@mui/material/Grid';
 import MenuList from './MenuList';
 
-import GroupModal from "../Component/GroupModal/GroupModal";
 import Login from "../Component/Login/Login";
 import "./index.css";
 import { useSelector } from "react-redux";
@@ -174,7 +173,7 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                 <DialogTitle>Create new workshop</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        What would you like to name this work area
+                        What would you like to name this work area ?
                     </DialogContentText>
                     <TextField
                         autoFocus

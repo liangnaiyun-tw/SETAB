@@ -6,6 +6,7 @@ const Group = {
     name: "",
     histories: [],
     tabs: [],
+    googleDriveFolderId: ""
 }
 
 export default Group;

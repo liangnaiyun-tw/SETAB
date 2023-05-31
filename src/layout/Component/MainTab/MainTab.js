@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -10,6 +11,7 @@ import Structure from '../Structure/Structure'
 import Board from '../../Main/dnd/board/Board'
 import { generateQuoteMap } from "../../Main/dnd/mockData"
 import styled from "@xstyled/styled-components";
+import { useSelector } from 'react-redux';
 
 
 function TabPanel(props) {
@@ -47,6 +49,8 @@ function a11yProps(index) {
 
 export default function BasicTabs({ token }) {
     const [value, setValue] = React.useState(0);
+    const { workspaces, groups, currentWorkspace, currentGroup } = useSelector((store) => store.firestore);
+
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -56,18 +60,34 @@ export default function BasicTabs({ token }) {
 
     `;
 
+
     const data = {
         medium: generateQuoteMap(100),
         large: generateQuoteMap(500)
     };
+
+    useEffect(() => {
+        if(workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name === "Unsaved"){
+            setValue(0);
+        }
+    }, [currentWorkspace])
 
     return (
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                     <Tab label="Info" {...a11yProps(0)} />
-                    <Tab label="Structure" {...a11yProps(1)} />
-                    <Tab label="Note" {...a11yProps(2)} />
+                    {
+                        workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name !== "Unsaved" &&
+                        <Tab label="Structure" {...a11yProps(1)} />
+
+                    }
+                    {
+                        workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name !== "Unsaved" &&
+                        <Tab label="Note" {...a11yProps(2)} />
+                    }
+
+
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
@@ -75,12 +95,22 @@ export default function BasicTabs({ token }) {
                     <Board initial={data.medium} withScrollableColumns />
                 </Container>
             </TabPanel>
-            <TabPanel value={value} index={1}>
-                <Structure />
-            </TabPanel>
-            <TabPanel value={value} index={2}>
-                <Note token={token} />
-            </TabPanel>
+            {
+                workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name !== "Unsaved" &&
+
+                <TabPanel value={value} index={1}>
+                    <Structure />
+                </TabPanel>
+            }
+            {
+                workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name !== "Unsaved" &&
+
+                <TabPanel value={value} index={2}>
+                    <Note token={token} />
+                </TabPanel>
+
+            }
+
         </Box>
 
     );
