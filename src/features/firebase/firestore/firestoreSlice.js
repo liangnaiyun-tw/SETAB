@@ -13,6 +13,7 @@ import app from "../../../shared/Firebase"
 
 import { v4 as uuidv4 } from "uuid";
 import axios from 'axios';
+import { async } from '@firebase/util';
 
 
 const db = getFirestore(app());
@@ -177,6 +178,19 @@ export const createWorkSpace = createAsyncThunk('firestore/createWorkSpace', asy
 
 
 })
+export const updateWorkspace = createAsyncThunk('firestore/updateWorkspace', async(workspace, thunkAPI) => {
+    const user = thunkAPI.getState().auth.user;
+
+    let q = query(collection(db, "workspaces"), where("id", "==", workspace.id), where("uid", "==", user.uid));
+    const querySnapshot = await getDocs(q);
+
+    await updateDoc(querySnapshot.docs[0].ref, {
+        name: workspace.name,
+    })
+
+    await thunkAPI.dispatch(loadStructureByUser());
+    return 'update workspace successfully';
+})
 export const createGroup = createAsyncThunk('firestore/createGroup', async (group, thunkAPI) => {
 
     const user = thunkAPI.getState().auth.user;
@@ -308,6 +322,12 @@ const firestoreSlice = createSlice({
                 console.log(action);
             })
             .addCase(createWorkSpace.fulfilled, (state, action) => {
+                console.log(action);
+            })
+            .addCase(updateWorkspace.fulfilled, (state, action) => {
+                console.log(action);
+            })
+            .addCase(updateWorkspace.rejected, (state, action) => {
                 console.log(action);
             })
             .addCase(createGroup.rejected, (state, action) => {
