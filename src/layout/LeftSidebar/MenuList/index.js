@@ -1,62 +1,70 @@
-
-
-import * as React from 'react';
-import { UncontrolledTreeEnvironment, Tree, StaticTreeDataProvider } from 'react-complex-tree';
-import 'react-complex-tree/lib/style-modern.css';
+import React, { useEffect, useState } from "react";
+import {
+  UncontrolledTreeEnvironment,
+  Tree,
+  StaticTreeDataProvider,
+} from "react-complex-tree";
+import "react-complex-tree/lib/style-modern.css";
+import { useSelector } from "react-redux";
 
 export default function MenuList() {
+  // To retrieve the workspaces of the current user.
+  const { workspaces } = useSelector((store) => store.firestore);
+  const [items, setItems] = useState({
+    root: {
+      index: "root",
+      canMove: true,
+      isFolder: true,
+      children: [],
+      data: "Root item",
+      canRename: true,
+    },
+  });
 
-    const items = {
-        root: {
-            index: 'root',
-            canMove: true,
-            isFolder: true,
-            children: ['child1', 'child2', 'child3'],
-            data: 'Root item',
-            canRename: true,
-        },
-        child1: {
-            index: 'child1',
-            canMove: true,
-            isFolder: true,
-            children: [],
-            data: 'Child item 1',
-            canRename: true,
-        },
-        child2: {
-            index: 'child2',
-            canMove: true,
-            isFolder: true,
-            children: [
-                'child2_1'
-            ],
-            data: 'Child item 2',
-            canRename: true,
-        },
-        child2_1: {
-            index: 'child2_1',
-            canMove: true,
-            isFolder: false,
-            children: [],
-            data: 'Child item 2_1',
-            canRename: true,
-        },
-        child3: {
-            index: 'child3',
-            canMove: true,
-            isFolder: true,
-            children: [],
-            data: 'Child item 3',
-            canRename: true,
-        },
-    };
-    const onDrop = (items, target) => {
-        console.log('dropEvent', items);
-        console.log('dropevent target', target);
-    };
-    return (
-        <>
-            <style>{`
+  // To parse workspaces into a tree structure
+  useEffect(() => {
+    const rootChildren = [];
+    const newItems = items;
+
+    workspaces.forEach((workspace) => {
+      rootChildren.push(workspace.id);
+      newItems[workspace.id] = {
+        index: workspace.id,
+        canMove: true,
+        isFolder: true,
+        children: [],
+        data: workspace.name,
+        canRename: true,
+      };
+    });
+    newItems.root.children = rootChildren;
+    setItems(newItems);
+  }, [workspaces]);
+
+  const onDrop = (items, target) => {
+    console.log("dropEvent", items);
+    console.log("dropevent target", target);
+  };
+  const defaultInteractionMode = {
+    mode: "custom",
+    createInteractiveElementProps: (item, treeId, actions, renderFlags) => ({
+      onClick: (e) => {
+        console.log("custom onClick event", e, item, treeId, actions);
+        // todo load node children
+      },
+      onFocus: (e) => {
+        console.log("custom onFocus event", e);
+      },
+      tabIndex: !renderFlags.isRenaming
+        ? renderFlags.isFocused
+          ? 0
+          : -1
+        : undefined,
+    }),
+  };
+  return (
+    <>
+      <style>{`
             .rct-tree-item-button{
                 color: #e8eaed;
             }
@@ -78,17 +86,22 @@ export default function MenuList() {
           --rct-color-focustree-item-hover-text: #333
         }
       `}</style>
-            <UncontrolledTreeEnvironment
-                dataProvider={new StaticTreeDataProvider(items, (item, data) => ({ ...item, data }))}
-                getItemTitle={item => item.data}
-                viewState={{}}
-                canDragAndDrop={true}
-                canDropOnFolder={true}
-                canReorderItems={true}
-                onDrop={(items, target) => { onDrop(items, target) }}
-            >
-                <Tree treeId="tree-1" rootItem="root" treeLabel="Tree Example" />
-            </UncontrolledTreeEnvironment>
-        </>
-    );
+      <UncontrolledTreeEnvironment
+        dataProvider={
+          new StaticTreeDataProvider(items, (item, data) => ({ ...item, data }))
+        }
+        getItemTitle={(item) => item.data}
+        viewState={{}}
+        canDragAndDrop={true}
+        canDropOnFolder={true}
+        canReorderItems={true}
+        onDrop={(items, target) => {
+          onDrop(items, target);
+        }}
+        defaultInteractionMode={defaultInteractionMode}
+      >
+        <Tree treeId="tree-1" rootItem="root" treeLabel="Tree Example" />
+      </UncontrolledTreeEnvironment>
+    </>
+  );
 }
