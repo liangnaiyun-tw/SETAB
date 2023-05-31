@@ -10,6 +10,7 @@
 #modal-pie-chart {
   width: 15% !important;
   height: auto !important;
+  cursor: pointer;
 }
 
 .modal-group-item,
@@ -28,4 +29,10 @@
   width: 90%;
   border: 2px solid darkgray;
   border-radius: 0.5rem;
+  transition-duration: 0.2s;
+}
+
+.modal-list-content:hover {
+  border: 2px solid black;
+  cursor: pointer
 }

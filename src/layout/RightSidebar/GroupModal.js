@@ -1,52 +1,87 @@
 import { Pie } from 'react-chartjs-2';
 import { interpolateColorByIndex } from '../../utils/interpolateColor';
-import { getGroupNameChain } from '../../utils/tabs';
+import { getGroupIdChain, getGroupNameChain } from '../../utils/tabs';
 import './GroupModal.css';
 import { Box, IconButton, Modal, Typography } from "@mui/material";
 import CircleIcon from '@mui/icons-material/Circle';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { createRandomUUID } from '../../utils/hash';
+import Breadcrumb from '@mui/material/Breadcrumbs';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { v4 as uuidv4 } from 'uuid';
+
+/*global chrome*/
+
 
 function GroupModal(props) {
+  const fetchTabs = useSelector(state => state.chromeTabs).fetchTabs;
+  const firestore = useSelector(state => state.firestore);
+
   const modalOpen = props.modalOpen;
   const selectedItem = props.selectedItem;
-  let totalMemory = 0;
-  const items = [];
+  const [items, setItems] = useState([]);
+  const [tabsInGroup, setTabsInGroup] = useState([]);
 
-  console.log(selectedItem);
-  if (selectedItem) {
-    selectedItem.tabs.forEach((tab) => {
-      totalMemory += tab.privateMemory;
-      let groupNameChain = getGroupNameChain(tab.group);
-      if (groupNameChain.length === selectedItem.chartLevel) {
-        // Insert tab
-        items.push({
-          ...tab,
-          totalMemory: tab.privateMemory
-        });
-      } else if (groupNameChain.length > selectedItem.chartLevel) {
-        if (!items.find((item) => item.name === groupNameChain[selectedItem.chartLevel])) {
-          // Insert group
-          items.push({
-            name: groupNameChain[selectedItem.chartLevel],
-            tabs: [],
-            totalMemory: 0,
-            chartLevel: selectedItem.chartLevel + 1,
-          });
+  useEffect(() => {
+    const newItems = [];
+    const newTabs = [];
+    if (firestore.workspaces.find(workspace => workspace.id === selectedItem)
+      || firestore.groups.find(group => group.id === selectedItem)) {
+
+      fetchTabs.forEach((tab) => {
+        let groupIdChain = getGroupIdChain(tab.group);
+        let groupNameChain = getGroupNameChain(tab.group);
+        if (groupIdChain.length >= props.chartLevel && groupIdChain[props.chartLevel - 1] === selectedItem) {
+          if (groupIdChain.length === props.chartLevel) {
+            newItems.push({
+              ...tab,
+              totalMemory: tab.privateMemory
+            });
+          } else {
+            if (!newItems.find((item) => item.name === groupNameChain[props.chartLevel])) {
+              newItems.push({
+                id: groupIdChain[props.chartLevel],
+                name: groupNameChain[props.chartLevel],
+                tabs: [],
+                totalMemory: 0
+              });
+            }
+            newItems.find((item) => item.id === groupIdChain[props.chartLevel]).totalMemory += tab.privateMemory;
+            newItems.find((item) => item.id === groupIdChain[props.chartLevel]).tabs.push(tab);
+          }
+          newTabs.push(tab);
         }
-        items.find((item) => item.name === groupNameChain[selectedItem.chartLevel]).totalMemory += tab.privateMemory;
-        items.find((item) => item.name === groupNameChain[selectedItem.chartLevel]).tabs.push(tab);
-      }
-    });
-  }
-  items.sort((a, b) => a.totalMemory - b.totalMemory);
+      });
+    }
+    newItems.sort((a, b) => a.totalMemory - b.totalMemory);
+    newTabs.sort((a, b) => a.privateMemory - b.privateMemory);
 
-  const backgroundColors = [];
-  const borderColors = [];
-  items.forEach((item, index) => {
-    backgroundColors.push("rgba(" + interpolateColorByIndex(index, items.length).join(", ") + ", 1)");
-    borderColors.push("rgb(255, 255, 255)");
-  });
+    const backgroundColors = newItems.map((item, index) => {
+      return "rgba(" + interpolateColorByIndex(index, newItems.length).join(", ") + ", 1)";
+    });
+    const borderColors = newItems.map(() => {
+      return "rgb(255, 255, 255)";
+    });
+
+    setTabsInGroup(newTabs);
+    setItems(newItems);
+    setBackgroundColors(backgroundColors);
+    setBorderColors(borderColors);
+  }, [fetchTabs, firestore, selectedItem, props.chartLevel]);
+
+
+  const totalMemory = items.reduce((sum, item) => sum + item.totalMemory, 0);
+  const [backgroundColors, setBackgroundColors] = useState([]);
+  const [borderColors, setBorderColors] = useState([]);
+  let groupNameChain = [];
+  if (tabsInGroup.length > 0) {
+    groupNameChain = getGroupNameChain(tabsInGroup[0].group);
+  }
+  // if (items.length > 0 && items.find(item => item.title)) {
+  //   groupNameChain = getGroupNameChain(items.find(item => item.title).group).slice(0, props.chartLevel);
+  // } else if (items.length > 0) {
+  //   groupNameChain = getGroupNameChain(items[0].tabs[0].group).slice(0, props.chartLevel);
+  // }
 
   const chartData = {
     datasets: [
@@ -59,14 +94,58 @@ function GroupModal(props) {
     ]
   };
 
-  let renderItem;
-  if (selectedItem?.tabs) {
+  function switchToTab(windowId, windowIndex) {
+    console.log(windowId, windowIndex);
+    chrome.windows.update(
+      windowId,
+      {
+        focused: true
+      }
+    ).catch((err) => {
+      console.error(err);
+    });
+    chrome.tabs.highlight({ windowId: windowId, tabs: windowIndex })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+
+  function selectItem(itemId) {
+    let newHistory = [...props.selectedItemHistory];
+    let newChartLevel = props.chartLevel + 1;
+    if (props.selectedItemHistory.length < newChartLevel) {
+      newHistory.push(itemId);
+    } else {
+      newHistory[newChartLevel - 1] = itemId;
+    }
+    props.setSelectedItem(itemId);
+    props.setSelectedItemHistory(newHistory);
+    props.setChartLevel(newChartLevel)
+  }
+
+  function modalClickEvent(event, elements) {
+    if (elements.length > 0) {
+      const item = items[elements[0].index];
+      if (fetchTabs.find(tab => tab.id === item.id)) {
+        let tab = fetchTabs.find(tab => tab.id === item.id);
+        switchToTab(tab.windowId, tab.windowIndex);
+      } else {
+        selectItem(item.id);
+      }
+    }
+  }
+
+  let renderItem = <></>;
+  if (selectedItem &&
+    (firestore.workspaces.find(workspace => workspace.id === selectedItem)
+      || firestore.groups.find(group => group.id === selectedItem))) {
     renderItem =
       <>
         <div className='modal-title'>
           <Pie id="modal-pie-chart"
             data={chartData}
             options={{
+              onClick: modalClickEvent,
               plugins: {
                 tooltip: {
                   callbacks: {
@@ -101,11 +180,17 @@ function GroupModal(props) {
           />
 
           <div className='modal-title-text'>
-            <Typography variant='h6'>
-              {getGroupNameChain(selectedItem.tabs[0].group).slice(0, selectedItem.chartLevel).join("/")}
-            </Typography>
+            <Breadcrumb aria-label="breadcrumb" variant="h6" separator="/">
+              {groupNameChain.map((name) => {
+                return (
+                  <Typography variant='h6' key={`${name}-${uuidv4()}`}>
+                    {name}
+                  </Typography>
+                );
+              })}
+            </Breadcrumb>
             <Typography variant='subtitle1'>
-              Memory Usage: {`${Math.round(selectedItem.totalMemory / 1024)} KB`}
+              Memory Usage: {`${Math.round(totalMemory / 1024)} KB`}
             </Typography>
           </div>
         </div>
@@ -115,17 +200,13 @@ function GroupModal(props) {
           <ul>
             {items.filter((item) => item.name).slice().reverse().map((group, index) => {
               return (
-                <li className='modal-group-item' key={`${group.name}-${createRandomUUID()}`}>
-                  <div className='modal-list-content'>
+                <li className='modal-group-item' key={`${group.name}-${uuidv4()}`}>
+                  <div className='modal-list-content' onClick={(e) => { selectItem(group.id) }}>
                     <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(items.length - 1 - index, items.length).join(", ") + ", 1)" }}></CircleIcon>
-                    <Typography variant='h6'>{group.name}</Typography>
-                    <div>Memory Usage: {(group.totalMemory / totalMemory * 100).toFixed(1)}%</div>
-                  </div>
-
-                  <div className='modal-delete-button-container'>
-                    <IconButton>
-                      <DeleteIcon></DeleteIcon>
-                    </IconButton>
+                    <div>
+                      <Typography variant='h6'>{group.name}</Typography>
+                      <div>Memory Usage: {(group.totalMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(group.totalMemory / 1024)} KB)</div>
+                    </div>
                   </div>
                 </li>
               );
@@ -133,13 +214,18 @@ function GroupModal(props) {
           </ul>
           <Typography variant='h5'>Tabs</Typography>
           <ul>
-            {items.filter((item) => !item.name).slice().reverse().map((tab, index) => {
+            {tabsInGroup.slice().reverse().map((tab, index) => {
               return (
                 <li className='modal-tab-item' key={`${tab.title}-${tab.windowId}-${tab.tabId}`}>
-                  <div className='modal-list-content'>
-                    <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(items.length - 1 - index, items.length).join(", ") + ", 1)" }}></CircleIcon>
-                    <Typography variant='h6'>{tab.alias}</Typography>
-                    <div>Memory Usage: {(tab.totalMemory / totalMemory * 100).toFixed(1)}%</div>
+                  <div className='modal-list-content' onClick={(e) => { switchToTab(tab.windowId, tab.windowIndex) }}>
+                    <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabsInGroup.length - 1 - index, tabsInGroup.length).join(", ") + ", 1)" }}></CircleIcon>
+                    <div>
+                      <Typography variant='h6'>{tab.alias}</Typography>
+                      <Typography variant="subtitle2">
+                        {getGroupNameChain(tab.group).join("/")}
+                      </Typography>
+                      <div>Memory Usage: {(tab.privateMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(tab.privateMemory / 1024)} KB)</div>
+                    </div>
                   </div>
 
                   <div className='modal-delete-button-container'>
@@ -150,33 +236,6 @@ function GroupModal(props) {
                 </li>
               );
             })}
-          </ul>
-        </div>
-      </>
-  } else if (selectedItem) {
-    renderItem =
-      <>
-        <div className="modal-title">
-          {selectedItem.tabIconUrl
-            ? <img src={selectedItem.tabIconUrl} alt="tab icon"></img>
-            : <></>}
-          <Typography variant="h6">
-            {selectedItem.title}
-          </Typography>
-        </div>
-
-        <div className="modal-text">
-          <ul>
-            <li>
-              <Typography variant='subtitle1'>
-                URL: {selectedItem.tabUrl}
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="subtitle1">
-                Memory Usage: {`${Math.round(selectedItem.privateMemory / 1024)} KB`}
-              </Typography>
-            </li>
           </ul>
         </div>
       </>

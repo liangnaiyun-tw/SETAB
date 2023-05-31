@@ -1,44 +1,57 @@
 import "./PieChart.css";
+import { useSelector } from "react-redux";
 import { Pie } from "react-chartjs-2";
 import { ArcElement, Chart as ChartJS, Legend, Title, Tooltip } from "chart.js";
 import { interpolateColorByIndex } from "../../utils/interpolateColor";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GroupModal } from "./GroupModal";
-import { getGroupNameChain } from "../../utils/tabs";
+import { getGroupIdChain, getGroupNameChain } from "../../utils/tabs";
+
+/*globa chrome*/
+
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
-function PieChart(props) {
-  const tabs = props.tabs;
+function PieChart() {
+  const state = useSelector((state) => state.chromeTabs);
 
-  let totalMemory = 0;
-  const workspaces = [];
-  tabs.forEach((tab) => {
-    totalMemory += tab.privateMemory;
-    let groupNameChain = getGroupNameChain(tab.group);
-    if (!workspaces.find((workspace) => workspace.name === groupNameChain[0])) {
-      workspaces.push({
-        name: groupNameChain[0],
-        tabs: [],
-        totalMemory: 0,
-        chartLevel: 1,
-      });
-    }
-    workspaces.find((workspace) => workspace.name === groupNameChain[0]).totalMemory += tab.privateMemory;
-    workspaces.find((workspace) => workspace.name === groupNameChain[0]).tabs.push(tab);
-  });
-  workspaces.sort(function (a, b) {
-    return a.totalMemory - b.totalMemory;
-  });
-  console.log("WORKSPACES");
-  console.log(workspaces);
+  const [workspaces, setWorkspaces] = useState([]);
+  const [backgroundColors, setBackgroundColors] = useState([]);
+  const [borderColors, setBorderColors] = useState([]);
 
-  const backgroundColors = [];
-  const borderColors = [];
-  workspaces.forEach((workspace, index) => {
-    backgroundColors.push("rgba(" + interpolateColorByIndex(index, workspaces.length).join(", ") + ', 1)');
-    borderColors.push('rgb(255, 255, 255)');
-  });
+  useEffect(() => {
+    const newWorkspaces = [];
+    state.fetchTabs.forEach((tab) => {
+      let groupIdChain = getGroupIdChain(tab.group);
+      let groupNameChain = getGroupNameChain(tab.group);
+      if (!newWorkspaces.find((workspace) => workspace.id === groupIdChain[0])) {
+        newWorkspaces.push({
+          id: groupIdChain[0],
+          name: groupNameChain[0],
+          tabs: [],
+          totalMemory: 0,
+        });
+      }
+      newWorkspaces.find((workspace) => workspace.id === groupIdChain[0]).totalMemory += tab.privateMemory;
+      newWorkspaces.find((workspace) => workspace.id === groupIdChain[0]).tabs.push(tab);
+    });
+    newWorkspaces.sort(function (a, b) {
+      return a.totalMemory - b.totalMemory;
+    });
+
+    const newBackgroundColors = newWorkspaces.map((workspace, index) => {
+      return "rgba(" + interpolateColorByIndex(index, newWorkspaces.length).join(", ") + ", 1)";
+    });
+    const newBorderColors = newWorkspaces.map(() => {
+      return "rgb(255, 255, 255)";
+    });
+
+    setWorkspaces(newWorkspaces);
+    setBackgroundColors(newBackgroundColors);
+    setBorderColors(newBorderColors);
+  }, [state.fetchTabs]);
+
+  const totalMemory = workspaces.reduce((sum, workspace) => sum + workspace.totalMemory, 0);
 
   const data = {
     datasets: [
@@ -47,20 +60,32 @@ function PieChart(props) {
         borderWidth: 2,
         backgroundColor: backgroundColors,
         borderColor: borderColors,
-      }
-    ]
+      },
+    ],
   };
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItemHistory, setSelectedItemHistory] = useState([]);
+  const [chartLevel, setChartLevel] = useState(1);
+
   function modalClickEvent(event, elements) {
     if (elements.length > 0) {
-      const dataIndex = elements[0].index;
-      const workspace = workspaces[dataIndex];
-      setSelectedItem(workspace);
+      const workspace = workspaces[elements[0].index];
+      let newHistory = [...selectedItemHistory];
+      if (selectedItemHistory.length === 0) {
+        newHistory.push(workspace.id);
+      } else {
+        newHistory[0] = workspace.id;
+      }
+
+      setSelectedItem(workspace.id);
+      setSelectedItemHistory(newHistory);
       setModalOpen(true);
+      setChartLevel(1);
     }
   }
+
 
   return (
     <div className="PieChart">
@@ -106,6 +131,10 @@ function PieChart(props) {
         setModalOpen={setModalOpen}
         selectedItem={selectedItem}
         setSelectedItem={setSelectedItem}
+        selectedItemHistory={selectedItemHistory}
+        setSelectedItemHistory={setSelectedItemHistory}
+        chartLevel={chartLevel}
+        setChartLevel={setChartLevel}
       ></GroupModal>
     </div>
   );

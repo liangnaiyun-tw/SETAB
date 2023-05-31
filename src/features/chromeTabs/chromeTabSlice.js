@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { updateUnsavedWorkspace } from "../firebase/firestore/firestoreSlice";
+import { v4 as uuidv4 } from "uuid";
 
 /*global chrome*/
 
@@ -30,7 +31,7 @@ async function getMemory(processes, thunkAPI) {
       });
 
       return {
-        id: tabInFirebase ? tabInFirebase.id : "",
+        id: tabInFirebase ? tabInFirebase.id : uuidv4(),
         alias: tab.title,
         title: tab.title,
         status: "complete",
@@ -51,7 +52,6 @@ async function getMemory(processes, thunkAPI) {
   tabTasks.sort(function (a, b) {
     return a.privateMemory - b.privateMemory;
   });
-  console.log(tabTasks);
 
   thunkAPI.dispatch(updateTabs({
     tabs: tabTasks

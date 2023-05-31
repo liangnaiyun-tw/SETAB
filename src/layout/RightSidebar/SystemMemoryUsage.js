@@ -6,7 +6,6 @@ import { IconButton, List, ListItem, ListItemButton, Typography } from "@mui/mat
 import { interpolateColorByIndex } from '../../utils/interpolateColor';
 import CircleIcon from '@mui/icons-material/Circle';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { createRandomUUID } from '../../utils/hash';
 import { fetchTabs } from '../../features/chromeTabs/chromeTabSlice';
 import { getFullGroupNameById } from '../../utils/tabs';
 
@@ -25,6 +24,14 @@ function SystemMemoryUsage() {
   }, [dispatch]);
 
   function clickOnOpenedTab(event, windowId, windowIndex) {
+    chrome.windows.update(
+      windowId,
+      {
+        focused: true
+      }
+    ).catch((err) => {
+      console.error(err);
+    });
     chrome.tabs.highlight({ windowId: windowId, tabs: windowIndex })
       .catch((err) => {
         console.error(err);
@@ -42,7 +49,7 @@ function SystemMemoryUsage() {
     <div className="SystemMemoryUsage">
       <div id="system-memeory-usage-title">Current Memory Usage</div>
 
-      <PieChart tabs={tabs}></PieChart>
+      <PieChart></PieChart>
 
       <List className="tab-list">
         {tabs.length === 0

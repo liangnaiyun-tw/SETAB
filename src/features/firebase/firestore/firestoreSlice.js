@@ -85,12 +85,13 @@ const initialState = {
             group: "d35c907e-7757-4185-90ec-695680557414",
             status: "complete",
             tabIconUrl: "https://www.gstatic.com/mobilesdk/160503_mobilesdk/logo/favicon.ico",
+            tabUrl: "https://console.firebase.google.com/project/setab-388009/firestore/data/~2Fgroups~2FNfeSrDFueAczGQpFuvqX",
             uid: "",
             windowId: [
-                424336777
+                424337788
             ],
             tabId: [
-                424336904
+                424337901
             ]
         },
         {
@@ -100,12 +101,13 @@ const initialState = {
             group: "2aec38cd-c8f9-49c5-8aa9-88331f5076bb",
             status: "complete",
             tabIconUrl: "https://developer.chrome.com/images/meta/favicon-32x32.png",
+            tabUrl: "https://developer.chrome.com/docs/extensions/reference/",
             uid: "",
             windowId: [
-                424336777
+                424337788
             ],
             tabId: [
-                424336851
+                424337789
             ]
         }
     ],

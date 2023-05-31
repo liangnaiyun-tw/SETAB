@@ -19,9 +19,28 @@ function getGroupNameChain(groupId) {
   return fullGroupNameChain.reverse();
 }
 
+function getGroupIdChain(groupId) {
+  if (groupId === "Unsaved") return [store.getState().firestore.workspaces[0].id];
+
+  let state = store.getState().firestore;
+  let fullGroupIdChain = [state.groups.find((group) => group.id === groupId).id], parent;
+  while (true) {
+    parent = state.groups.find((group) => group.groups.includes(groupId));
+    if (!parent) {
+      parent = state.workspaces.find((workspace) => workspace.groups.includes(groupId));
+      fullGroupIdChain.push(parent.id);
+      break;
+    } else {
+      fullGroupIdChain.push(parent.id);
+      groupId = parent.id;
+    }
+  }
+  return fullGroupIdChain.reverse();
+}
+
 function getFullGroupNameById(groupId) {
   if (groupId === "Unsaved") return groupId;
   return getGroupNameChain(groupId).join("/");
 }
 
-export { getGroupNameChain, getFullGroupNameById };
+export { getGroupNameChain, getGroupIdChain, getFullGroupNameById };
