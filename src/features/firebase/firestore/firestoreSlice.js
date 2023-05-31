@@ -271,6 +271,21 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
         return e.response;
     }
 })
+export const updateGroup = createAsyncThunk('firestore/updateGroup', async(group, thunkAPI) => {
+    const user = thunkAPI.getState().auth.user;
+
+    let q = query(collection(db, "groups"), where("id", "==", group.id), where("uid", "==", user.uid));
+    const querySnapshot = await getDocs(q);
+
+    await updateDoc(querySnapshot.docs[0].ref, {
+        name: group.name
+    })
+
+    await thunkAPI.dispatch(loadStructureByUser());
+
+    return 'update group successfully'
+
+})
 export const createTab = createAsyncThunk('firestore/createTab', async (tab, thunkAPI) => {
 
     const user = thunkAPI.getState().auth.user;
@@ -331,6 +346,12 @@ const firestoreSlice = createSlice({
                 console.log(action);
             })
             .addCase(createGroup.rejected, (state, action) => {
+                console.log(action);
+            })
+            .addCase(updateGroup.fulfilled, (state, action) => {
+                console.log(action);
+            })
+            .addCase(updateGroup.rejected, (state, action) => {
                 console.log(action);
             })
             .addCase(createGroup.fulfilled, (state, action) => {

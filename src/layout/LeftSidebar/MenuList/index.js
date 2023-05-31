@@ -3,7 +3,7 @@
 import { UncontrolledTreeEnvironment, Tree, StaticTreeDataProvider } from 'react-complex-tree';
 import 'react-complex-tree/lib/style-modern.css';
 import { useSelector, useDispatch } from 'react-redux';
-import { setCurrentWorkspace, createGroup, updateWorkspace } from '../../../features/firebase/firestore/firestoreSlice';
+import { setCurrentWorkspace, createGroup, updateWorkspace, updateGroup } from '../../../features/firebase/firestore/firestoreSlice';
 
 import React, { useEffect, useState } from "react";
 import Menu from "@mui/material/Menu";
@@ -85,6 +85,11 @@ export default function MenuList() {
             workspace.id = currnetNode.index;
             workspace.name = rename;
             dispatch(updateWorkspace(workspace))
+        } else if(currnetNode && currentGroup.nodeType === nodeType.Group){
+            let group = Group;
+            group.id = currnetNode.index;
+            group.name = rename;
+            dispatch(updateGroup(group))
         }
         handleRenameDialogClose();
         
