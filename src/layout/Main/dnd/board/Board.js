@@ -1,11 +1,12 @@
 // @flow
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@xstyled/styled-components";
 import { colors } from "@atlaskit/theme";
 import PropTypes from "prop-types";
 import Column from "./Column";
 import reorder, { reorderQuoteMap } from "../reorder";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
+import { useSelector } from "react-redux";
 
 const Container = styled.div`
   // background-color: ${colors.B100};
@@ -23,10 +24,15 @@ const Board = ({
   containerHeight,
   withScrollableColumns
 }) => {
-  console.log('board initial', initial)
+  const { currentWorkspace, workspaces, groups } = useSelector((store) => store.firestore)
+  
   const [columns, setColumns] = useState(initial);
+  
+  
+  console.log('columns', columns)
 
   const [ordered, setOrdered] = useState(Object.keys(initial));
+  console.log(ordered)
 
   const onDragEnd = (result) => {
     if (result.combine) {
@@ -83,6 +89,19 @@ const Board = ({
 
     setColumns(data.quoteMap);
   };
+
+  useEffect(() => {
+    const newColumns = {};
+    if(currentWorkspace){
+      let workspaceGroups = groups.filter(group => group.workspace === currentWorkspace);
+      workspaceGroups.forEach(g => {
+        newColumns[g.name] = [{id: g.id, content: '123'}];
+      });
+      console.log('newColumns', newColumns)
+      setColumns(newColumns);
+      setOrdered(Object.keys(newColumns))
+    }
+  }, [workspaces, currentWorkspace])
 
   return (
     <>
