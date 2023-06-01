@@ -44,7 +44,6 @@ export const loadStructureByUser = createAsyncThunk('firestore/loadStructureByUs
     const accessToken = thunkAPI.getState().auth.accessToken;
 
 
-
     // user
     const userQuery = query(
         collection(db, "users"),
@@ -98,6 +97,7 @@ export const loadStructureByUser = createAsyncThunk('firestore/loadStructureByUs
     const workspaceQuerySnapshot = await getDocs(workspaceQuery);
     let workspaces = [unSaveWorkSpace];
     
+    // To sort the workspaces according to user workspaces
     let workspacesInDB = workspaceQuerySnapshot.docs;
     if(userInDB && userInDB.workspaces.length > 0){
         workspacesInDB.sort((a, b) => {
@@ -111,14 +111,6 @@ export const loadStructureByUser = createAsyncThunk('firestore/loadStructureByUs
                 return 0;
             }
         })
-        // userInDB.workspaces.forEach((wid) => {
-        //     workspaceQuerySnapshot.docs.forEach((doc) => {
-        //         const w = doc.data();
-        //         if(w.id === wid){
-        //             workspaces.push(w);
-        //         }
-        //     });
-        // })
     } 
 
     workspacesInDB.forEach((doc) => {
@@ -163,6 +155,19 @@ export const updateUserWorkspaces = createAsyncThunk('firestore/updateUserWorksp
         await thunkAPI.dispatch(loadStructureByUser());
 
         return "update User Workspaces sucessfully";
+})
+export const updateWorkspaceGroups = createAsyncThunk('firestore/updateWorkspaceGroups', async({groups, workspaceId}, thunkAPI) => {
+    const user = thunkAPI.getState().auth.user;
+
+    let q = query(collection(db, "workspaces"), where("id", "==", workspaceId), where("uid", "==", user.uid));
+    const querySnapshot = await getDocs(q);
+
+    await updateDoc(querySnapshot.docs[0].ref, {
+        groups: [...groups]
+    })
+
+    await thunkAPI.dispatch(loadStructureByUser());
+    return 'update Workspace groups successfully';
 })
 export const createWorkSpace = createAsyncThunk('firestore/createWorkSpace', async (workspace, thunkAPI) => {
 
@@ -405,6 +410,12 @@ const firestoreSlice = createSlice({
                 console.log(action)
             })
             .addCase(updateUserWorkspaces.rejected, (state, action) => {
+                console.log(action)
+            })
+            .addCase(updateWorkspaceGroups.fulfilled, (state, action) => {
+                console.log(action)
+            })
+            .addCase(updateWorkspaceGroups.rejected, (state, action) => {
                 console.log(action)
             })
     }

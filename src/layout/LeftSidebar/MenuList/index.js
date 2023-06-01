@@ -3,7 +3,7 @@
 import { UncontrolledTreeEnvironment, Tree, StaticTreeDataProvider } from 'react-complex-tree';
 import 'react-complex-tree/lib/style-modern.css';
 import { useSelector, useDispatch } from 'react-redux';
-import { setCurrentWorkspace, createGroup, updateWorkspace, updateGroup, updateUserWorkspaces } from '../../../features/firebase/firestore/firestoreSlice';
+import { setCurrentWorkspace, createGroup, updateWorkspace, updateGroup, updateUserWorkspaces, updateWorkspaceGroups } from '../../../features/firebase/firestore/firestoreSlice';
 
 import React, { useEffect, useState, useRef } from "react";
 import Menu from "@mui/material/Menu";
@@ -80,6 +80,16 @@ export default function MenuList() {
             let children = [...treeEnvironment.current.items.root.children];
             children = [...children.filter(c => c !== "")];
             dispatch(updateUserWorkspaces(children));
+          } else {
+            const parent = treeEnvironment.current.items[target.parentItem];
+            let children = [...parent.children]
+            if(parent.nodeType === nodeType.Workspace){
+              dispatch(updateWorkspaceGroups({groups: children, workspaceId: parent.index}))
+            } else {
+              // todo update group's group
+            }
+            
+            
           }
         }
     };
@@ -173,7 +183,6 @@ export default function MenuList() {
 
     useEffect(() => {
         setItems((prev) => {
-          
             prev.root.children = [...workspaces.map(workspace => workspace.id)];
 
             for (let i = 0; i < workspaces.length; i++) {
@@ -205,7 +214,11 @@ export default function MenuList() {
         const currGroupsByCurrentWorkspace = groups.filter(
           (group) => group.workspace === currentWorkspace
         );
-        const currentWorkspaceChildren = currGroupsByCurrentWorkspace.map(group => group.id);
+
+        // To retrieve groups from the current workspace in the correct order.
+        let currWorkspace = []; 
+        currWorkspace = workspaces.filter(x => x.id === currentWorkspace)[0];
+        const currentWorkspaceChildren = currWorkspace.groups;
 
         setItems((prev) => {
             prev[currentWorkspace].children = currentWorkspaceChildren
