@@ -147,7 +147,6 @@ export const updateUserWorkspaces = createAsyncThunk('firestore/updateUserWorksp
     const userQuery = query(collection(db, "users"), where("uid", "==", user.uid))
         const userQuerySnapshot = await getDocs(userQuery);
         const data = userQuerySnapshot.docs[0].data();
-        debugger;
         await updateDoc(userQuerySnapshot.docs[0].ref, {
             ...data,
             workspaces: [...workspaces],
@@ -221,6 +220,14 @@ export const createWorkSpace = createAsyncThunk('firestore/createWorkSpace', asy
 
 
 })
+export const deleteWorkspace = createAsyncThunk('firestore/deleteWorkspace', async(workspaceId, thunkAPI) => {
+    const user = thunkAPI.getState().auth.user;
+    let q = query(collection(db, "workspaces"), where("id", "==", workspaceId), where("uid", "==", user.uid));
+    const querySnapshot = await getDocs(q);
+    await deleteDoc(querySnapshot.docs[0].ref);
+    await thunkAPI.dispatch(loadStructureByUser());
+    return 'delete workspace successfully';
+})
 export const updateWorkspace = createAsyncThunk('firestore/updateWorkspace', async(workspace, thunkAPI) => {
     const user = thunkAPI.getState().auth.user;
 
@@ -229,6 +236,7 @@ export const updateWorkspace = createAsyncThunk('firestore/updateWorkspace', asy
 
     await updateDoc(querySnapshot.docs[0].ref, {
         name: workspace.name,
+        groups: workspace.groups
     })
 
     await thunkAPI.dispatch(loadStructureByUser());
@@ -258,7 +266,7 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
             :
             (() => {
                 parent = workspaces.filter(workspace =>
-                    workspace.id == currentWorkspace
+                    workspace.id === (group.workspace ? group.workspace : currentWorkspace)
                 )[0]
                 parentIsWorkspace = true;
                 return parent.googleDriveFolderId;
@@ -285,7 +293,7 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
             id: uuidv4(),
             googleDriveFolderId: folder.id,
             uid: user.uid,
-            workspace: currentWorkspace
+            workspace: group.workspace ? group.workspace : currentWorkspace
         }
         await addDoc(collection(db, "groups"), {
             ...newGroup,
@@ -416,6 +424,12 @@ const firestoreSlice = createSlice({
                 console.log(action)
             })
             .addCase(updateWorkspaceGroups.rejected, (state, action) => {
+                console.log(action)
+            })
+            .addCase(deleteWorkspace.fulfilled, (state, action) => {
+                console.log(action)
+            })
+            .addCase(deleteWorkspace.rejected, (state, action) => {
                 console.log(action)
             })
     }

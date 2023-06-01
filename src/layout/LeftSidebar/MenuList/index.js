@@ -3,7 +3,7 @@
 import { UncontrolledTreeEnvironment, Tree, StaticTreeDataProvider } from 'react-complex-tree';
 import 'react-complex-tree/lib/style-modern.css';
 import { useSelector, useDispatch } from 'react-redux';
-import { setCurrentWorkspace, createGroup, updateWorkspace, updateGroup, updateUserWorkspaces, updateWorkspaceGroups } from '../../../features/firebase/firestore/firestoreSlice';
+import { setCurrentWorkspace, createGroup, updateWorkspace, updateGroup, updateUserWorkspaces, updateWorkspaceGroups, deleteWorkspace, createWorkSpace } from '../../../features/firebase/firestore/firestoreSlice';
 
 import React, { useEffect, useState, useRef } from "react";
 import Menu from "@mui/material/Menu";
@@ -77,22 +77,90 @@ export default function MenuList() {
         if(target.targetType === "between-items"){
           
           if(target.parentItem === "root"){
-            let children = [...treeEnvironment.current.items.root.children];
-            children = [...children.filter(c => c !== "")];
-            dispatch(updateUserWorkspaces(children));
+            items.forEach(item => {
+              if(item.nodeType === nodeType.Workspace){
+                updateRootChildren();
+              } else {
+                updateRootChildren(true, [item]);
+                
+                
+                let targetItemWorkspace = workspaces.filter(w => w.id === item.parent)[0];
+                dispatch(updateWorkspaceGroups({groups: [...targetItemWorkspace.groups.filter(g => g !== item.index)], workspaceId: targetItemWorkspace.id}))
+
+
+                let newWorkspace = Workspace;
+                newWorkspace.name = item.data;
+                newWorkspace.groups = groups.filter(g => g.id === item.index)[0].groups;
+                dispatch(createWorkSpace(newWorkspace))
+              }
+            })
+            
           } else {
-            const parent = treeEnvironment.current.items[target.parentItem];
-            let children = [...parent.children]
-            if(parent.nodeType === nodeType.Workspace){
-              dispatch(updateWorkspaceGroups({groups: children, workspaceId: parent.index}))
-            } else {
-              // todo update group's group
-            }
             
-            
+            updateParentChildren(target.parentItem);
           }
+        } else if(target.targetType === "item") {
+          if(target.targetItem === "root") {
+            updateRootChildren();
+          } else {
+            setCurrentWorkspace(target.targetItem);
+            let targetItem = treeEnvironment.current.items[target.targetItem];
+            if(targetItem.nodeType === nodeType.Workspace){
+              updateParentChildren(targetItem.index, items);
+            } else {
+              debugger;
+              updateParentChildren(targetItem.index);
+            }
+          }
+          
+          // To simultaneously update the parentItem and targetItem's children
+          if(target.parentItem === "root"){
+            updateRootChildren(true, items);
+            items.forEach(item => {
+              if(item.nodeType === nodeType.Workspace){
+                dispatch(deleteWorkspace(item.index))
+                let newGroup = Group;
+                newGroup.name = item.data;
+                newGroup.workspace = target.targetItem;
+                dispatch(createGroup(newGroup));
+              }
+            });
+            
+          } else {
+            updateParentChildren(target.parentItem);
+          }
+
+          
         }
     };
+
+    const updateRootChildren = (removeTarget = false, items = []) => {
+      
+      let children = [...treeEnvironment.current.items.root.children];
+      children = [...children.filter(c => c !== "")];
+      if(removeTarget && items.length > 0){
+        items.forEach(item => {
+          children = [...children.filter(c => c !== item)];
+        })
+      }
+      
+      dispatch(updateUserWorkspaces(children));
+    }
+
+    const updateParentChildren = (target, deleteItems = []) => {
+      const parent = treeEnvironment.current.items[target];
+      let children = [...parent.children]
+      if(deleteItems.length > 0){
+        deleteItems.forEach(i => {
+          children = children.filter(c => c !== i.index);
+        })
+      }
+      if(parent.nodeType === nodeType.Workspace){
+        dispatch(updateWorkspaceGroups({groups: children, workspaceId: parent.index}))
+      } else {
+        // todo update group's group
+      }
+    }
 
     const handleNodeMoreClose = () => {
         setAnchorEl(null);
@@ -198,7 +266,8 @@ export default function MenuList() {
                     data: workspaces[i].name,
                     canRename: type !== nodeType.UnsavedWorkspace,
                     workspaceId: workspaces[i].id,
-                    nodeType: type
+                    nodeType: type,
+                    parent: 'root'
                 }
                 
             }
@@ -232,6 +301,7 @@ export default function MenuList() {
                   data: group.name,
                   canRename: true,
                   nodeType: nodeType.Group,
+                  parent: group.workspace
                 };
             });
             
