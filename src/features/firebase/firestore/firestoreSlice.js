@@ -97,7 +97,31 @@ export const loadStructureByUser = createAsyncThunk('firestore/loadStructureByUs
     );
     const workspaceQuerySnapshot = await getDocs(workspaceQuery);
     let workspaces = [unSaveWorkSpace];
-    workspaceQuerySnapshot.docs.forEach((doc) => {
+    
+    let workspacesInDB = workspaceQuerySnapshot.docs;
+    if(userInDB && userInDB.workspaces.length > 0){
+        workspacesInDB.sort((a, b) => {
+            const indexA = userInDB.workspaces.indexOf(a.data().id);
+            const indexB = userInDB.workspaces.indexOf(b.data().id);
+            if(indexA < indexB){
+                return -1;
+            } else if (indexA > indexB){
+                return 1;
+            } else {
+                return 0;
+            }
+        })
+        // userInDB.workspaces.forEach((wid) => {
+        //     workspaceQuerySnapshot.docs.forEach((doc) => {
+        //         const w = doc.data();
+        //         if(w.id === wid){
+        //             workspaces.push(w);
+        //         }
+        //     });
+        // })
+    } 
+
+    workspacesInDB.forEach((doc) => {
         workspaces.push(doc.data());
     });
 
@@ -125,6 +149,20 @@ export const loadStructureByUser = createAsyncThunk('firestore/loadStructureByUs
 
     thunkAPI.dispatch(addAllStructure({ workspaces, groups, tabs, userInDB }));
 
+})
+export const updateUserWorkspaces = createAsyncThunk('firestore/updateUserWorkspaces', async(workspaces, thunkAPI) => {
+    const user = thunkAPI.getState().auth.user;
+    const userQuery = query(collection(db, "users"), where("uid", "==", user.uid))
+        const userQuerySnapshot = await getDocs(userQuery);
+        const data = userQuerySnapshot.docs[0].data();
+        debugger;
+        await updateDoc(userQuerySnapshot.docs[0].ref, {
+            ...data,
+            workspaces: [...workspaces],
+        });
+        await thunkAPI.dispatch(loadStructureByUser());
+
+        return "update User Workspaces sucessfully";
 })
 export const createWorkSpace = createAsyncThunk('firestore/createWorkSpace', async (workspace, thunkAPI) => {
 
@@ -362,6 +400,12 @@ const firestoreSlice = createSlice({
             })
             .addCase(createTab.fulfilled, (state, action) => {
                 console.log(action);
+            })
+            .addCase(updateUserWorkspaces.fulfilled, (state, action) => {
+                console.log(action)
+            })
+            .addCase(updateUserWorkspaces.rejected, (state, action) => {
+                console.log(action)
             })
     }
 })

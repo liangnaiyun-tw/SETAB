@@ -3,9 +3,9 @@
 import { UncontrolledTreeEnvironment, Tree, StaticTreeDataProvider } from 'react-complex-tree';
 import 'react-complex-tree/lib/style-modern.css';
 import { useSelector, useDispatch } from 'react-redux';
-import { setCurrentWorkspace, createGroup, updateWorkspace, updateGroup } from '../../../features/firebase/firestore/firestoreSlice';
+import { setCurrentWorkspace, createGroup, updateWorkspace, updateGroup, updateUserWorkspaces } from '../../../features/firebase/firestore/firestoreSlice';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -39,6 +39,13 @@ export default function MenuList() {
     const handleAddGroupDialogOpen = () => setOpenAddGroupDialogDialog(true);
     const handleAddGroupDialogClose = () => setOpenAddGroupDialogDialog(false);
     const open = Boolean(anchorEl);
+    // tree state control
+    const [expandedItems, setExpandedItems] = useState([""])
+    const [focusedItem, setFocusedItem] = useState("")
+    const [selectedItems, setSelectedItems] = useState([""])
+
+    const treeEnvironment = useRef();
+    const tree = useRef();
     const nodeType = {
         UnsavedWorkspace: 0,
         Workspace: 1,
@@ -50,7 +57,7 @@ export default function MenuList() {
         index: 'root',
             canMove: true,
             isFolder: true,
-            children: ['child1'],
+            children: [],
             data: 'Root item',
             canRename: true,
             folderId: ""
@@ -64,6 +71,17 @@ export default function MenuList() {
     const onDrop = (items, target) => {
         console.log('dropEvent', items);
         console.log('dropevent target', target);
+        console.log('tree', tree)
+        console.log('treeEnvironment', treeEnvironment)
+        console.log(treeEnvironment.current.items)
+        if(target.targetType === "between-items"){
+          
+          if(target.parentItem === "root"){
+            let children = [...treeEnvironment.current.items.root.children];
+            children = [...children.filter(c => c !== "")];
+            dispatch(updateUserWorkspaces(children));
+          }
+        }
     };
 
     const handleNodeMoreClose = () => {
@@ -154,8 +172,8 @@ export default function MenuList() {
 
 
     useEffect(() => {
-        console.log('workspace useEffect', workspaces)
         setItems((prev) => {
+          
             prev.root.children = [...workspaces.map(workspace => workspace.id)];
 
             for (let i = 0; i < workspaces.length; i++) {
@@ -183,6 +201,7 @@ export default function MenuList() {
 
 
     useEffect(() => {
+
         const currGroupsByCurrentWorkspace = groups.filter(
           (group) => group.workspace === currentWorkspace
         );
@@ -205,37 +224,64 @@ export default function MenuList() {
             
             return { ...prev };
         })
+        
       }, [groups, currentWorkspace, currentGroup]);
 
 
     return (
         <>
-            <style>{`
-            .rct-tree-item-button{
-                color: #e8eaed;
-            }
-        :root {
-          --rct-color-tree-bg: #202020;
-          --rct-color-tree-focus-outline: #ffffff;
-          --rct-color-focustree-item-selected-bg: #333;
-          --rct-color-focustree-item-focused-border: #fff;
-          --rct-color-focustree-item-draggingover-bg: #333;
-          --rct-color-focustree-item-draggingover-color: inherit;
-          --rct-color-search-highlight-bg: #333;
-          --rct-color-drag-between-line-bg: #333;
-          --rct-color-arrow: #e8eaed;
-          --rct-item-height: 30px;
-          --rct-search-text: #e8eaed
-          --rct-arrow-size: 10px;
-          --rct-focus-outline: #e8eaed;
-          --rct-color-focustree-item-selected-text: #e8eaed;
-          --rct-color-focustree-item-hover-text: #333
-        }
-      `}</style>
             <UncontrolledTreeEnvironment
+                ref={treeEnvironment}
                 dataProvider={new StaticTreeDataProvider(items, (item, data) => ({ ...item, data }))}
                 getItemTitle={(item) => getCustomItemTitle(item)}
-                viewState={{}}
+                // getItemTitle={item => item.data}
+                // renderItem={({ item, depth, children, title, context, arrow }) => {
+                //   const InteractiveComponent = context.isRenaming ? 'div' : 'button';
+                //   const type = context.isRenaming ? undefined : 'button';
+                //   return (
+                //     <li
+                //       {...(context.itemContainerWithChildrenProps)}
+                //       className="rct-tree-item-li"
+                //     >
+                //       <div
+                //         {...(context.itemContainerWithoutChildrenProps)}
+                //         style={{ paddingLeft: `${(depth + 1) * 4}px` }}
+                //         className={[
+                //           'rct-tree-item-title-container',
+                //           item.isFolder && 'rct-tree-item-title-container-isFolder',
+                //           context.isSelected && 'rct-tree-item-title-container-selected',
+                //           context.isExpanded && 'rct-tree-item-title-container-expanded',
+                //           context.isFocused && 'rct-tree-item-title-container-focused',
+                //           context.isDraggingOver &&
+                //             'rct-tree-item-title-container-dragging-over',
+                //           context.isSearchMatching &&
+                //             'rct-tree-item-title-container-search-match',
+                //         ].join(' ')}
+                //       >
+                //         {arrow}
+                //         <InteractiveComponent
+                //           type={type}
+                //           {...(context.interactiveElementProps)}
+                //           className="rct-tree-item-button"
+                //         >
+                //           {title}
+                //         </InteractiveComponent>
+                //         <button onClick={context.startRenamingItem} type="button">
+                //           Rename
+                //         </button>
+                //       </div>
+                //       {children}
+                //     </li>
+                //   );
+                // }}
+                viewState={{
+                  'tree-1': {
+                    expandedItems: expandedItems,
+                    focusedItem: focusedItem,
+                    selectedItems: selectedItems
+                  }
+                }}
+                canSearchByStartingTyping={false}
                 canDragAndDrop={true}
                 canDropOnFolder={true}
                 canReorderItems={true}
@@ -248,7 +294,12 @@ export default function MenuList() {
                 onExpandItem={(item) => onExpandNode(item)}
                 
             >
-                <Tree treeId="tree-1" rootItem="root" treeLabel="Tree Example" />
+              <div
+              className="rct-dark"
+              style={{ backgroundColor: '#222', color: '#e3e3e3' }}
+            >
+              <Tree treeId="tree-1" rootItem="root" treeLabel="Tree Example" ref={tree} />
+            </div>
             </UncontrolledTreeEnvironment>
 
             <Menu
