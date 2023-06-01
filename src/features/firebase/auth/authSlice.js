@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, getRedirectResult } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, getRedirectResult, signInWithRedirect } from "firebase/auth";
 
 const initialState = {
     isLoading: false,
@@ -12,6 +12,7 @@ const AUTH_SCOPES = [
     'email',
     'profile',
     'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/plus.login',
 ]
 
 let provider = new GoogleAuthProvider();
@@ -20,9 +21,31 @@ AUTH_SCOPES.forEach(SCOPE => provider.addScope(SCOPE));
 export const initLogin = createAsyncThunk('auth/initLogin', async (_, thunkAPI) => {
     const auth = getAuth();
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
-            signInWithPopup(auth, provider)
+            console.log(user);
+            console.log(auth);
+            await signInWithPopup(auth, provider)
+                .then((result) => {
+                    const credential = GoogleAuthProvider.credentialFromResult(result);
+                    const accessToken = credential?.accessToken;
+                    const user = result.user;
+                    console.log(user);
+                    console.log(accessToken);
+                    thunkAPI.dispatch(setAuth({ user, accessToken }));
+                    thunkAPI.dispatch(setLoginStatus(true));
+
+                })
+                .catch((error) => {
+                    console.error(error);
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    const email = error.email;
+                    thunkAPI.dispatch(setLoginStatus(false));
+                    const credential = GoogleAuthProvider.credentialFromError(error);
+                })
+        } else {
+            await signInWithPopup(auth, provider)
                 .then((result) => {
                     const credential = GoogleAuthProvider.credentialFromResult(result);
                     const accessToken = credential?.accessToken;
@@ -42,8 +65,7 @@ export const initLogin = createAsyncThunk('auth/initLogin', async (_, thunkAPI) 
                 })
                 .finally(() => {
                     thunkAPI.dispatch(setLoadingStatus(false));
-                })
-        } else {
+                });
             thunkAPI.dispatch(setLoginStatus(false))
             thunkAPI.dispatch(setAuth({ user: undefined, accessToken: undefined }))
         }
@@ -56,7 +78,7 @@ export const login = createAsyncThunk('auth/login', async (_, thunkAPI) => {
     thunkAPI.dispatch(setLoadingStatus(true));
 
     if (!thunkAPI.getState().auth.isLogin) {
-        signInWithPopup(auth, provider)
+        await signInWithPopup(auth, provider)
             .then((result) => {
                 const credential = GoogleAuthProvider.credentialFromResult(result);
                 const accessToken = credential?.accessToken;
@@ -65,7 +87,6 @@ export const login = createAsyncThunk('auth/login', async (_, thunkAPI) => {
                 console.log(accessToken);
                 thunkAPI.dispatch(setAuth({ user, accessToken }));
                 thunkAPI.dispatch(setLoginStatus(true));
-
             })
             .catch((error) => {
                 const errorCode = error.code;

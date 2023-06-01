@@ -23,7 +23,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { initLogin } from "./features/firebase/auth/authSlice";
 import { loadStructureByUser } from "./features/firebase/firestore/firestoreSlice";
 
-
+/*global chrome*/
 app();
 
 function App() {
@@ -66,12 +66,15 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(initLogin());
-  }, [])
+    if (!user) {
+      dispatch(initLogin());
+    }
+  }, [dispatch, user])
 
   useEffect(() => {
     dispatch(loadStructureByUser());
-  }, [user])
+  }, [dispatch, user])
+
 
   return (
     <>

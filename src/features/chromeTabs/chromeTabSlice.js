@@ -44,10 +44,10 @@ async function getMemory(processes, thunkAPI) {
         windowIndex: tab.index,
       };
     } catch (err) {
-      console.error(err);
       return null;
     }
   }));
+  console.log(tabTasks);
   tabTasks = tabTasks.map(tab => tab.value).filter(tab => tab != null);
   tabTasks.sort(function (a, b) {
     return a.privateMemory - b.privateMemory;
