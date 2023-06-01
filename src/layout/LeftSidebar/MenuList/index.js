@@ -24,6 +24,7 @@ import Group from "../../../interface/Group";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from '@mui/icons-material/Edit';
 import Workspace from '../../../interface/Workspace';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function MenuList() {
     // To retrieve the workspaces of the current user.
@@ -32,6 +33,9 @@ export default function MenuList() {
     const [newGroupName, setNewGroupName] = useState("");
     const [currnetNode, setCurrentNode] = useState(null);
     const [rename, setRename] = useState("")
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
+    const handleDeleteDialogOpen = () => setOpenDeleteDialog(true)
+    const handleDeleteDialogClose = () => setOpenDeleteDialog(false)
     const [openRenameDialog, setOpenRenameDialog] = useState(false)
     const handleRenameDialogOpen = () => setOpenRenameDialog(true)
     const handleRenameDialogClose = () => setOpenRenameDialog(false)
@@ -189,6 +193,17 @@ export default function MenuList() {
         }
         handleRenameDialogClose();
         
+    }
+
+    const handleDelete = () => {
+      if(currnetNode.nodeType === nodeType.Workspace){
+        // todo delete workspace should also delete 
+        dispatch(deleteWorkspace(currnetNode.index))
+      } else {
+        // todo when deleting a workspace, it is common to also delete its associated groups
+        // dispatch(deleteGroup(currnetNode.index))
+      }
+      handleDeleteDialogClose()
     }
 
     const handleCreateGroup = () => {
@@ -440,6 +455,12 @@ export default function MenuList() {
           </ListItemIcon>
           Rename
         </MenuItem>
+        <MenuItem onClick={() => handleDeleteDialogOpen()}>
+          <ListItemIcon>
+            <DeleteIcon fontSize='small'/>
+          </ListItemIcon>
+          Delete
+        </MenuItem>
       </Menu>
       <Dialog
         open={openAddGroupDialogDialog}
@@ -506,6 +527,28 @@ export default function MenuList() {
             onClick={handleRename}
           >
             Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* delete dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleDeleteDialogClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Are you sure you want to delete?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteDialogClose}>Cancel</Button>
+          <Button onClick={handleDelete} autoFocus>
+            Delete
           </Button>
         </DialogActions>
       </Dialog>
