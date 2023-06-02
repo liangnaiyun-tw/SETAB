@@ -19,9 +19,7 @@ function SystemMemoryUsage() {
 
   useEffect(() => {
     const event = dispatch(fetchTabs());
-    return () => {
-      event();
-    }
+    return event;
   }, [dispatch]);
 
   function clickOnOpenedTab(event, windowIndex) {

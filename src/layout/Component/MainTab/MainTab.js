@@ -50,7 +50,7 @@ function a11yProps(index) {
 export default function BasicTabs({ token }) {
     const [value, setValue] = React.useState(0);
     const { workspaces, groups, currentWorkspace, currentGroup } = useSelector((store) => store.firestore);
-
+    const [workspaceName, setWorkspaceName] = React.useState("")
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -66,11 +66,29 @@ export default function BasicTabs({ token }) {
         large: generateQuoteMap(500)
     };
 
+    const SwitchStructure = () => {
+        if (currentGroup.length > 0) {
+            return (
+                <Structure />
+            )
+        } else if (currentWorkspace.length > 0) {
+            return (
+                <Container>
+                    <Board initial={data.medium} withScrollableColumns />
+                </Container>
+            )
+        }
+    }
+
     useEffect(() => {
-        if(workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name === "Unsaved"){
+        const workspace = workspaces.filter(workspace => workspace.id === currentWorkspace)[0];
+        if (workspace && workspace.name === "Unsaved") {
             setValue(0);
         }
-    }, [currentWorkspace])
+        if (workspace) {
+            setWorkspaceName(workspace.name)
+        }
+    }, [currentWorkspace, workspaces])
 
     return (
         <Box sx={{ width: '100%' }}>
@@ -78,12 +96,12 @@ export default function BasicTabs({ token }) {
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                     <Tab label="Info" {...a11yProps(0)} />
                     {
-                        workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name !== "Unsaved" &&
+                        workspaceName !== "Unsaved" &&
                         <Tab label="Structure" {...a11yProps(1)} />
 
                     }
                     {
-                        workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name !== "Unsaved" &&
+                        workspaceName !== "Unsaved" &&
                         <Tab label="Note" {...a11yProps(2)} />
                     }
 
@@ -91,19 +109,17 @@ export default function BasicTabs({ token }) {
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
-                <Container>
-                    <Board initial={data.medium} withScrollableColumns />
-                </Container>
+
             </TabPanel>
             {
-                workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name !== "Unsaved" &&
+                workspaceName !== "Unsaved" &&
 
                 <TabPanel value={value} index={1}>
-                    <Structure />
+                    <SwitchStructure />
                 </TabPanel>
             }
             {
-                workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name !== "Unsaved" &&
+                workspaceName !== "Unsaved" &&
 
                 <TabPanel value={value} index={2}>
                     <Note token={token} />

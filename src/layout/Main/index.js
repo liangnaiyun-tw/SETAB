@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import MainTab from "../Component/MainTab/MainTab"
 import "./index.css"
 
@@ -19,8 +19,7 @@ const Main = ({ cssMain, styleMain, token }) => {
 
   const { workspaces, groups, currentWorkspace, currentGroup } = useSelector((store) => store.firestore);
   const dispatch = useDispatch();
-
-
+  const [workspaceName, setWorkspaceName] = useState("");
 
   const handleBreadCrumbClick = (id, isWorkspace) => {
     if (isWorkspace) {
@@ -28,14 +27,21 @@ const Main = ({ cssMain, styleMain, token }) => {
     } else {
       let index;
       for (let i = 0; i < currentGroup.length; i++) {
-        if (currentGroup[i] === id){
+        if (currentGroup[i] === id) {
           index = i;
           break;
-        } 
+        }
       }
       dispatch(setCurrentGroup(currentGroup.slice(0, index + 1)));
     }
   }
+
+  useEffect(() => {
+    const workspace = workspaces.filter(workspace => workspace.id === currentWorkspace)[0];
+    if (workspace) {
+      setWorkspaceName(workspace.name)
+    }
+  }, [currentWorkspace, workspaces])
 
   return (
     <>
@@ -43,19 +49,20 @@ const Main = ({ cssMain, styleMain, token }) => {
         <div role="presentation" onClick={handleClick}>
           <Breadcrumbs aria-label="breadcrumb" className="Breadcrumbs">
             {
-              <Link onClick={() => { handleBreadCrumbClick(currentWorkspace, true)}} underline="hover" color="inherit" href="/">
+
+              <Link onClick={() => { handleBreadCrumbClick(currentWorkspace, true) }} underline="hover" color="inherit" href="/">
                 {
-                  workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name
+                  workspaceName
                 }
               </Link>
             }
             {
               currentGroup.length !== 0 ?
                 currentGroup.map((groupId) => groups.filter(group => group.id === groupId)[0])
-                .map((group) => 
-                    (<Link key={group.id} onClick={() => {handleBreadCrumbClick(group.id, false)}} underline="hover" color="inherit" href="/">
-                      {group.name}
-                    </Link>)
+                  .map((group) =>
+                  (<Link key={group.id} onClick={() => { handleBreadCrumbClick(group.id, false) }} underline="hover" color="inherit" href="/">
+                    {group.name}
+                  </Link>)
                   ) : null
             }
           </Breadcrumbs>
