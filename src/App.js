@@ -46,14 +46,16 @@ function App() {
 
   const styleLeftSidebar = {
     backgroundColor: "#202020",
-    width: positionFirst.positionFirstX + 500,
+    // width: positionFirst.positionFirstX + 500,
+    width: 500
   };
   const styleMain = {
     backgroundColor: "beige",
   };
   const styleRightSidebar = {
     backgroundColor: 'rgba(108, 101, 133, 1)',
-    width: 500 - positionSecond.positionSecondX,
+    // width: 500 - positionSecond.positionSecondX,
+    width: 500
   };
   const styleFooter = {
     height: "5vh",
@@ -77,7 +79,7 @@ function App() {
     <>
       <div className="app">
         <LeftSidebar cssLeftSidebar="leftSidebar" styleLeftSidebar={styleLeftSidebar} />
-        <Draggable
+        {/* <Draggable
           defaultPosition={{ x: 0, y: 0 }}
           position={{ x: positionFirst.positionFirstX }}
           onDrag={onDragFirst}
@@ -85,11 +87,11 @@ function App() {
           <div>
             <ViewDrawer cssDrawer="drawerFirst" cssHandle="handleFirst" />
           </div>
-        </Draggable>
+        </Draggable> */}
         <Container>
           <Main cssMain="main" styleMain={styleMain} />
         </Container>
-        <Draggable
+        {/* <Draggable
           defaultPosition={{ x: 0, y: 0 }}
           position={{ x: positionSecond.positionSecondX }}
           onDrag={onDragSecond}
@@ -97,7 +99,7 @@ function App() {
           <div>
             <ViewDrawer cssDrawer="drawerSecond" cssHandle="handleSecond" />
           </div>
-        </Draggable>
+        </Draggable> */}
         <RightSidebar
           cssRightSidebar="rightSidebar"
           styleRightSidebar={styleRightSidebar}
