@@ -1,7 +1,7 @@
 import store from "../app/store";
 
 function getGroupNameChain(groupId) {
-  if (groupId === "Unsaved") return ["Unsaved"];
+  if (groupId === store.getState().firestore.workspaces[0].id) return ["Unsaved"];
 
   let state = store.getState().firestore;
   let fullGroupNameChain = [state.groups.find((group) => group.id === groupId).name], parent;
@@ -20,7 +20,7 @@ function getGroupNameChain(groupId) {
 }
 
 function getGroupIdChain(groupId) {
-  if (groupId === "Unsaved") return [store.getState().firestore.workspaces[0].id];
+  if (groupId === store.getState().firestore.workspaces[0].id) return [store.getState().firestore.workspaces[0].id];
 
   let state = store.getState().firestore;
   let fullGroupIdChain = [state.groups.find((group) => group.id === groupId).id], parent;

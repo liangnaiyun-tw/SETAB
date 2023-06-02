@@ -35,7 +35,7 @@ async function getMemory(processes, thunkAPI) {
         alias: tab.title,
         title: tab.title,
         status: "complete",
-        group: tabInFirebase ? tabInFirebase.group : "Unsaved",
+        group: tabInFirebase ? tabInFirebase.group : thunkAPI.getState().firestore.workspaces[0].id,
         tabId: tab.id,
         windowId: tab.windowId,
         tabUrl: tab.url ? tab.url : tab.pendingUrl,
@@ -57,7 +57,7 @@ async function getMemory(processes, thunkAPI) {
     tabs: tabTasks
   }));
   thunkAPI.dispatch(updateUnsavedWorkspace({
-    tabs: tabTasks.filter((tab) => tab.group === "Unsaved")
+    tabs: tabTasks.filter((tab) => tab.group === thunkAPI.getState().firestore.workspaces[0].id)
   }));
 
   thunkAPI.dispatch(chromeTabSlice.actions.setFetchLoadingStatus(false));
