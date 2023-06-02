@@ -42,6 +42,7 @@ function App() {
   const Container = styled.div`
     overflow-x: scroll;
     display: grid;
+    width: 100%;
   `;
 
   const styleLeftSidebar = {
