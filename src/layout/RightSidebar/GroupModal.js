@@ -122,48 +122,24 @@ function GroupModal(props) {
     props.setChartLevel(newChartLevel)
   }
 
-  async function clickFreezeTab(event, windowId, windowIndex) {
-    let tabs = await chrome.tabs.query({
-      windowId: windowId,
-      index: windowIndex
-    }).catch((err) => {
-      console.error(err);
-    });
-
-    if (tabs.length > 0) {
-      await chrome.tabs.discard(tabs[0].id)
-        .then((tab) => {
-          dispatch(freezeTab({
-            tabId: tab.id
-          }))
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
+  async function clickFreezeTab(event, currentTab) {
+    await chrome.tabs.discard(currentTab.tabId)
+      .then((tab) => {
+        dispatch(freezeTab(currentTab));
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   }
 
-  async function clickCloseTab(event, windowId, windowIndex) {
-    let tabs = await chrome.tabs.query({
-      windowId: windowId,
-      index: windowIndex
-    }).catch((err) => {
-      console.error(err);
-    });
-
-    console.log(tabs);
-    if (tabs.length > 0) {
-      await chrome.tabs.remove(tabs[0].id)
-        .then(() => {
-          dispatch(deleteTab({
-            windowId: windowId,
-            windowIndex: windowIndex
-          }));
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
+  async function clickCloseTab(event, currentTab) {
+    await chrome.tabs.remove(currentTab.tabId)
+      .then(() => {
+        dispatch(deleteTab(currentTab));
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   }
 
   function modalClickEvent(event, elements) {
@@ -257,15 +233,11 @@ function GroupModal(props) {
           </ul>
           <Typography variant='h5'>Tabs</Typography>
           <ul>
-            {tabsInGroup.slice().reverse().map((tab, index) => {
-              let tabClass = tab.status === "complete" ? 'modal-list-content' : 'modal-list-content-unload';
-              let tabStatusIcon = tab.status === "complete"
-                ? <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabsInGroup.length - 1 - index, tabsInGroup.length).join(", ") + ", 1)" }}></CircleIcon>
-                : <EnergySavingsLeafOutlinedIcon sx={{ color: "#53af2e" }}></EnergySavingsLeafOutlinedIcon>
+            {tabsInGroup.filter(tab => tab.status === "complete").reverse().map((tab, index) => {
               return (
                 <li className='modal-tab-item' key={`${tab.title}-${tab.windowId}-${tab.tabId}`}>
-                  <div className={tabClass} onClick={(e) => { switchToTab(tab.windowId, tab.windowIndex) }}>
-                    {tabStatusIcon}
+                  <div className='modal-list-content' onClick={(e) => { switchToTab(tab.windowId, tab.windowIndex) }}>
+                    <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabsInGroup.length - 1 - index, tabsInGroup.length).join(", ") + ", 1)" }}></CircleIcon>
                     <div className='modal-list-content-text'>
                       <Typography variant='h6' noWrap={true}>{tab.alias}</Typography>
                       <Typography variant="subtitle2" noWrap={true}>
@@ -276,13 +248,41 @@ function GroupModal(props) {
                   </div>
 
                   <div className='modal-freeze-button-container'>
-                    <IconButton onClick={(event) => clickFreezeTab(event, tab.windowId, tab.windowIndex)}>
+                    <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
                       <PauseOutlinedIcon></PauseOutlinedIcon>
                     </IconButton>
                   </div>
 
                   <div className='modal-delete-button-container'>
-                    <IconButton onClick={(event) => clickCloseTab(event, tab.windowId, tab.windowIndex)}>
+                    <IconButton onClick={(event) => clickCloseTab(event, tab)}>
+                      <DeleteIcon></DeleteIcon>
+                    </IconButton>
+                  </div>
+                </li>
+              );
+            })}
+            {tabsInGroup.filter(tab => tab.status !== "complete").reverse().map((tab, index) => {
+              return (
+                <li className='modal-tab-item' key={`${tab.title}-${tab.windowId}-${tab.tabId}`}>
+                  <div className='modal-list-content-unload' onClick={(e) => { switchToTab(tab.windowId, tab.windowIndex) }}>
+                    <EnergySavingsLeafOutlinedIcon sx={{ color: "#53af2e" }}></EnergySavingsLeafOutlinedIcon>
+                    <div className='modal-list-content-text'>
+                      <Typography variant='h6' noWrap={true}>{tab.alias}</Typography>
+                      <Typography variant="subtitle2" noWrap={true}>
+                        {getGroupNameChain(tab.group).join("/")}
+                      </Typography>
+                      <Typography variant='body2'>Memory Usage: {(tab.privateMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(tab.privateMemory / 1024)} KB)</Typography>
+                    </div>
+                  </div>
+
+                  <div className='modal-freeze-button-container'>
+                    <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
+                      <PauseOutlinedIcon></PauseOutlinedIcon>
+                    </IconButton>
+                  </div>
+
+                  <div className='modal-delete-button-container'>
+                    <IconButton onClick={(event) => clickCloseTab(event, tab)}>
                       <DeleteIcon></DeleteIcon>
                     </IconButton>
                   </div>
