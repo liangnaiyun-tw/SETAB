@@ -7,7 +7,7 @@
 }
 
 .PieChart canvas {
-  width: 80% !important;
+  width: 75% !important;
   max-width: 250px;
   min-width: 200px;
   height: auto !important;

@@ -64,15 +64,14 @@ async function getMemory(thunkAPI) {
     }
   });
 
-  tabs.sort(function (a, b) {
-    return a.privateMemory - b.privateMemory;
-  });
-  console.log(tabs);
-
   if (thunkAPI.getState().chromeTabs.isDataModified) {
     console.log("HERE BLOCK");
     thunkAPI.dispatch(setDataModified(false));
   } else {
+    tabs.sort(function (a, b) {
+      return a.privateMemory - b.privateMemory;
+    });
+    console.log(tabs);
     thunkAPI.dispatch(updateTabs({
       tabs: tabs
     }));

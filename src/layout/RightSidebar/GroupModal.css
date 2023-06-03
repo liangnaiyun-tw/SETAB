@@ -15,6 +15,18 @@
   cursor: pointer;
 }
 
+.group-name-chain-breadcrumb-item {
+  border-radius: 80px;
+  padding-left: 10px;
+  padding-right: 10px;
+  transition-duration: 0.2s;
+  cursor: pointer;
+}
+
+.group-name-chain-breadcrumb-item:hover {
+  background-color: darkgray;
+}
+
 .modal-group-item,
 .modal-tab-item {
   list-style-type: none;

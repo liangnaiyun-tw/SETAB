@@ -31,7 +31,7 @@ const unSaveWorkSpace = {
 //     tabs: [],
 //     historys: [],
 //     currentWorkspace: "",
-//     currentGroup: "",
+//     currentGroup: ""
 // }
 
 /*Fake Data*/
@@ -88,10 +88,10 @@ const initialState = {
             tabUrl: "https://console.firebase.google.com/project/setab-388009/firestore/data/~2Fgroups~2FNfeSrDFueAczGQpFuvqX",
             uid: "",
             windowId: [
-                424337788
+                424340572
             ],
             tabId: [
-                424337901
+                424340932
             ]
         },
         {
@@ -104,10 +104,10 @@ const initialState = {
             tabUrl: "https://developer.chrome.com/docs/extensions/reference/",
             uid: "",
             windowId: [
-                424337788
+                424340572
             ],
             tabId: [
-                424337789
+                424343144
             ]
         }
     ],

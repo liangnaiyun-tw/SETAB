@@ -79,7 +79,7 @@ function GroupModal(props) {
   const [borderColors, setBorderColors] = useState([]);
   let groupNameChain = [];
   if (tabsInGroup.length > 0) {
-    groupNameChain = getGroupNameChain(tabsInGroup[0].group);
+    groupNameChain = getGroupNameChain(tabsInGroup[0].group).slice(0, props.chartLevel);
   }
 
   const chartData = {
@@ -154,6 +154,11 @@ function GroupModal(props) {
     }
   }
 
+  function breadcrumbClickEvent(event, index) {
+    props.setSelectedItem(props.selectedItemHistory[index]);
+    props.setChartLevel(index + 1);
+  }
+
   let renderItem = <></>;
   if (selectedItem &&
     (firestore.workspaces.find(workspace => workspace.id === selectedItem)
@@ -200,9 +205,9 @@ function GroupModal(props) {
 
           <div className='modal-title-text'>
             <Breadcrumb aria-label="breadcrumb" variant="h6" separator="/">
-              {groupNameChain.map((name) => {
+              {groupNameChain.map((name, index) => {
                 return (
-                  <Typography variant='h6' key={`${name}-${uuidv4()}`}>
+                  <Typography className='group-name-chain-breadcrumb-item' variant='h6' noWrap={false} key={`${name}-${uuidv4()}`} onClick={(event) => breadcrumbClickEvent(event, index)}>
                     {name}
                   </Typography>
                 );
@@ -241,7 +246,7 @@ function GroupModal(props) {
                     <div className='modal-list-content-text'>
                       <Typography variant='h6' noWrap={true}>{tab.alias}</Typography>
                       <Typography variant="subtitle2" noWrap={true}>
-                        {getGroupNameChain(tab.group).join("/")}
+                        {getGroupNameChain(tab.group).join(" / ")}
                       </Typography>
                       <Typography variant='body2'>Memory Usage: {(tab.privateMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(tab.privateMemory / 1024)} KB)</Typography>
                     </div>
@@ -269,7 +274,7 @@ function GroupModal(props) {
                     <div className='modal-list-content-text'>
                       <Typography variant='h6' noWrap={true}>{tab.alias}</Typography>
                       <Typography variant="subtitle2" noWrap={true}>
-                        {getGroupNameChain(tab.group).join("/")}
+                        {getGroupNameChain(tab.group).join(" / ")}
                       </Typography>
                       <Typography variant='body2'>Memory Usage: {(tab.privateMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(tab.privateMemory / 1024)} KB)</Typography>
                     </div>
