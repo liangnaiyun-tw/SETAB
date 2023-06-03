@@ -12,6 +12,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import {
   Dialog,
+  Button,
   DialogActions,
   DialogContent,
   DialogContentText,
@@ -25,14 +26,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import Workspace from '../../../interface/Workspace';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { PropaneSharp } from '@mui/icons-material';
-import {
-  Button,
-  Classes,
-  Collapse,
-  Colors,
-  Icon,
-  InputGroup,
-} from '@blueprintjs/core';
 
 export default function MenuList() {
   // To retrieve the workspaces of the current user.
