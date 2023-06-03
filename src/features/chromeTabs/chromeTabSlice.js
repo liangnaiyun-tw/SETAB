@@ -46,6 +46,7 @@ function getMemory(thunkAPI) {
               tabIconUrl: tab.favIconUrl,
               privateMemory: process.privateMemory,
               windowIndex: tab.index,
+              uid: ""
             };
           } else {
             return {
@@ -60,6 +61,7 @@ function getMemory(thunkAPI) {
               tabIconUrl: tab.favIconUrl,
               privateMemory: 0,
               windowIndex: tab.index,
+              uid: ""
             };
           }
         } catch (err) {
