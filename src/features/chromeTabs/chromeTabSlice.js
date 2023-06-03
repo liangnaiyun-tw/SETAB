@@ -68,15 +68,16 @@ async function getMemory(thunkAPI) {
     console.log("HERE BLOCK");
     thunkAPI.dispatch(setDataModified(false));
   } else {
+    console.log(tabs);
+    thunkAPI.dispatch(updateUnsavedWorkspace({
+      tabs: tabs.filter((tab) => tab.group === thunkAPI.getState().firestore.workspaces[0].id)
+    }));
+
     tabs.sort(function (a, b) {
       return a.privateMemory - b.privateMemory;
     });
-    console.log(tabs);
     thunkAPI.dispatch(updateTabs({
       tabs: tabs
-    }));
-    thunkAPI.dispatch(updateUnsavedWorkspace({
-      tabs: tabs.filter((tab) => tab.group === thunkAPI.getState().firestore.workspaces[0].id)
     }));
   }
   thunkAPI.dispatch(setFetchLoadingStatus(false));
