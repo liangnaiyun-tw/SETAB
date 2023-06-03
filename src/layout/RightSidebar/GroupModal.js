@@ -11,7 +11,7 @@ import Breadcrumb from '@mui/material/Breadcrumbs';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
-import { deleteTab, freezeTab } from '../../features/chromeTabs/chromeTabSlice';
+import { closeChromeTab, deleteTab, freezeChromeTab, freezeTab, reloadChromeTab } from '../../features/chromeTabs/chromeTabSlice';
 
 /*global chrome*/
 
@@ -93,20 +93,8 @@ function GroupModal(props) {
     ]
   };
 
-  function switchToTab(windowId, windowIndex) {
-    console.log(windowId, windowIndex);
-    chrome.windows.update(
-      windowId,
-      {
-        focused: true
-      }
-    ).catch((err) => {
-      console.error(err);
-    });
-    chrome.tabs.highlight({ windowId: windowId, tabs: windowIndex })
-      .catch((err) => {
-        console.error(err);
-      });
+  function switchToTab(currentTab) {
+    dispatch(reloadChromeTab(currentTab));
   }
 
   function selectItem(itemId) {
@@ -122,24 +110,12 @@ function GroupModal(props) {
     props.setChartLevel(newChartLevel)
   }
 
-  async function clickFreezeTab(event, currentTab) {
-    await chrome.tabs.discard(currentTab.tabId)
-      .then((tab) => {
-        dispatch(freezeTab(currentTab));
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+  function clickFreezeTab(event, currentTab) {
+    dispatch(freezeChromeTab(currentTab));
   }
 
-  async function clickCloseTab(event, currentTab) {
-    await chrome.tabs.remove(currentTab.tabId)
-      .then(() => {
-        dispatch(deleteTab(currentTab));
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+  function clickCloseTab(event, currentTab) {
+    dispatch(closeChromeTab(currentTab));
   }
 
   function modalClickEvent(event, elements) {
@@ -147,7 +123,7 @@ function GroupModal(props) {
       const item = items[elements[0].index];
       if (fetchTabs.find(tab => tab.id === item.id)) {
         let tab = fetchTabs.find(tab => tab.id === item.id);
-        switchToTab(tab.windowId, tab.windowIndex);
+        switchToTab(tab);
       } else {
         selectItem(item.id);
       }
@@ -241,7 +217,7 @@ function GroupModal(props) {
             {tabsInGroup.filter(tab => tab.status === "complete").reverse().map((tab, index) => {
               return (
                 <li className='modal-tab-item' key={`${tab.title}-${tab.windowId}-${tab.tabId}`}>
-                  <div className='modal-list-content' onClick={(e) => { switchToTab(tab.windowId, tab.windowIndex) }}>
+                  <div className='modal-list-content' onClick={(e) => { switchToTab(tab) }}>
                     <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabsInGroup.length - 1 - index, tabsInGroup.length).join(", ") + ", 1)" }}></CircleIcon>
                     <div className='modal-list-content-text'>
                       <Typography variant='h6' noWrap={true}>{tab.alias}</Typography>
@@ -269,7 +245,7 @@ function GroupModal(props) {
             {tabsInGroup.filter(tab => tab.status !== "complete").reverse().map((tab, index) => {
               return (
                 <li className='modal-tab-item' key={`${tab.title}-${tab.windowId}-${tab.tabId}`}>
-                  <div className='modal-list-content-unload' onClick={(e) => { switchToTab(tab.windowId, tab.windowIndex) }}>
+                  <div className='modal-list-content-unload' onClick={(e) => { switchToTab(tab) }}>
                     <EnergySavingsLeafOutlinedIcon sx={{ color: "#53af2e" }}></EnergySavingsLeafOutlinedIcon>
                     <div className='modal-list-content-text'>
                       <Typography variant='h6' noWrap={true}>{tab.alias}</Typography>

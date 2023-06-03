@@ -65,7 +65,6 @@ async function getMemory(thunkAPI) {
   });
 
   if (thunkAPI.getState().chromeTabs.isDataModified) {
-    console.log("HERE BLOCK");
     thunkAPI.dispatch(setDataModified(false));
   } else {
     console.log(tabs);
@@ -76,7 +75,7 @@ async function getMemory(thunkAPI) {
     tabs.sort(function (a, b) {
       return a.privateMemory - b.privateMemory;
     });
-    thunkAPI.dispatch(updateTabs({
+    thunkAPI.dispatch(updateChromeTabs({
       tabs: tabs
     }));
   }
@@ -92,6 +91,47 @@ const fetchTabs = createAsyncThunk('chromeTabs/fetchTabs', async (_, thunkAPI) =
   }
 });
 
+const freezeChromeTab = createAsyncThunk('chromeTabs/clickFreezeTab', async (currentTab, thunkAPI) => {
+  try {
+    let tab = await chrome.tabs.discard(currentTab.tabId);
+    if (tab !== undefined) {
+      thunkAPI.dispatch(freezeTab({
+        ...currentTab,
+        newTab: tab
+      }));
+    }
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+const reloadChromeTab = createAsyncThunk('chromeTabs/reloadChromeTab', async (currentTab, thunkAPI) => {
+  try {
+    await chrome.windows.update(
+      currentTab.windowId,
+      {
+        focused: true
+      }
+    );
+    await chrome.tabs.highlight({
+      windowId: currentTab.windowId,
+      tabs: currentTab.windowIndex
+    });
+    thunkAPI.dispatch(reloadTab(currentTab));
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+const closeChromeTab = createAsyncThunk('chromeTabs/closeChromeTab', async (currentTab, thunkAPI) => {
+  try {
+    await chrome.tabs.remove(currentTab.tabId);
+    thunkAPI.dispatch(deleteTab(currentTab));
+  } catch (err) {
+    console.error(err);
+  }
+});
+
 const chromeTabSlice = createSlice({
   name: "chromeTabs",
   initialState: initState,
@@ -103,16 +143,25 @@ const chromeTabSlice = createSlice({
       console.log(action);
       state.isDataModified = action.payload;
     },
-    updateTabs: (state, action) => {
+    updateChromeTabs: (state, action) => {
       const { tabs } = action.payload;
       state.fetchTabs = tabs;
+    },
+    reloadTab: (state, action) => {
+      let index = state.fetchTabs.findIndex((tab) => {
+        return tab.tabId === action.payload.tabId;
+      });
+      if (index >= 0) {
+        state.fetchTabs[index].status = "complete";
+      }
+      state.isDataModified = true;
     },
     freezeTab: (state, action) => {
       let index = state.fetchTabs.findIndex((tab) => {
         return tab.tabId === action.payload.tabId;
       });
-      console.log(index);
       if (index >= 0) {
+        state.fetchTabs[index].tabId = action.payload.newTab.id;
         state.fetchTabs[index].status = "unloaded";
         state.fetchTabs[index].privateMemory = 0;
       }
@@ -123,6 +172,9 @@ const chromeTabSlice = createSlice({
         return tab.tabId === action.payload.tabId;
       })
       if (index >= 0) {
+        for (let i = index + 1; i < state.fetchTabs.length; ++i) {
+          state.fetchTabs[i].windowIndex--;
+        }
         state.fetchTabs.splice(index, 1);
       }
       state.fetchTabs.sort((a, b) => a.privateMemory - b.privateMemory);
@@ -131,12 +183,33 @@ const chromeTabSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchTabs, (state, action) => {
+      .addCase(fetchTabs.fulfilled, (state, action) => {
+        console.log(action);
+      })
+      .addCase(fetchTabs.rejected, (state, action) => {
+        console.log(action);
+      })
+      .addCase(freezeChromeTab.fulfilled, (state, action) => {
+        console.log(action);
+      })
+      .addCase(freezeChromeTab.rejected, (state, action) => {
+        console.log(action);
+      })
+      .addCase(closeChromeTab.fulfilled, (state, action) => {
+        console.log(action);
+      })
+      .addCase(closeChromeTab.rejected, (state, action) => {
+        console.log(action);
+      })
+      .addCase(reloadChromeTab.fulfilled, (state, action) => {
+        console.log(action);
+      })
+      .addCase(reloadChromeTab.rejected, (state, action) => {
         console.log(action);
       });
   }
 });
 
-export const { setFetchLoadingStatus, setDataModified, updateTabs, freezeTab, switchGroup, deleteTab } = chromeTabSlice.actions;
-export { fetchTabs };
+export const { setFetchLoadingStatus, setDataModified, updateChromeTabs, reloadTab, freezeTab, switchGroup, deleteTab } = chromeTabSlice.actions;
+export { fetchTabs, freezeChromeTab, reloadChromeTab, closeChromeTab };
 export default chromeTabSlice.reducer;

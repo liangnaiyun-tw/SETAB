@@ -8,7 +8,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EnergySavingsLeafOutlinedIcon from '@mui/icons-material/EnergySavingsLeafOutlined';
 import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined';
-import { freezeTab, deleteTab, fetchTabs } from '../../features/chromeTabs/chromeTabSlice';
+import { freezeTab, deleteTab, fetchTabs, freezeChromeTab, closeChromeTab, reloadChromeTab } from '../../features/chromeTabs/chromeTabSlice';
 import { getGroupNameChain } from '../../utils/tabs';
 
 /*global chrome*/
@@ -24,39 +24,16 @@ function SystemMemoryUsage() {
     }
   }, [dispatch]);
 
-  function clickOnOpenedTab(event, windowId, windowIndex) {
-    chrome.windows.update(
-      windowId,
-      {
-        focused: true
-      }
-    ).catch((err) => {
-      console.error(err);
-    });
-    chrome.tabs.highlight({ windowId: windowId, tabs: windowIndex })
-      .catch((err) => {
-        console.error(err);
-      });
+  function clickOnOpenedTab(event, currentTab) {
+    dispatch(reloadChromeTab(currentTab));
   }
 
-  async function clickFreezeTab(event, currentTab) {
-    await chrome.tabs.discard(currentTab.tabId)
-      .then((tab) => {
-        dispatch(freezeTab(currentTab));
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+  function clickFreezeTab(event, currentTab) {
+    dispatch(freezeChromeTab(currentTab));
   }
 
-  async function clickCloseTab(event, currentTab) {
-    await chrome.tabs.remove(currentTab.tabId)
-      .then(() => {
-        dispatch(deleteTab(currentTab));
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+  function clickCloseTab(event, currentTab) {
+    dispatch(closeChromeTab(currentTab));
   }
 
   return (
@@ -71,7 +48,7 @@ function SystemMemoryUsage() {
           : tabs.filter(tab => tab.status !== "unloaded").reverse().map((tab, index) => {
             return (
               <li key={`${tab.title}-${tab.windowId}-${tab.tabId}`} className='tab-list-item'>
-                <div className='tab-list-content' onClick={(event) => clickOnOpenedTab(event, tab.windowId, tab.windowIndex)}>
+                <div className='tab-list-content' onClick={(event) => clickOnOpenedTab(event, tab)}>
                   <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
                   <div className='tab-list-content-text'>
                     <Typography variant='body1' noWrap={true}>{tab.alias}</Typography>
@@ -100,7 +77,7 @@ function SystemMemoryUsage() {
           : tabs.filter(tab => tab.status === "unloaded").map((tab) => {
             return (
               <li key={`${tab.title}-${tab.windowId}-${tab.tabId}`} className='tab-list-item'>
-                <div className='tab-list-content-unload' onClick={(event) => clickOnOpenedTab(event, tab.windowId, tab.windowIndex)}>
+                <div className='tab-list-content-unload' onClick={(event) => clickOnOpenedTab(event, tab)}>
                   <EnergySavingsLeafOutlinedIcon sx={{ color: "#53af2e" }}></EnergySavingsLeafOutlinedIcon>
                   <div className='tab-list-content-text'>
                     <Typography variant='body1' noWrap={true}>{tab.alias}</Typography>
