@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, getRedirectResult, signInWithRedirect } from "firebase/auth";
+import User from '../../../interface/User';
 
 /*global chrome*/
 
@@ -43,71 +44,42 @@ export const initLogin = createAsyncThunk('auth/initLogin', async (_, thunkAPI) 
                     "Content-Type": "application/json"
                 }
             }).then((response) => {
-                console.log(response.data);
+                let data = response.data;
+                user.uid = data.metadata.source[0].id;
+                user.uid = data.names[0].displayName;
+                user.uid = data.photos[0].url;
             }).catch((err) => {
                 console.error(err);
             });
-            // signInWithPopup(auth, provider)
-            //     .then((result) => {
-            //         const credential = GoogleAuthProvider.credentialFromResult(result);
-            //         const accessToken = credential?.accessToken;
-            //         const user = result.user;
-            //         console.log(user);
-            //         console.log(accessToken);
-            //         thunkAPI.dispatch(setAuth({ user, accessToken }));
-            //         thunkAPI.dispatch(setLoginStatus(true));
-
-            //     })
-            //     .catch((error) => {
-            //         console.error(error);
-            //         const errorCode = error.code;
-            //         const errorMessage = error.message;
-            //         const email = error.email;
-            //         thunkAPI.dispatch(setLoginStatus(false));
-            //         const credential = GoogleAuthProvider.credentialFromError(error);
-            //     })
         } else {
             let accessToken;
+            let user = User;
             chrome.identity.getAuthToken({ interactive: true }, function (token) {
-                console.log(token);
                 accessToken = token;
-                console.log(user);
-                console.log(accessToken);
                 axios.get('https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses,metadata,photos', {
                     headers: {
                         "Authorization": "Bearer " + accessToken,
                     }
                 }).then((response) => {
-                    console.log(response.data);
+                    let data = response.data;
+                    console.log(data);
+                    user = {
+                        ...User,
+                        uid: data.metadata.sources[0].id,
+                        displayName: data.names[0].displayName,
+                        photoUrl: data.photos[0].url
+                    };
+                    console.log(user, accessToken);
+                    thunkAPI.dispatch(setAuth({ user, accessToken }));
+                    thunkAPI.dispatch(setLoginStatus(true));
+                    
                 }).catch((err) => {
                     console.error(err);
+                    thunkAPI.dispatch(setLoginStatus(false))
+                    thunkAPI.dispatch(setAuth({ user: undefined, accessToken: undefined }))
                 });
-                thunkAPI.dispatch(setAuth({ user, accessToken }));
-                thunkAPI.dispatch(setLoginStatus(true));
-                thunkAPI.dispatch(setLoginStatus(false))
-                thunkAPI.dispatch(setAuth({ user: undefined, accessToken: undefined }))
-            });
-            // signInWithPopup(auth, provider)
-            //     .then((result) => {
-            //         const credential = GoogleAuthProvider.credentialFromResult(result);
-            //         const accessToken = credential?.accessToken;
-            //         const user = result.user;
-            //         console.log(user);
-            //         console.log(accessToken);
-            //         thunkAPI.dispatch(setAuth({ user, accessToken }));
-            //         thunkAPI.dispatch(setLoginStatus(true));
 
-            //     })
-            //     .catch((error) => {
-            //         console.error(error);
-            //         const errorCode = error.code;
-            //         const errorMessage = error.message;
-            //         const email = error.email;
-            //         thunkAPI.dispatch(setLoginStatus(false));
-            //         const credential = GoogleAuthProvider.credentialFromError(error);
-            //     })
-            // thunkAPI.dispatch(setLoginStatus(false))
-            // thunkAPI.dispatch(setAuth({ user: undefined, accessToken: undefined }))
+            });
         }
     });
 })
