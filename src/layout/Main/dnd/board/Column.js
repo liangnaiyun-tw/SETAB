@@ -30,6 +30,7 @@ const Column = (props) => {
   const title = props.title;
   const quotes = props.quotes;
   const index = props.index;
+  console.log('Column quotes', quotes)
   return (
     <Draggable draggableId={title} index={index}>
       {(provided, snapshot) => (

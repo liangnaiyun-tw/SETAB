@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect } from 'react'
 import BackspaceIcon from '@mui/icons-material/Backspace';
-import CreateNewNoteModal from '../CreateNewNoteModal/CreateNewNoteModa';
+import CreateNewNoteModal from '../CreateNewNoteModal/CreateNewNoteModal';
 import { Button, Skeleton } from '@mui/material';
 import OutboundIcon from '@mui/icons-material/Outbound';
 
@@ -15,12 +15,18 @@ export default function Note() {
 
     const { isLoadingNote, fileList, isEditing, editingUrl, isIframeLoading } = useSelector((store) => store.note);
     const { user, accessToken } = useSelector((store) => store.auth);
+    const { currentWorkspace, currentGroup } = useSelector((store) => store.firestore);
+
 
     const dispatch = useDispatch();
 
     useEffect(() => {
         dispatch(getNotes(accessToken));
     }, [accessToken, dispatch])
+
+    useEffect(() => {
+        dispatch(getNotes(accessToken));
+    }, [currentWorkspace, currentGroup])
 
     const onEdit = (alternateLink) => {
         dispatch(handleEdit(alternateLink));
@@ -29,6 +35,8 @@ export default function Note() {
     const onPickNewNote = (newNoteDetail) => {
         dispatch(pickNewNote({ newNoteDetail, accessToken }));
     }
+
+    
 
     return (
 
@@ -41,7 +49,7 @@ export default function Note() {
                                 Note List
                             </Button>
                             <Button variant="outlined" color="error" href={editingUrl} target="_blank" endIcon={<OutboundIcon />}>
-                                New Page
+                                Edit in new tab
                             </Button>
                         </div>
 

@@ -1,10 +1,11 @@
 import React from 'react';
 import styled from '@xstyled/styled-components';
 import { borderRadius, grid } from './constants';
+import { colors } from "@atlaskit/theme";
 
-const getBackgroundColor = (isDragging, isGroupedOver, authorColors) => {
+const getBackgroundColor = (isDragging, isGroupedOver) => {
   if (isDragging) {
-    return authorColors.soft;
+    return colors.Y50;
   }
 
   if (isGroupedOver) {
@@ -14,8 +15,8 @@ const getBackgroundColor = (isDragging, isGroupedOver, authorColors) => {
   return '#FFFFFF';
 };
 
-const getBorderColor = (isDragging, authorColors) =>
-  isDragging ? authorColors.hard : 'transparent';
+const getBorderColor = (isDragging) =>
+  isDragging ? colors.N400A : 'transparent';
 
 const imageSize = 40;
 
@@ -40,7 +41,6 @@ const CloneBadge = styled.div`
 const Container = styled.a`
   border-radius: ${borderRadius}px;
   border: 2px solid transparent;
-  border-color: ${(props) => getBorderColor(props.isDragging, props.colors)};
   background-color: ${(props) =>
     getBackgroundColor(props.isDragging, props.isGroupedOver, props.colors)};
   box-shadow: ${({ isDragging }) => (isDragging ? `2px 2px 1px #A5ADBA` : 'none')};
@@ -61,7 +61,7 @@ const Container = styled.a`
 
   &:focus {
     outline: none;
-    border-color: ${(props) => props.colors.hard};
+    border-color: ${(props) => colors.N400A};
     box-shadow: none;
   }
 
@@ -107,10 +107,10 @@ const Footer = styled.div`
 `;
 
 const Author = styled.small`
-  color: ${(props) => props.colors.hard};
+  color: ${(props) => colors.N400A};
   flex-grow: 0;
   margin: 0;
-  background-color: ${(props) => props.colors.soft};
+  background-color: ${(props) => colors.Y50};
   border-radius: ${borderRadius}px;
   font-weight: normal;
   padding: ${grid / 2}px;
@@ -147,12 +147,13 @@ function QuoteItem(props) {
   const { quote, isDragging, isGroupedOver, provided, style, isClone, index } = props;
 
   return (
+    
     <Container
-      href={quote.author.url}
+      // href={quote.author.url}
       isDragging={isDragging}
       isGroupedOver={isGroupedOver}
       isClone={isClone}
-      colors={quote.author.colors}
+      // colors={quote.author.colors}
       ref={provided.innerRef}
       {...provided.draggableProps}
       {...provided.dragHandleProps}
@@ -160,14 +161,14 @@ function QuoteItem(props) {
       data-is-dragging={isDragging}
       data-testid={quote.id}
       data-index={index}
-      aria-label={`${quote.author.name} quote ${quote.content}`}
+      // aria-label={`${quote.author.name} quote ${quote.content}`}
     >
-      <Avatar src={quote.author.avatarUrl} alt={quote.author.name} />
-      {isClone ? <CloneBadge>Clone</CloneBadge> : null}
+      {/* <Avatar src={quote.author.avatarUrl} alt={quote.author.name} /> */}
+      {/* {isClone ? <CloneBadge>Clone</CloneBadge> : null} */}
       <Content>
         <BlockQuote>{quote.content}</BlockQuote>
         <Footer>
-          <Author colors={quote.author.colors}>{quote.author.name}</Author>
+          {/* <Author colors={quote.author.colors}>{quote.author.name}</Author> */}
           <QuoteId>
             id:
             {quote.id}

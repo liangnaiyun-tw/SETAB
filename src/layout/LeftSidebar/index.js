@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import AppBar from '@mui/material/AppBar';
 import Stack from '@mui/material/Stack';
 import Toolbar from '@mui/material/Toolbar';
@@ -20,15 +20,18 @@ import AddIcon from '@mui/icons-material/Add';
 import Grid from '@mui/material/Grid';
 import MenuList from './MenuList';
 
-import GroupModal from "../Component/GroupModal/GroupModal";
 import Login from "../Component/Login/Login";
 import "./index.css";
 import { useSelector } from "react-redux";
 import SearchBar from './SearchBar';
-
+import { Dialog, Button, Modal, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
+import { createWorkSpace } from "../../features/firebase/firestore/firestoreSlice";
+import Workspace from "../../interface/Workspace";
+import { useDispatch } from "react-redux";
 
 
 const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
+    
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -38,7 +41,21 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
         setAnchorEl(null);
     };
 
+    const [openCreateWorkshopDialog, setOpenCreateWorkshopDialog] = useState(false);
+    const handleDialogOpen = () => setOpenCreateWorkshopDialog(true);
+    const handleDialogClose = () => setOpenCreateWorkshopDialog(false);
+
     const { user } = useSelector((store) => store.auth)
+    const [newWorkSpaceName, setNewWorkSpaceName] = useState("")
+    
+    const dispatch = useDispatch();
+
+    const handleCreateWorkSpace = async () => {
+        handleDialogClose();
+        let workspace =  Workspace;
+        workspace.name = newWorkSpaceName;
+        dispatch(createWorkSpace(workspace));
+    }
 
     return (
         <>
@@ -107,11 +124,11 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                                                 <Avatar /> My account
                                             </MenuItem>
                                             <Divider />
-                                            <MenuItem onClick={handleClose}>
+                                            <MenuItem onClick={() => { handleClose(); handleDialogOpen(); }}>
                                                 <ListItemIcon>
                                                     <PersonAdd fontSize="small" />
                                                 </ListItemIcon>
-                                                Add another account
+                                                Add workspace
                                             </MenuItem>
                                             <MenuItem onClick={handleClose}>
                                                 <ListItemIcon>
@@ -152,6 +169,31 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                     }
                 </div>
             </div>
+            <Dialog open={openCreateWorkshopDialog} onClose={handleDialogClose}>
+                <DialogTitle>Create new workshop</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        What would you like to name this work area ?
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="name"
+                        label="name"
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                        onChange={(e) => {
+                            setNewWorkSpaceName(e.target.value);
+                          }}
+                        value={newWorkSpaceName}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>Cancel</Button>
+                    <Button disabled={newWorkSpaceName.length===0} onClick={handleCreateWorkSpace}>Create</Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 };

@@ -21,8 +21,8 @@
 
 .userDisplayName {
   text-align: center;
-  color: #c51230;
-  font-weight: lighter;
+  color: white;
+  font-weight: light;
   font-size: large;
   transition: border 0.5s;
   border-bottom: 4px solid rgba(200, 18, 48, 0);

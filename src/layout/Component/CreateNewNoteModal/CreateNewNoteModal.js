@@ -5,7 +5,14 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { styled } from '@mui/material/styles';
 import MuiGrid from '@mui/material/Grid';
-import { Dialog, Button, Modal, Box, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
+import { Dialog, Button, Modal, Box, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Divider } from "@mui/material";
+import ButtonGroup from '@mui/material/ButtonGroup';
+import ArticleIcon from '@mui/icons-material/Article';
+import SlideshowIcon from '@mui/icons-material/Slideshow';
+import GridOnIcon from '@mui/icons-material/GridOn';
+
+import { useDispatch } from "react-redux";
+import { createNewNote } from "../../../features/note/noteSlice";
 
 const Grid = styled(MuiGrid)(({ theme }) => ({
     width: '100%',
@@ -28,25 +35,31 @@ const style = {
     p: 4,
 };
 
-
-
-
 const CreateNewNoteModal = ({ token, onPickNewNote }) => {
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    const [newNoteName, setNewNoteName] = useState("");
+
+
+    const buttons = [
+        <Button key="one" onClick={() => { handleDialogClose(); handleFileCreate(FILE_TYPE.DOCUMENT); }} disabled={newNoteName.length === 0} variant="contained" startIcon={<ArticleIcon />} >document</Button>,
+        <Button key="two" onClick={() => { handleDialogClose(); handleFileCreate(FILE_TYPE.SLIDES); }} disabled={newNoteName.length === 0} color="warning" variant="contained" startIcon={<SlideshowIcon />} >slides</Button>,
+        <Button key="three" onClick={() => { handleDialogClose(); handleFileCreate(FILE_TYPE.SPREADSHEET); }} disabled={newNoteName.length === 0} color="success" variant="contained" startIcon={<GridOnIcon />} >spreadsheet</Button>,
+    ];
+
+    const FILE_TYPE = {
+        DOCUMENT: 0,
+        SLIDES: 1,
+        SPREADSHEET: 2
+    }
+
+
 
     const [openDialog, setOpenDialog] = useState(false);
     const handleDialogOpen = () => setOpenDialog(true);
     const handleDialogClose = () => setOpenDialog(false);
 
-    const handleClickDialogOpen = () => {
-        setOpenDialog(true);
-    };
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
 
     const [openPicker, data, authResponse] = useDrivePicker();
 
@@ -71,19 +84,17 @@ const CreateNewNoteModal = ({ token, onPickNewNote }) => {
         })
     }
 
-    const handleFileCreate = async (data) => {
-        const response = await fetch("https://www.googleapis.com/upload/drive/v3/files", {
-            method: "POST",
-            body: JSON.stringify(data)
-        })
+    const dispatch = useDispatch();
+
+    const handleFileCreate = (type) => {
+        dispatch(createNewNote({ type, newNoteName }))
     }
 
     return (
         <div>
             <div className='AddNote' onClick={handleOpen}>
-                +
+                <div className="plusIcon">+</div>
             </div>
-            {/* <Button onClick={handleOpen}>Open modal</Button> */}
             <Modal
                 open={open}
                 onClose={handleClose}
@@ -92,36 +103,29 @@ const CreateNewNoteModal = ({ token, onPickNewNote }) => {
                 className="CreateNoteModal"
             >
                 <Box sx={style}>
-
-                    <Grid container>
+                    <Grid container className="SelectCreateMethod">
                         <Grid item xs>
                             <Button variant="outlined" startIcon={<NoteAddIcon />} onClick={() => { handleClose(); handleDialogOpen(); }} >
-                                create new file
+                                create new note
                             </Button>
                         </Grid>
+                        <Divider orientation="vertical" flexItem>
+                            |
+                        </Divider>
                         <Grid item xs>
                             <Button variant="outlined" startIcon={<CloudDownloadIcon />} onClick={() => { handleClose(); handleOpenPicker(); }}>
                                 import exist file
                             </Button>
                         </Grid>
                     </Grid>
-
-                    {/* <Typography id="modal-modal-title" variant="h6" component="h2">
-                        Text in a modal
-                    </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                    </Typography> */}
                 </Box>
             </Modal>
-            {
 
-            }
             <Dialog open={openDialog} onClose={handleDialogClose}>
-                <DialogTitle>Create new File</DialogTitle>
+                <DialogTitle>Create new Note</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Setting File Metadata
+                        What would you like to name this note ?
                     </DialogContentText>
                     <TextField
                         autoFocus
@@ -131,16 +135,26 @@ const CreateNewNoteModal = ({ token, onPickNewNote }) => {
                         type="text"
                         fullWidth
                         variant="standard"
+                        value={newNoteName}
+                        onChange={(e) => { setNewNoteName(e.target.value) }}
                     />
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            '& > *': {
+                                m: 1,
+                            },
+                        }}
+                    >
+                        <ButtonGroup size="large" aria-label="large button group" style={{ marginTop: "3vh" }}>
+                            {buttons}
+                        </ButtonGroup>
+                    </Box>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleDialogClose}>Cancel</Button>
-                    <Button onClick={() => { handleDialogClose(); handleFileCreate(); }}>Create</Button>
-                </DialogActions>
             </Dialog>
         </div>
     );
 };
 
-
-export default CreateNewNoteModal;
