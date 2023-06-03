@@ -7,9 +7,11 @@
   column-gap: 2%;
 }
 
-#modal-pie-chart {
-  width: 15% !important;
-  height: auto !important;
+.modal-title canvas {
+  width: 140px !important;
+  min-width: 140px;
+  max-width: 175px;
+  height: 140px !important;
   cursor: pointer;
 }
 
@@ -27,12 +29,34 @@
   align-items: center;
   column-gap: 2%;
   width: 99%;
+  min-width: 500px;
   border: 2px solid darkgray;
   border-radius: 0.5rem;
   transition-duration: 0.2s;
 }
 
-.modal-list-content:hover {
+.modal-list-content-unload {
+  display: flex;
+  align-items: center;
+  column-gap: 2%;
+  width: 99%;
+  min-width: 500px;
+  border: 2px solid darkgray;
+  border-radius: 0.5rem;
+  background-color: beige;
+  filter: brightness(0.6);
+  transition-duration: 0.2s;
+}
+
+.modal-list-content:hover,
+.modal-list-content-unload:hover {
   border: 2px solid black;
   cursor: pointer
+}
+
+.modal-list-content-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 90%;
 }

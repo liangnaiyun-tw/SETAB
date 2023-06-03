@@ -39,48 +39,24 @@ function SystemMemoryUsage() {
       });
   }
 
-  async function clickFreezeTab(event, windowId, windowIndex) {
-    let tabs = await chrome.tabs.query({
-      windowId: windowId,
-      index: windowIndex
-    }).catch((err) => {
-      console.error(err);
-    });
-
-    if (tabs.length > 0) {
-      await chrome.tabs.discard(tabs[0].id)
-        .then((tab) => {
-          dispatch(freezeTab({
-            tabId: tab.id
-          }))
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
+  async function clickFreezeTab(event, currentTab) {
+    await chrome.tabs.discard(currentTab.tabId)
+      .then((tab) => {
+        dispatch(freezeTab(currentTab));
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   }
 
-  async function clickCloseTab(event, windowId, windowIndex) {
-    let tabs = await chrome.tabs.query({
-      windowId: windowId,
-      index: windowIndex
-    }).catch((err) => {
-      console.error(err);
-    });
-
-    console.log(tabs);
-    if (tabs.length > 0) {
-      await chrome.tabs.remove(tabs[0].id)
-        .then(() => {
-          dispatch(deleteTab({
-            windowId: windowId,
-            windowIndex: windowIndex
-          }));
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
+  async function clickCloseTab(event, currentTab) {
+    await chrome.tabs.remove(currentTab.tabId)
+      .then(() => {
+        dispatch(deleteTab(currentTab));
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   }
 
   return (
@@ -106,13 +82,13 @@ function SystemMemoryUsage() {
                 </div>
 
                 <div className='tab-list-freeze-button-container'>
-                  <IconButton onClick={(event) => clickFreezeTab(event, tab.windowId, tab.windowIndex)}>
+                  <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
                     <PauseOutlinedIcon></PauseOutlinedIcon>
                   </IconButton>
                 </div>
 
                 <div className='tab-list-delete-button-container'>
-                  <IconButton onClick={(event) => clickCloseTab(event, tab.windowId, tab.windowIndex)}>
+                  <IconButton onClick={(event) => clickCloseTab(event, tab)}>
                     <DeleteIcon></DeleteIcon>
                   </IconButton>
                 </div>
@@ -135,13 +111,13 @@ function SystemMemoryUsage() {
                 </div>
 
                 <div className='tab-list-freeze-button-container'>
-                  <IconButton onClick={(event) => clickFreezeTab(event, tab.windowId, tab.windowIndex)}>
+                  <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
                     <PauseOutlinedIcon></PauseOutlinedIcon>
                   </IconButton>
                 </div>
 
                 <div className='tab-list-delete-button-container'>
-                  <IconButton onClick={(event) => clickCloseTab(event, tab.windowId, tab.windowIndex)}>
+                  <IconButton onClick={(event) => clickCloseTab(event, tab)}>
                     <DeleteIcon></DeleteIcon>
                   </IconButton>
                 </div>

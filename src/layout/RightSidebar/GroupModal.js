@@ -5,15 +5,19 @@ import './GroupModal.css';
 import { Box, IconButton, Modal, Typography } from "@mui/material";
 import CircleIcon from '@mui/icons-material/Circle';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EnergySavingsLeafOutlinedIcon from '@mui/icons-material/EnergySavingsLeafOutlined';
+import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined';
 import Breadcrumb from '@mui/material/Breadcrumbs';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
+import { deleteTab, freezeTab } from '../../features/chromeTabs/chromeTabSlice';
 
 /*global chrome*/
 
 
 function GroupModal(props) {
+  const dispatch = useDispatch();
   const fetchTabs = useSelector(state => state.chromeTabs).fetchTabs;
   const firestore = useSelector(state => state.firestore);
 
@@ -77,11 +81,6 @@ function GroupModal(props) {
   if (tabsInGroup.length > 0) {
     groupNameChain = getGroupNameChain(tabsInGroup[0].group);
   }
-  // if (items.length > 0 && items.find(item => item.title)) {
-  //   groupNameChain = getGroupNameChain(items.find(item => item.title).group).slice(0, props.chartLevel);
-  // } else if (items.length > 0) {
-  //   groupNameChain = getGroupNameChain(items[0].tabs[0].group).slice(0, props.chartLevel);
-  // }
 
   const chartData = {
     datasets: [
@@ -123,11 +122,24 @@ function GroupModal(props) {
     props.setChartLevel(newChartLevel)
   }
 
-  function closeTab(event, tabId) {
-    chrome.tabs.remove(tabId)
+  async function clickFreezeTab(event, currentTab) {
+    await chrome.tabs.discard(currentTab.tabId)
+      .then((tab) => {
+        dispatch(freezeTab(currentTab));
+      })
       .catch((err) => {
         console.error(err);
+      });
+  }
+
+  async function clickCloseTab(event, currentTab) {
+    await chrome.tabs.remove(currentTab.tabId)
+      .then(() => {
+        dispatch(deleteTab(currentTab));
       })
+      .catch((err) => {
+        console.error(err);
+      });
   }
 
   function modalClickEvent(event, elements) {
@@ -210,9 +222,9 @@ function GroupModal(props) {
                 <li className='modal-group-item' key={`${group.name}-${uuidv4()}`}>
                   <div className='modal-list-content' onClick={(e) => { selectItem(group.id) }}>
                     <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(items.length - 1 - index, items.length).join(", ") + ", 1)" }}></CircleIcon>
-                    <div>
-                      <Typography variant='h6'>{group.name}</Typography>
-                      <div>Memory Usage: {(group.totalMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(group.totalMemory / 1024)} KB)</div>
+                    <div className='modal-list-content-text'>
+                      <Typography variant='h6' noWrap={true}>{group.name}</Typography>
+                      <Typography variant='body2' noWrap={true}>Memory Usage: {(group.totalMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(group.totalMemory / 1024)} KB)</Typography>
                     </div>
                   </div>
                 </li>
@@ -221,23 +233,57 @@ function GroupModal(props) {
           </ul>
           <Typography variant='h5'>Tabs</Typography>
           <ul>
-            {tabsInGroup.slice().reverse().map((tab, index) => {
+            {tabsInGroup.filter(tab => tab.status === "complete").reverse().map((tab, index) => {
               return (
                 <li className='modal-tab-item' key={`${tab.title}-${tab.windowId}-${tab.tabId}`}>
                   <div className='modal-list-content' onClick={(e) => { switchToTab(tab.windowId, tab.windowIndex) }}>
                     <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabsInGroup.length - 1 - index, tabsInGroup.length).join(", ") + ", 1)" }}></CircleIcon>
-                    <div>
-                      <Typography variant='h6'>{tab.alias}</Typography>
-                      <Typography variant="subtitle2">
+                    <div className='modal-list-content-text'>
+                      <Typography variant='h6' noWrap={true}>{tab.alias}</Typography>
+                      <Typography variant="subtitle2" noWrap={true}>
                         {getGroupNameChain(tab.group).join("/")}
                       </Typography>
-                      <div>Memory Usage: {(tab.privateMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(tab.privateMemory / 1024)} KB)</div>
+                      <Typography variant='body2'>Memory Usage: {(tab.privateMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(tab.privateMemory / 1024)} KB)</Typography>
                     </div>
                   </div>
 
+                  <div className='modal-freeze-button-container'>
+                    <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
+                      <PauseOutlinedIcon></PauseOutlinedIcon>
+                    </IconButton>
+                  </div>
+
                   <div className='modal-delete-button-container'>
-                    <IconButton>
-                      <DeleteIcon onClick={(event) => closeTab(event, tab.tabId)}></DeleteIcon>
+                    <IconButton onClick={(event) => clickCloseTab(event, tab)}>
+                      <DeleteIcon></DeleteIcon>
+                    </IconButton>
+                  </div>
+                </li>
+              );
+            })}
+            {tabsInGroup.filter(tab => tab.status !== "complete").reverse().map((tab, index) => {
+              return (
+                <li className='modal-tab-item' key={`${tab.title}-${tab.windowId}-${tab.tabId}`}>
+                  <div className='modal-list-content-unload' onClick={(e) => { switchToTab(tab.windowId, tab.windowIndex) }}>
+                    <EnergySavingsLeafOutlinedIcon sx={{ color: "#53af2e" }}></EnergySavingsLeafOutlinedIcon>
+                    <div className='modal-list-content-text'>
+                      <Typography variant='h6' noWrap={true}>{tab.alias}</Typography>
+                      <Typography variant="subtitle2" noWrap={true}>
+                        {getGroupNameChain(tab.group).join("/")}
+                      </Typography>
+                      <Typography variant='body2'>Memory Usage: {(tab.privateMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(tab.privateMemory / 1024)} KB)</Typography>
+                    </div>
+                  </div>
+
+                  <div className='modal-freeze-button-container'>
+                    <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
+                      <PauseOutlinedIcon></PauseOutlinedIcon>
+                    </IconButton>
+                  </div>
+
+                  <div className='modal-delete-button-container'>
+                    <IconButton onClick={(event) => clickCloseTab(event, tab)}>
+                      <DeleteIcon></DeleteIcon>
                     </IconButton>
                   </div>
                 </li>
