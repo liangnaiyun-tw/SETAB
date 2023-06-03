@@ -12,7 +12,6 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import {
   Dialog,
-  Button,
   DialogActions,
   DialogContent,
   DialogContentText,
@@ -25,6 +24,15 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from '@mui/icons-material/Edit';
 import Workspace from '../../../interface/Workspace';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { PropaneSharp } from '@mui/icons-material';
+import {
+  Button,
+  Classes,
+  Collapse,
+  Colors,
+  Icon,
+  InputGroup,
+} from '@blueprintjs/core';
 
 export default function MenuList() {
   // To retrieve the workspaces of the current user.
@@ -72,92 +80,78 @@ export default function MenuList() {
   });
 
   const dispatch = useDispatch();
-  const onDrop = (items, target) => {
-    if (target.targetType === "between-items") {
 
-      if (target.parentItem === "root") {
-        items.forEach(item => {
-          if (item.nodeType === nodeType.Workspace) {
-            updateRootChildren();
-          } else {
-            updateRootChildren(true, [item]);
+  const updateItemParent = (item) => {
 
-
-            let targetItemWorkspace = workspaces.filter(w => w.id === item.parent)[0];
-            dispatch(updateWorkspaceGroups({ groups: [...targetItemWorkspace.groups.filter(g => g !== item.index)], workspaceId: targetItemWorkspace.id }))
-
-
-            let newWorkspace = Workspace;
-            newWorkspace.name = item.data;
-            newWorkspace.groups = groups.filter(g => g.id === item.index)[0].groups;
-            dispatch(createWorkSpace(newWorkspace))
-          }
-        })
-
+    if (item.parent !== 'root') {
+      let parent = treeEnvironment.current.items[item.parent];
+      let newGroups = [...parent.children].filter(x => x !== "" && x !== item.index)
+      if (workspaces.filter(ws => ws.id === item.parent)) {
+        dispatch(updateWorkspaceGroups({ workspaceId: parent.index, groups: newGroups }))
       } else {
-
-        updateParentChildren(target.parentItem);
+        dispatch(updateGroup({ name: parent.data, groups: newGroups }))
       }
-    } else if (target.targetType === "item") {
-      if (target.targetItem === "root") {
-        updateRootChildren();
-      } else {
-        setCurrentWorkspace(target.targetItem);
-        let targetItem = treeEnvironment.current.items[target.targetItem];
-        if (targetItem.nodeType === nodeType.Workspace) {
-          updateParentChildren(targetItem.index, items);
+    }
+    if (item.parent === 'root' && item.nodeType === nodeType.Workspace) {
+      dispatch(updateUserWorkspaces([...treeEnvironment.current.items.root.children]));
+    }
+  }
+
+  const onDrop = (items, target) => {
+    console.log('items', items)
+    console.log('target', target)
+
+    items.forEach(i => {
+
+      updateItemParent(i);
+      if ('targetItem' in target) {
+
+        if (target.targetItem !== 'root') {
+          let targetItem = treeEnvironment.current.items[target.targetItem];
+          let newGroups = targetItem.children.filter(x => x !== "");
+          if (i.nodeType === nodeType.Workspace) {
+
+            dispatch(deleteWorkspace(i.index));
+            dispatch(createGroup({ name: i.data, groups: i.children, workspace: targetItem.index }))
+            newGroups = newGroups.filter(x => x !== i.index);
+          }
+          if (targetItem.nodeType === nodeType.Workspace) {
+            dispatch(updateWorkspaceGroups({ workspaceId: targetItem.index, groups: newGroups }))
+          } else {
+            dispatch(updateGroup({ name: targetItem.data, groups: newGroups }))
+          }
         } else {
-          debugger;
-          updateParentChildren(targetItem.index);
+          let newUserWorkspaces = [...treeEnvironment.current.items.root.children];
+          if (i.nodeType === nodeType.Group) {
+            dispatch(deleteGroup(i.index))
+            dispatch(createWorkSpace({ name: i.data, groups: i.children }));
+            newUserWorkspaces = newUserWorkspaces.filter(x => x !== "" && x !== i.index);
+          }
+
+          dispatch(updateUserWorkspaces(newUserWorkspaces));
+        }
+      } else if ('parentItem' in target && target.parentItem === 'root') {
+        let newUserWorkspaces = [...treeEnvironment.current.items.root.children];
+        if (i.nodeType === nodeType.Group) {
+          dispatch(deleteGroup(i.index))
+          dispatch(createWorkSpace({ name: i.data, groups: i.children }));
+          newUserWorkspaces = newUserWorkspaces.filter(x => x !== "" && x !== i.index);
+        }
+        dispatch(updateUserWorkspaces(newUserWorkspaces));
+      } else if ('parentItem' in target && target.parentItem !== 'root') {
+        let targetItem = treeEnvironment.current.items[target.parentItem];
+        let newGroups = targetItem.children;
+        if (targetItem.nodeType === nodeType.Workspace) {
+          dispatch(updateWorkspaceGroups({ workspaceId: targetItem.index, groups: newGroups }))
+        } else {
+          dispatch(updateGroup({ name: targetItem.data, groups: newGroups }))
         }
       }
 
-      // To simultaneously update the parentItem and targetItem's children
-      if (target.parentItem === "root") {
-        updateRootChildren(true, items);
-        items.forEach(item => {
-          if (item.nodeType === nodeType.Workspace) {
-            dispatch(deleteWorkspace(item.index))
-            let newGroup = Group;
-            newGroup.name = item.data;
-            newGroup.workspace = target.targetItem;
-            dispatch(createGroup(newGroup));
-          }
-        });
+    })
 
-      } else {
-        updateParentChildren(target.parentItem);
-      }
-    }
+
   };
-
-  const updateRootChildren = (removeTarget = false, items = []) => {
-
-    let children = [...treeEnvironment.current.items.root.children];
-    children = [...children.filter(c => c !== "")];
-    if (removeTarget && items.length > 0) {
-      items.forEach(item => {
-        children = [...children.filter(c => c !== item)];
-      })
-    }
-
-    dispatch(updateUserWorkspaces(children));
-  }
-
-  const updateParentChildren = (target, deleteItems = []) => {
-    const parent = treeEnvironment.current.items[target];
-    let children = [...parent.children]
-    if (deleteItems.length > 0) {
-      deleteItems.forEach(i => {
-        children = children.filter(c => c !== i.index);
-      })
-    }
-    if (parent.nodeType === nodeType.Workspace) {
-      dispatch(updateWorkspaceGroups({ groups: children, workspaceId: parent.index }))
-    } else {
-      // todo update group's group
-    }
-  }
 
   const handleNodeMoreClose = () => {
     setAnchorEl(null);
@@ -178,7 +172,7 @@ export default function MenuList() {
       workspace.id = currnetNode.index;
       workspace.name = rename;
       dispatch(updateWorkspace(workspace))
-    } else if (currnetNode && currentGroup.nodeType === nodeType.Group) {
+    } else if (currnetNode && currnetNode.nodeType === nodeType.Group) {
       let group = Group;
       group.id = currnetNode.index;
       group.name = rename;
@@ -186,6 +180,24 @@ export default function MenuList() {
     }
     handleRenameDialogClose();
 
+  }
+
+  const handleRenameItem = (item, newName) => {
+    setRename(newName);
+    if (item.nodeType === nodeType.Workspace) {
+      let workspace = Workspace;
+      workspace.id = item.index;
+      workspace.name = newName;
+      workspace.groups = item.children;
+      dispatch(updateWorkspace(workspace))
+    } else if (item.nodeType === nodeType.Group) {
+      let group = Group;
+      group.id = item.index;
+      group.name = newName;
+      group.groups = item.children;
+      dispatch(updateGroup(group))
+    }
+    setRename('')
   }
 
   const handleDelete = () => {
@@ -205,16 +217,16 @@ export default function MenuList() {
     dispatch(createGroup(newGroup)).then((data) => {
       const returnGroup = data.payload;
       if (currnetNode.nodeType === nodeType.Group) {
+        debugger;
         let group = groups.filter(g => g.id === currnetNode.index)[0];
         let groupOfGroups = group.groups;
         let newGroup = Group;
         newGroup.name = group.name;
         newGroup.groups = groupOfGroups.concat([returnGroup.id]);
+        newGroup.id = group.id;
         dispatch(updateGroup(newGroup));
       }
     })
-
-
 
     handleAddGroupDialogClose();
     setNewGroupName("");
@@ -229,6 +241,7 @@ export default function MenuList() {
   };
 
   const getCustomItemTitle = (node) => {
+
     return (
       <div style={itemTitleContainer}>
         {(() => {
@@ -263,59 +276,35 @@ export default function MenuList() {
 
   const onExpandNode = (node) => {
     if (node.nodeType === nodeType.Workspace) {
-      dispatch(setCurrentWorkspace(node.index));
+      dispatch(setCurrentWorkspace(node.index))
+      if (workspaces) {
+        let currWorkspace = workspaces.filter(w => w.id === node.index)[0];
+        setItems((prev) => {
+          prev[node.index].children = [...currWorkspace.groups]
+          return { ...prev };
+        })
+      }
 
-      let currWorkspace = workspaces.filter(w => w.id === node.index)[0];
-      let currGroups = groups.filter(g => currWorkspace.groups.indexOf(g.id) !== -1);
-      setItems((prev) => {
-        prev[node.index].children = currWorkspace.groups
-
-        currGroups.forEach((group) => {
-          prev[group.id] = {
-            index: group.id,
-            canMove: true,
-            isFolder: true,
-            children: groups.filter(g => g.id === group.id)[0] ? groups.filter(g => g.id === group.id)[0].groups : [],
-            data: group.name,
-            canRename: true,
-            nodeType: nodeType.Group,
-            parent: group.workspace
-          };
-        });
-        console.log({ ...prev })
-        return { ...prev };
-      })
     } else if (node.nodeType === nodeType.Group) {
-      let newGroup = currentGroup;
-      newGroup = newGroup.concat(node.index);
-      dispatch(setCurrentGroup(newGroup))
+      if (currentGroup) {
+        let newGroup = currentGroup;
+        newGroup = newGroup.concat([node.index]);
+        dispatch(setCurrentGroup(newGroup))
+        let currGroup = groups.filter(g => g.id === node.index)[0];
 
-      let currGroup = groups.filter(g => g.id === node.index)[0];
-      let currGroups = groups.filter(g => currGroup.groups.indexOf(g.id) !== -1);
-      setItems((prev) => {
-        prev[node.index].children = currGroup.groups
+        setItems((prev) => {
+          prev[node.index].children = [...currGroup.groups]
+          return { ...prev };
+        })
 
-        currGroups.forEach((group) => {
-          prev[group.id] = {
-            index: group.id,
-            canMove: true,
-            isFolder: true,
-            children: groups.filter(g => g.id === group.id)[0] ? groups.filter(g => g.id === group.id)[0].groups : [],
-            data: group.name,
-            canRename: true,
-            nodeType: nodeType.Group,
-            parent: currGroup.id
-          };
-        });
-
-        return { ...prev };
-      })
-      console.log(treeEnvironment.current.items)
+      }
     }
   };
 
   useEffect(() => {
-    if (workspaces) {
+    console.log('workspaces', workspaces)
+    console.log('groups', groups)
+    if (workspaces && groups) {
       setItems((prev) => {
         prev.root.children = [...workspaces.map(workspace => workspace.id)];
 
@@ -328,7 +317,7 @@ export default function MenuList() {
             index: workspaces[i].id,
             canMove: type !== nodeType.UnsavedWorkspace,
             isFolder: type !== nodeType.UnsavedWorkspace,
-            children: [],
+            children: workspaces[i].groups,
             data: workspaces[i].name,
             canRename: type !== nodeType.UnsavedWorkspace,
             workspaceId: workspaces[i].id,
@@ -337,97 +326,73 @@ export default function MenuList() {
           }
 
         }
-        return { ...prev };
-      })
-    }
-  }, [workspaces])
 
-
-  useEffect(() => {
-
-    const currGroupsByCurrentWorkspace = groups.filter(
-      (group) => group.workspace === currentWorkspace
-    );
-
-    // To retrieve groups from the current workspace in the correct order.
-    let currWorkspace = [];
-    if (workspaces) {
-      currWorkspace = workspaces.filter(x => x.id === currentWorkspace)[0];
-      let currentWorkspaceChildren = [];
-      if (currWorkspace) {
-        currentWorkspaceChildren = currWorkspace.groups
-      }
-      setItems((prev) => {
-        prev[currentWorkspace].children = currentWorkspaceChildren
-
-        currGroupsByCurrentWorkspace.forEach((group) => {
+        groups.forEach(group => {
+          let parent = ""
+          workspaces.forEach(ws => {
+            if (ws.groups.includes(group.id)) {
+              parent = ws.id
+            }
+          })
+          if (parent === "") {
+            groups.forEach(g => {
+              if (g.groups.includes(group.id)) {
+                parent = g.id
+              }
+            })
+          }
           prev[group.id] = {
             index: group.id,
             canMove: true,
             isFolder: true,
-            children: [],
+            children: group.groups,
             data: group.name,
             canRename: true,
             nodeType: nodeType.Group,
-            parent: group.workspace
+            parent: parent
           };
         });
-
         return { ...prev };
       })
     }
 
 
 
-  }, [groups, currentWorkspace, currentGroup]);
 
+  }, [groups, currentWorkspace, currentGroup, workspaces]);
+
+  const cx = (...classNames) =>
+    classNames.filter(cn => !!cn).join(' ');
 
   return (
     <>
       <UncontrolledTreeEnvironment
         ref={treeEnvironment}
-        dataProvider={new StaticTreeDataProvider(items, (item, data) => ({ ...item, data }))}
-        getItemTitle={(item) => getCustomItemTitle(item)}
-        // getItemTitle={item => item.data}
-        // renderItem={({ item, depth, children, title, context, arrow }) => {
-        //   const InteractiveComponent = context.isRenaming ? 'div' : 'button';
-        //   const type = context.isRenaming ? undefined : 'button';
-        //   return (
-        //     <li
-        //       {...(context.itemContainerWithChildrenProps)}
-        //       className="rct-tree-item-li"
+        dataProvider={new StaticTreeDataProvider(items, (item, newName) => ({ ...item, data: newName }))}
+        getItemTitle={(item) => item.data}
+        renderItemTitle={({ title, item }) => getCustomItemTitle(item)}
+        // getItemTitle={(item) => item.data}
+        // renderItem={props => (
+        //   <li
+        //     className='rct-tree-item-li'
+        //     {...(props.context.itemContainerWithChildrenProps)}
+        //   >
+        //     <div
+        //       className='rct-tree-item-title-container'
+        //       {...(props.context.itemContainerWithoutChildrenProps)}
+        //       {...(props.context.interactiveElementProps)}
         //     >
-        //       <div
-        //         {...(context.itemContainerWithoutChildrenProps)}
-        //         style={{ paddingLeft: `${(depth + 1) * 4}px` }}
-        //         className={[
-        //           'rct-tree-item-title-container',
-        //           item.isFolder && 'rct-tree-item-title-container-isFolder',
-        //           context.isSelected && 'rct-tree-item-title-container-selected',
-        //           context.isExpanded && 'rct-tree-item-title-container-expanded',
-        //           context.isFocused && 'rct-tree-item-title-container-focused',
-        //           context.isDraggingOver &&
-        //             'rct-tree-item-title-container-dragging-over',
-        //           context.isSearchMatching &&
-        //             'rct-tree-item-title-container-search-match',
-        //         ].join(' ')}
-        //       >
-        //         {arrow}
-        //         <InteractiveComponent
-        //           type={type}
-        //           {...(context.interactiveElementProps)}
-        //           className="rct-tree-item-button"
-        //         >
-        //           {title}
-        //         </InteractiveComponent>
-        //         <button onClick={context.startRenamingItem} type="button">
-        //           Rename
-        //         </button>
-        //       </div>
-        //       {children}
-        //     </li>
-        //   );
-        // }}
+
+        //       <div className='rct-tree-item-arrow'>{props.arrow}</div>
+
+        //       <button className='rct-tree-item-button'>
+        //         <CustomItemTitle node={props.item} />
+        //       </button>
+        //     </div>
+        //     {props.children}
+        //   </li>
+        // )}
+
         viewState={{
           'tree-1': {
             expandedItems: expandedItems,
@@ -435,10 +400,12 @@ export default function MenuList() {
             selectedItems: selectedItems
           }
         }}
-        canSearchByStartingTyping={false}
+        canSearchByStartingTyping={true}
         canDragAndDrop={true}
         canDropOnFolder={true}
         canReorderItems={true}
+        canRename={true}
+        onRenameItem={(item, name, treeId) => handleRenameItem(item, name)}
         onDrop={(items, target) => { onDrop(items, target) }}
         onFocusItem={(item, treeId) => {
           if (item.nodeType === nodeType.Workspace) {
@@ -447,6 +414,7 @@ export default function MenuList() {
         }}
         onExpandItem={(item) => onExpandNode(item)}
 
+
       >
         <div
           className="rct-dark"
@@ -454,7 +422,7 @@ export default function MenuList() {
         >
           <Tree treeId="tree-1" rootItem="root" treeLabel="Tree Example" ref={tree} />
         </div>
-      </UncontrolledTreeEnvironment>
+      </UncontrolledTreeEnvironment >
 
       <Menu
         anchorEl={anchorEl}
@@ -501,7 +469,7 @@ export default function MenuList() {
           </ListItemIcon>
           Create new group
         </MenuItem>
-        <MenuItem
+        {/* <MenuItem
           onClick={() => {
             handleRenameDialogOpen();
           }}
@@ -510,7 +478,7 @@ export default function MenuList() {
             <EditIcon fontSize="small" />
           </ListItemIcon>
           Rename
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem onClick={() => handleDeleteDialogOpen()}>
           <ListItemIcon>
             <DeleteIcon fontSize='small' />
