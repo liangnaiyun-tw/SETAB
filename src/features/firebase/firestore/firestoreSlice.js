@@ -244,7 +244,7 @@ const firestoreSlice = createSlice({
             state.tabs = action.payload.tabs;
         },
         updateUnsavedWorkspace: (state, action) => {
-            state.workspaces.find((workspace) => workspace.name === UNSAVED_WORKSPACE).tabs = action.payload.tabs;
+            state.workspaces[0].tabs = action.payload.tabs;
         }
     },
     extraReducers: (builder) => {

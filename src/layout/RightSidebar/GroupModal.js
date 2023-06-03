@@ -123,6 +123,13 @@ function GroupModal(props) {
     props.setChartLevel(newChartLevel)
   }
 
+  function closeTab(event, tabId) {
+    chrome.tabs.remove(tabId)
+      .catch((err) => {
+        console.error(err);
+      })
+  }
+
   function modalClickEvent(event, elements) {
     if (elements.length > 0) {
       const item = items[elements[0].index];
@@ -230,7 +237,7 @@ function GroupModal(props) {
 
                   <div className='modal-delete-button-container'>
                     <IconButton>
-                      <DeleteIcon></DeleteIcon>
+                      <DeleteIcon onClick={(event) => closeTab(event, tab.tabId)}></DeleteIcon>
                     </IconButton>
                   </div>
                 </li>

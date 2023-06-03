@@ -1,24 +1,75 @@
 #system-memeory-usage-title {
   text-align: center;
-  font-size: 30;
+  font-size: 15px;
   font-weight: bold;
 }
 
 #no-tab-message {
   text-align: center;
-  font-size: 30;
+  font-size: 15px;
   font-weight: bold;
 }
 
-.tab-item-text {
-  white-space: pre-wrap;
-  /* CSS3 */
-  white-space: -moz-pre-wrap;
-  /* Firefox */
-  white-space: -pre-wrap;
-  /* Opera <7 */
-  white-space: -o-pre-wrap;
-  /* Opera 7 */
-  word-wrap: break-word;
-  /* IE */
+.tab-list {
+  padding-left: 15px;
+  margin-left: auto;
+}
+
+.tab-list-item {
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 2%;
+  margin-bottom: 3%;
+  margin-left: auto;
+}
+
+.tab-list-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 85%;
+  min-width: 200px;
+  column-gap: 2%;
+  padding: 5px;
+  border: 2px solid darkgray;
+  border-radius: 7px;
+  cursor: pointer;
+  background-color: beige;
+  transition-duration: 0.2s;
+}
+
+.tab-list-content-unload {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 85%;
+  min-width: 200px;
+  column-gap: 2%;
+  padding: 5px;
+  border: 2px solid darkgray;
+  border-radius: 7px;
+  cursor: pointer;
+  background-color: beige;
+  filter: brightness(0.6);
+  transition-duration: 0.2s;
+}
+
+.tab-list-content:hover,
+.tab-list-content-unload:hover {
+  border: 2px solid black;
+}
+
+
+.tab-list-content-text {
+  width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab-list-delete-button-container,
+.tab-list-freeze-button-container {
+  width: 40px;
 }
