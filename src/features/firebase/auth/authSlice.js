@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, getRedirectResult, signInWithRedirect } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
 import User from '../../../interface/User';
 
 /*global chrome*/
@@ -72,7 +72,7 @@ export const initLogin = createAsyncThunk('auth/initLogin', async (_, thunkAPI) 
                     console.log(user, accessToken);
                     thunkAPI.dispatch(setAuth({ user, accessToken }));
                     thunkAPI.dispatch(setLoginStatus(true));
-                    
+
                 }).catch((err) => {
                     console.error(err);
                     thunkAPI.dispatch(setLoginStatus(false))

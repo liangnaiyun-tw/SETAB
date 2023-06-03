@@ -11,7 +11,7 @@ import "./Structure.css";
 import { createGroup, setCurrentGroup } from '../../../features/firebase/firestore/firestoreSlice';
 import { useDispatch } from 'react-redux';
 import FolderTwoToneIcon from '@mui/icons-material/FolderTwoTone';
-import { Dialog, Button, Modal, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
+import { Dialog, Button, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
 import Group from '../../../interface/Group';
 
 
@@ -71,9 +71,9 @@ const Structure = () => {
                                 return groups.filter(groupInDB => groupInDB.id === group)[0]
                             })
                             .map(group =>
-                                (<Button onClick={() => { handleStructureOpenGroup(group) }} className='group' key={group.id} variant="contained" startIcon={<FolderTwoToneIcon />}>
-                                    {group.name}
-                                </Button>))
+                            (<Button onClick={() => { handleStructureOpenGroup(group) }} className='group' key={group.id} variant="contained" startIcon={<FolderTwoToneIcon />}>
+                                {group.name}
+                            </Button>))
                 }
             </div>
             <hr />

@@ -67,10 +67,10 @@ export default function BasicTabs({ token }) {
     };
 
     useEffect(() => {
-        if(workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name === "Unsaved"){
+        if (workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name === "Unsaved") {
             setValue(0);
         }
-    }, [currentWorkspace])
+    }, [workspaces, currentWorkspace])
 
     return (
         <Box sx={{ width: '100%' }}>

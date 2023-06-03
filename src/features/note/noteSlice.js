@@ -3,10 +3,8 @@ import axios from 'axios'
 import {
     getFirestore,
     collection,
-    addDoc,
     query,
     updateDoc,
-    deleteDoc,
     where,
     getDocs,
 } from "firebase/firestore";
@@ -75,7 +73,7 @@ export const createNewNote = createAsyncThunk('note/createNewNote', async ({ typ
             :
             (() => {
                 parent = workspaces.filter(workspace =>
-                    workspace.id == currentWorkspace
+                    workspace.id === currentWorkspace
                 )[0]
                 parentIsWorkspace = true;
                 return parent.googleDriveFolderId;

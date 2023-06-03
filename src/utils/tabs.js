@@ -3,10 +3,10 @@ import store from "../app/store";
 function getGroupNameChain(groupId) {
   if (groupId === store.getState().firestore.workspaces[0].id) return ["Unsaved"];
 
-  let currentGroupId = groupId;
   let state = store.getState().firestore;
-  let fullGroupNameChain = [state.groups.find((group) => group.id === currentGroupId).name], parent;
+  let fullGroupNameChain = [state.groups.find((group) => group.id === groupId).name], parent;
   while (true) {
+    let currentGroupId = groupId;
     parent = state.groups.find((group) => group.groups.includes(currentGroupId));
     if (!parent) {
       parent = state.workspaces.find((workspace) => workspace.groups.includes(currentGroupId));
@@ -14,7 +14,7 @@ function getGroupNameChain(groupId) {
       break;
     } else {
       fullGroupNameChain.push(parent.name);
-      currentGroupId = parent.id;
+      groupId = parent.id;
     }
   }
   return fullGroupNameChain.reverse();
@@ -23,10 +23,10 @@ function getGroupNameChain(groupId) {
 function getGroupIdChain(groupId) {
   if (groupId === store.getState().firestore.workspaces[0].id) return [store.getState().firestore.workspaces[0].id];
 
-  let currentGroupId = groupId;
   let state = store.getState().firestore;
-  let fullGroupIdChain = [state.groups.find((group) => group.id === currentGroupId).id], parent;
+  let fullGroupIdChain = [state.groups.find((group) => group.id === groupId).id], parent;
   while (true) {
+    let currentGroupId = groupId;
     parent = state.groups.find((group) => group.groups.includes(currentGroupId));
     if (!parent) {
       parent = state.workspaces.find((workspace) => workspace.groups.includes(currentGroupId));
@@ -34,7 +34,7 @@ function getGroupIdChain(groupId) {
       break;
     } else {
       fullGroupIdChain.push(parent.id);
-      currentGroupId = parent.id;
+      groupId = parent.id;
     }
   }
   return fullGroupIdChain.reverse();

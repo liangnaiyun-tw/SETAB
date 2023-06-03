@@ -25,10 +25,10 @@ const Board = ({
   withScrollableColumns
 }) => {
   const { currentWorkspace, workspaces, groups } = useSelector((store) => store.firestore)
-  
+
   const [columns, setColumns] = useState(initial);
-  
-  
+
+
   console.log('columns', columns)
 
   const [ordered, setOrdered] = useState(Object.keys(initial));
@@ -92,16 +92,16 @@ const Board = ({
 
   useEffect(() => {
     const newColumns = {};
-    if(currentWorkspace){
+    if (currentWorkspace) {
       let workspaceGroups = groups.filter(group => group.workspace === currentWorkspace);
       workspaceGroups.forEach(g => {
-        newColumns[g.name] = [{id: g.id, content: '123'}];
+        newColumns[g.name] = [{ id: g.id, content: '123' }];
       });
       console.log('newColumns', newColumns)
       setColumns(newColumns);
       setOrdered(Object.keys(newColumns))
     }
-  }, [workspaces, currentWorkspace])
+  }, [workspaces, groups, currentWorkspace])
 
   return (
     <>

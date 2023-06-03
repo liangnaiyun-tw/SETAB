@@ -23,7 +23,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { initLogin } from "./features/firebase/auth/authSlice";
 import { loadStructureByUser } from "./features/firebase/firestore/firestoreSlice";
 
-/*global chrome*/
+
 app();
 
 function App() {
