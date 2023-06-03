@@ -158,3 +158,4 @@ const CreateNewNoteModal = ({ token, onPickNewNote }) => {
     );
 };
 
+export default CreateNewNoteModal;

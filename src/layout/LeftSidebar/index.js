@@ -1,11 +1,8 @@
 import React, { useState } from "react";
 import AppBar from '@mui/material/AppBar';
-import Stack from '@mui/material/Stack';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
 import setab_logo from '../../assets/setab.jpg';
 import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
@@ -24,14 +21,14 @@ import Login from "../Component/Login/Login";
 import "./index.css";
 import { useSelector } from "react-redux";
 import SearchBar from './SearchBar';
-import { Dialog, Button, Modal, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
+import { Dialog, Button, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
 import { createWorkSpace } from "../../features/firebase/firestore/firestoreSlice";
 import Workspace from "../../interface/Workspace";
 import { useDispatch } from "react-redux";
 
 
 const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
-    
+
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -47,12 +44,12 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
 
     const { user } = useSelector((store) => store.auth)
     const [newWorkSpaceName, setNewWorkSpaceName] = useState("")
-    
+
     const dispatch = useDispatch();
 
     const handleCreateWorkSpace = async () => {
         handleDialogClose();
-        let workspace =  Workspace;
+        let workspace = Workspace;
         workspace.name = newWorkSpaceName;
         dispatch(createWorkSpace(workspace));
     }
@@ -185,13 +182,13 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                         variant="standard"
                         onChange={(e) => {
                             setNewWorkSpaceName(e.target.value);
-                          }}
+                        }}
                         value={newWorkSpaceName}
                     />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose}>Cancel</Button>
-                    <Button disabled={newWorkSpaceName.length===0} onClick={handleCreateWorkSpace}>Create</Button>
+                    <Button disabled={newWorkSpaceName.length === 0} onClick={handleCreateWorkSpace}>Create</Button>
                 </DialogActions>
             </Dialog>
         </>

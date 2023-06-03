@@ -2,7 +2,6 @@ import React from "react";
 import MainTab from "../Component/MainTab/MainTab"
 import "./index.css"
 
-import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import { useSelector, useDispatch } from "react-redux";
@@ -28,10 +27,10 @@ const Main = ({ cssMain, styleMain, token }) => {
     } else {
       let index;
       for (let i = 0; i < currentGroup.length; i++) {
-        if (currentGroup[i] === id){
+        if (currentGroup[i] === id) {
           index = i;
           break;
-        } 
+        }
       }
       dispatch(setCurrentGroup(currentGroup.slice(0, index + 1)));
     }
@@ -43,7 +42,7 @@ const Main = ({ cssMain, styleMain, token }) => {
         <div role="presentation" onClick={handleClick}>
           <Breadcrumbs aria-label="breadcrumb" className="Breadcrumbs">
             {
-              <Link onClick={() => { handleBreadCrumbClick(currentWorkspace, true)}} underline="hover" color="inherit" href="/">
+              <Link onClick={() => { handleBreadCrumbClick(currentWorkspace, true) }} underline="hover" color="inherit" href="/">
                 {
                   workspaces.filter(workspace => workspace.id === currentWorkspace)[0].name
                 }
@@ -52,10 +51,10 @@ const Main = ({ cssMain, styleMain, token }) => {
             {
               currentGroup.length !== 0 ?
                 currentGroup.map((groupId) => groups.filter(group => group.id === groupId)[0])
-                .map((group) => 
-                    (<Link key={group.id} onClick={() => {handleBreadCrumbClick(group.id, false)}} underline="hover" color="inherit" href="/">
-                      {group.name}
-                    </Link>)
+                  .map((group) =>
+                  (<Link key={group.id} onClick={() => { handleBreadCrumbClick(group.id, false) }} underline="hover" color="inherit" href="/">
+                    {group.name}
+                  </Link>)
                   ) : null
             }
           </Breadcrumbs>
