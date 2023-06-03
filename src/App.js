@@ -28,6 +28,8 @@ app();
 
 function App() {
 
+
+
   const { user } = useSelector((store) => store.auth);
   const [positionFirst, setPositionFirst] = useState({ positionFirstX: 0 });
   const [positionSecond, setPositionSecond] = useState({ positionSecondX: 0 });
@@ -51,7 +53,8 @@ function App() {
     width: 500
   };
   const styleMain = {
-    backgroundColor: "beige",
+    backgroundColor: "#202020",
+    color: "white"
   };
   const styleRightSidebar = {
     backgroundColor: 'rgba(108, 101, 133, 1)',

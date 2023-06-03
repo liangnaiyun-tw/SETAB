@@ -8,6 +8,44 @@ import reorder, { reorderQuoteMap } from "../reorder";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { useSelector } from "react-redux";
 
+
+const InitSturctureList = {
+  id: 'first-level',
+  title: 'top level',
+  children: [
+    {
+      id: '1',
+      content: "Haven't slept for a solid 83 hours, but, yeah, I'm good.",
+      author: "Shang",
+    },
+    {
+      id: 'second-level',
+      title: 'second level',
+      children: [
+        {
+          id: '4',
+          content: "Haven't slept for a solid 83 hours, but, yeah, I'm good.",
+          author: "Shang",
+        },{
+          id: '5',
+          content: "Haven't slept for a solid 83 hours, but, yeah, I'm good.",
+          author: "Shang",
+        },
+      ],
+    },
+    {
+      id: '2',
+      content: "Haven't slept for a solid 83 hours, but, yeah, I'm good.",
+      author: "Shang",
+    },{
+      id: '3',
+      content: "Haven't slept for a solid 83 hours, but, yeah, I'm good.",
+      author: "Shang",
+    },
+  ],
+};
+
+
 const Container = styled.div`
   // background-color: ${colors.B100};
   // min-height: 100vh;
@@ -17,6 +55,12 @@ const Container = styled.div`
   // overflow-x: scroll;
 `;
 
+// const NestedContainer = styled(Container)`
+//   padding: 0;
+//   margin-bottom: ${grid}px;
+// `;
+
+
 const Board = ({
   isCombineEnabled,
   initial,
@@ -24,8 +68,10 @@ const Board = ({
   containerHeight,
   withScrollableColumns
 }) => {
-  const { currentWorkspace, workspaces, groups } = useSelector((store) => store.firestore)
+  const { currentWorkspace, currentGroup, workspaces, groups, tabs } = useSelector((store) => store.firestore)
   
+  const [structureList, setStructureList] = useState(InitSturctureList);
+
   const [columns, setColumns] = useState(initial);
   
   
@@ -33,6 +79,13 @@ const Board = ({
 
   const [ordered, setOrdered] = useState(Object.keys(initial));
   console.log(ordered)
+
+
+  // rebuild structure list
+  // useEffect(() => {
+
+  // }, [currentWorkspace, currentGroup, workspaces, groups, tabs])
+
 
   const onDragEnd = (result) => {
     if (result.combine) {
@@ -105,7 +158,34 @@ const Board = ({
 
   return (
     <>
-      <DragDropContext onDragEnd={onDragEnd}>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* <DragDropContext onDragEnd={onDragEnd}>
         <Droppable
           droppableId="board"
           type="COLUMN"
@@ -127,10 +207,11 @@ const Board = ({
                 />
               ))}
               {provided.placeholder}
+              
             </Container>
           )}
         </Droppable>
-      </DragDropContext>
+      </DragDropContext> */}
     </>
   );
 };

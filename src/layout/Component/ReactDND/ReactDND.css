@@ -1,0 +1,8 @@
+.board{
+    display: flex;
+    grid-auto-flow: column dense;
+    column-gap: .5rem; 
+    flex-direction: row; 
+    align-items: flex-start;
+    padding: 1%; 
+}

@@ -8,7 +8,8 @@ import {
     deleteDoc,
     where,
     getDocs,
-    writeBatch
+    writeBatch,
+    getDoc
 } from "firebase/firestore";
 import app from "../../../shared/Firebase"
 
@@ -258,8 +259,6 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
 
     try {
 
-
-
         // create google drive folder
         let parentIsWorkspace;
         let parent;
@@ -384,7 +383,42 @@ export const createTab = createAsyncThunk('firestore/createTab', async (tab, thu
         ...newTab,
     });
 })
+export const moveTabToOtherGroup = createAsyncThunk('firestore/moveTabToOtherGroup', async ({tabId, newGroupId}, thunkAPI) => {
+    try{
+        const {groups, tabs} = thunkAPI.getState().firestore;
 
+        const tab = tabs.filter(tab => tab.id === tabId)[0];
+        const originGroup = groups.filter(group => group.id===tabs.group)[0];
+        const newGroup = groups.filter(group => group.id===newGroupId)[0];
+    
+        let tabQuery = query(collection(db, "tabs"), where("id", "==", tabId));
+        let originGroupQuery = query(collection(db, "groups", where("id", "==", tab.group)));
+        let newGroupQuery = query(collection(db, "groups"), where("id", "==", newGroupId));
+        
+        const tabQuerySnapshot = await getDocs(tabQuery);
+        const originGroupQuerySnapshot = await getDocs(originGroupQuery);
+        const newGroupQuerySnapshot = await getDocs(newGroupQuery);
+    
+        await updateDoc(tabQuerySnapshot.docs[0].ref, {
+            ...tab,
+            group: newGroup.id
+        })
+        await updateDoc(originGroupQuerySnapshot.docs[0].ref, {
+            ...originGroup,
+            tabs: tabs.filter(tab => tab.id !== tabId)
+        })
+        await updateDoc(newGroupQuerySnapshot.docs[0].ref, {
+            ...newGroup,
+            tabs: [tabId, ...newGroup.tabs]
+        })
+    
+        await thunkAPI.dispatch(loadStructureByUser());
+
+    } catch(e) {
+        return e.response;
+    }
+    
+})
 
 const firestoreSlice = createSlice({
     name: 'firestore',
@@ -470,6 +504,12 @@ const firestoreSlice = createSlice({
                 console.log(action)
             })
             .addCase(deleteGroup.rejected, (state, action) => {
+                console.log(action)
+            })
+            .addCase(moveTabToOtherGroup.fulfilled, (state, action) => {
+                console.log(action)
+            })
+            .addCase(moveTabToOtherGroup.rejected, (state, action) => {
                 console.log(action)
             })
     }

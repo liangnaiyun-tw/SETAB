@@ -65,7 +65,7 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                     <Toolbar variant="dense">
                         <Typography variant="h1" color="white" component="div">
 
-                            <Box sx={{ flexGrow: 1 }}>
+                            <Box sx={{ flexGrow: 1, height: "13vh"}}>
                                 <Grid container style={{ display: 'flex', alignItems: 'center' }}>
                                     <Grid item xs={9}>
                                         < img src={setab_logo} alt="setab_logo" width="100%" style={{ maxHeight: '67px', maxWidth: '240px' }} />
