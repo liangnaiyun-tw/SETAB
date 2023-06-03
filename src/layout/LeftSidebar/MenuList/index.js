@@ -3,7 +3,7 @@
 import { UncontrolledTreeEnvironment, Tree, StaticTreeDataProvider } from 'react-complex-tree';
 import 'react-complex-tree/lib/style-modern.css';
 import { useSelector, useDispatch } from 'react-redux';
-import { setCurrentWorkspace, createGroup, updateWorkspace, updateGroup, updateUserWorkspaces, updateWorkspaceGroups, deleteWorkspace, createWorkSpace } from '../../../features/firebase/firestore/firestoreSlice';
+import { setCurrentWorkspace, createGroup, updateWorkspace, updateGroup, updateUserWorkspaces, updateWorkspaceGroups, deleteWorkspace, createWorkSpace, setCurrentGroup, deleteGroup } from '../../../features/firebase/firestore/firestoreSlice';
 
 import React, { useEffect, useState, useRef } from "react";
 import Menu from "@mui/material/Menu";
@@ -128,8 +128,6 @@ export default function MenuList() {
       } else {
         updateParentChildren(target.parentItem);
       }
-
-
     }
   };
 
@@ -194,9 +192,8 @@ export default function MenuList() {
     if (currnetNode.nodeType === nodeType.Workspace) {
       // todo delete workspace should also delete 
       dispatch(deleteWorkspace(currnetNode.index))
-    } else {
-      // todo when deleting a workspace, it is common to also delete its associated groups
-      // dispatch(deleteGroup(currnetNode.index))
+    } else if (currnetNode.nodeType === nodeType.Group) {
+      dispatch(deleteGroup(currnetNode.index))
     }
     handleDeleteDialogClose()
   }
@@ -205,7 +202,19 @@ export default function MenuList() {
     const newGroup = Group;
     newGroup.name = newGroupName;
 
-    dispatch(createGroup(newGroup));
+    dispatch(createGroup(newGroup)).then((data) => {
+      const returnGroup = data.payload;
+      if (currnetNode.nodeType === nodeType.Group) {
+        let group = groups.filter(g => g.id === currnetNode.index)[0];
+        let groupOfGroups = group.groups;
+        let newGroup = Group;
+        newGroup.name = group.name;
+        newGroup.groups = groupOfGroups.concat([returnGroup.id]);
+        dispatch(updateGroup(newGroup));
+      }
+    })
+
+
 
     handleAddGroupDialogClose();
     setNewGroupName("");
@@ -227,6 +236,7 @@ export default function MenuList() {
             case 0:
               return <div>{node.data}</div>;
             case 1:
+            case 2:
               return (
                 <>
                   <div>{node.data}</div>
@@ -243,8 +253,6 @@ export default function MenuList() {
                   </div>
                 </>
               );
-            case 2:
-              return <div>{node.data}</div>;
             case 3:
               return <div>{node.data}</div>;
           }
@@ -254,37 +262,84 @@ export default function MenuList() {
   };
 
   const onExpandNode = (node) => {
-    dispatch(setCurrentWorkspace(node.index));
+    if (node.nodeType === nodeType.Workspace) {
+      dispatch(setCurrentWorkspace(node.index));
+
+      let currWorkspace = workspaces.filter(w => w.id === node.index)[0];
+      let currGroups = groups.filter(g => currWorkspace.groups.indexOf(g.id) !== -1);
+      setItems((prev) => {
+        prev[node.index].children = currWorkspace.groups
+
+        currGroups.forEach((group) => {
+          prev[group.id] = {
+            index: group.id,
+            canMove: true,
+            isFolder: true,
+            children: groups.filter(g => g.id === group.id)[0] ? groups.filter(g => g.id === group.id)[0].groups : [],
+            data: group.name,
+            canRename: true,
+            nodeType: nodeType.Group,
+            parent: group.workspace
+          };
+        });
+        console.log({ ...prev })
+        return { ...prev };
+      })
+    } else if (node.nodeType === nodeType.Group) {
+      let newGroup = currentGroup;
+      newGroup = newGroup.concat(node.index);
+      dispatch(setCurrentGroup(newGroup))
+
+      let currGroup = groups.filter(g => g.id === node.index)[0];
+      let currGroups = groups.filter(g => currGroup.groups.indexOf(g.id) !== -1);
+      setItems((prev) => {
+        prev[node.index].children = currGroup.groups
+
+        currGroups.forEach((group) => {
+          prev[group.id] = {
+            index: group.id,
+            canMove: true,
+            isFolder: true,
+            children: groups.filter(g => g.id === group.id)[0] ? groups.filter(g => g.id === group.id)[0].groups : [],
+            data: group.name,
+            canRename: true,
+            nodeType: nodeType.Group,
+            parent: currGroup.id
+          };
+        });
+
+        return { ...prev };
+      })
+      console.log(treeEnvironment.current.items)
+    }
   };
 
-
-
   useEffect(() => {
-    setItems((prev) => {
-      prev.root.children = [...workspaces.map(workspace => workspace.id)];
+    if (workspaces) {
+      setItems((prev) => {
+        prev.root.children = [...workspaces.map(workspace => workspace.id)];
 
-      for (let i = 0; i < workspaces.length; i++) {
-        let type = nodeType.Workspace;
-        if (workspaces[i].id === "") {
-          type = nodeType.UnsavedWorkspace
+        for (let i = 0; i < workspaces.length; i++) {
+          let type = nodeType.Workspace;
+          if (workspaces[i].id === "") {
+            type = nodeType.UnsavedWorkspace
+          }
+          prev[workspaces[i].id] = {
+            index: workspaces[i].id,
+            canMove: type !== nodeType.UnsavedWorkspace,
+            isFolder: type !== nodeType.UnsavedWorkspace,
+            children: [],
+            data: workspaces[i].name,
+            canRename: type !== nodeType.UnsavedWorkspace,
+            workspaceId: workspaces[i].id,
+            nodeType: type,
+            parent: 'root'
+          }
+
         }
-        prev[workspaces[i].id] = {
-          index: workspaces[i].id,
-          canMove: type !== nodeType.UnsavedWorkspace,
-          isFolder: type !== nodeType.UnsavedWorkspace,
-          children: [],
-          data: workspaces[i].name,
-          canRename: type !== nodeType.UnsavedWorkspace,
-          workspaceId: workspaces[i].id,
-          nodeType: type,
-          parent: 'root'
-        }
-
-      }
-      return { ...prev };
-    })
-
-
+        return { ...prev };
+      })
+    }
   }, [workspaces])
 
 
@@ -296,30 +351,33 @@ export default function MenuList() {
 
     // To retrieve groups from the current workspace in the correct order.
     let currWorkspace = [];
-    currWorkspace = workspaces.filter(x => x.id === currentWorkspace)[0];
-    let currentWorkspaceChildren = [];
-    if (currWorkspace) {
-      currentWorkspaceChildren = currWorkspace.groups
+    if (workspaces) {
+      currWorkspace = workspaces.filter(x => x.id === currentWorkspace)[0];
+      let currentWorkspaceChildren = [];
+      if (currWorkspace) {
+        currentWorkspaceChildren = currWorkspace.groups
+      }
+      setItems((prev) => {
+        prev[currentWorkspace].children = currentWorkspaceChildren
+
+        currGroupsByCurrentWorkspace.forEach((group) => {
+          prev[group.id] = {
+            index: group.id,
+            canMove: true,
+            isFolder: true,
+            children: [],
+            data: group.name,
+            canRename: true,
+            nodeType: nodeType.Group,
+            parent: group.workspace
+          };
+        });
+
+        return { ...prev };
+      })
     }
 
-    setItems((prev) => {
-      prev[currentWorkspace].children = currentWorkspaceChildren
 
-      currGroupsByCurrentWorkspace.forEach((group) => {
-        prev[group.id] = {
-          index: group.id,
-          canMove: true,
-          isFolder: true,
-          children: [],
-          data: group.name,
-          canRename: true,
-          nodeType: nodeType.Group,
-          parent: group.workspace
-        };
-      });
-
-      return { ...prev };
-    })
 
   }, [groups, currentWorkspace, currentGroup]);
 

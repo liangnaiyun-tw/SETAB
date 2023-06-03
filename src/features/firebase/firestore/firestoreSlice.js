@@ -8,6 +8,7 @@ import {
     deleteDoc,
     where,
     getDocs,
+    writeBatch
 } from "firebase/firestore";
 import app from "../../../shared/Firebase"
 
@@ -96,22 +97,22 @@ export const loadStructureByUser = createAsyncThunk('firestore/loadStructureByUs
     );
     const workspaceQuerySnapshot = await getDocs(workspaceQuery);
     let workspaces = [unSaveWorkSpace];
-    
+
     // To sort the workspaces according to user workspaces
     let workspacesInDB = workspaceQuerySnapshot.docs;
-    if(userInDB && userInDB.workspaces.length > 0){
+    if (userInDB && userInDB.workspaces.length > 0) {
         workspacesInDB.sort((a, b) => {
             const indexA = userInDB.workspaces.indexOf(a.data().id);
             const indexB = userInDB.workspaces.indexOf(b.data().id);
-            if(indexA < indexB){
+            if (indexA < indexB) {
                 return -1;
-            } else if (indexA > indexB){
+            } else if (indexA > indexB) {
                 return 1;
             } else {
                 return 0;
             }
         })
-    } 
+    }
 
     workspacesInDB.forEach((doc) => {
         workspaces.push(doc.data());
@@ -142,20 +143,20 @@ export const loadStructureByUser = createAsyncThunk('firestore/loadStructureByUs
     thunkAPI.dispatch(addAllStructure({ workspaces, groups, tabs, userInDB }));
 
 })
-export const updateUserWorkspaces = createAsyncThunk('firestore/updateUserWorkspaces', async(workspaces, thunkAPI) => {
+export const updateUserWorkspaces = createAsyncThunk('firestore/updateUserWorkspaces', async (workspaces, thunkAPI) => {
     const user = thunkAPI.getState().auth.user;
     const userQuery = query(collection(db, "users"), where("uid", "==", user.uid))
-        const userQuerySnapshot = await getDocs(userQuery);
-        const data = userQuerySnapshot.docs[0].data();
-        await updateDoc(userQuerySnapshot.docs[0].ref, {
-            ...data,
-            workspaces: [...workspaces],
-        });
-        await thunkAPI.dispatch(loadStructureByUser());
+    const userQuerySnapshot = await getDocs(userQuery);
+    const data = userQuerySnapshot.docs[0].data();
+    await updateDoc(userQuerySnapshot.docs[0].ref, {
+        ...data,
+        workspaces: [...workspaces],
+    });
+    await thunkAPI.dispatch(loadStructureByUser());
 
-        return "update User Workspaces sucessfully";
+    return "update User Workspaces sucessfully";
 })
-export const updateWorkspaceGroups = createAsyncThunk('firestore/updateWorkspaceGroups', async({groups, workspaceId}, thunkAPI) => {
+export const updateWorkspaceGroups = createAsyncThunk('firestore/updateWorkspaceGroups', async ({ groups, workspaceId }, thunkAPI) => {
     const user = thunkAPI.getState().auth.user;
 
     let q = query(collection(db, "workspaces"), where("id", "==", workspaceId), where("uid", "==", user.uid));
@@ -220,15 +221,22 @@ export const createWorkSpace = createAsyncThunk('firestore/createWorkSpace', asy
 
 
 })
-export const deleteWorkspace = createAsyncThunk('firestore/deleteWorkspace', async(workspaceId, thunkAPI) => {
+export const deleteWorkspace = createAsyncThunk('firestore/deleteWorkspace', async (workspaceId, thunkAPI) => {
     const user = thunkAPI.getState().auth.user;
     let q = query(collection(db, "workspaces"), where("id", "==", workspaceId), where("uid", "==", user.uid));
     const querySnapshot = await getDocs(q);
     await deleteDoc(querySnapshot.docs[0].ref);
+
+    q = query(collection(db, "groups"), where("uid", "==", user.uid), where("workspace", "==", workspaceId));
+    const deleteQuerySnapshot = await getDocs(q);
+    const batch = writeBatch(db)
+    deleteQuerySnapshot.forEach(doc => batch.delete(doc.ref));
+    batch.commit()
+
     await thunkAPI.dispatch(loadStructureByUser());
     return 'delete workspace successfully';
 })
-export const updateWorkspace = createAsyncThunk('firestore/updateWorkspace', async(workspace, thunkAPI) => {
+export const updateWorkspace = createAsyncThunk('firestore/updateWorkspace', async (workspace, thunkAPI) => {
     const user = thunkAPI.getState().auth.user;
 
     let q = query(collection(db, "workspaces"), where("id", "==", workspace.id), where("uid", "==", user.uid));
@@ -317,25 +325,48 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
         await thunkAPI.dispatch(loadStructureByUser());
         thunkAPI.dispatch(setCurrentGroup([...currentGroup, newGroup.id]));
 
-        return "create group succuess"
+        return newGroup;
     } catch (e) {
         return e.response;
     }
 })
-export const updateGroup = createAsyncThunk('firestore/updateGroup', async(group, thunkAPI) => {
+export const updateGroup = createAsyncThunk('firestore/updateGroup', async (group, thunkAPI) => {
     const user = thunkAPI.getState().auth.user;
 
     let q = query(collection(db, "groups"), where("id", "==", group.id), where("uid", "==", user.uid));
     const querySnapshot = await getDocs(q);
-
+    const data = querySnapshot.docs[0].data();
     await updateDoc(querySnapshot.docs[0].ref, {
-        name: group.name
+        name: group.name,
+        group: [...data.groups.concat(group.groups)]
     })
 
     await thunkAPI.dispatch(loadStructureByUser());
 
     return 'update group successfully'
 
+})
+export const deleteGroup = createAsyncThunk('firestroe/deleteGroup', async (groupId, thunkAPI) => {
+    const user = thunkAPI.getState().auth.user;
+    let q = query(collection(db, "groups"), where("id", "==", groupId), where("uid", "==", user.uid));
+    let querySnapshot = await getDocs(q);
+    let data = querySnapshot.docs[0].data();
+    let groupsToDelete = data.groups;
+
+    await deleteDoc(querySnapshot.docs[0].ref);
+
+    while (groupsToDelete.length > 0) {
+        groupId = groupsToDelete.pop();
+        q = query(collection(db, "groups"), where("id", "==", groupId), where("uid", "==", user.uid));
+        querySnapshot = await getDocs(q);
+        data = querySnapshot.docs[0].data();
+        groupsToDelete = groupsToDelete.concat(data.groups);
+        await deleteDoc(querySnapshot.docs[0].ref);
+    }
+
+    await thunkAPI.dispatch(loadStructureByUser());
+
+    return 'delete group successfully'
 })
 export const createTab = createAsyncThunk('firestore/createTab', async (tab, thunkAPI) => {
 
@@ -407,6 +438,9 @@ const firestoreSlice = createSlice({
             })
             .addCase(createGroup.fulfilled, (state, action) => {
                 console.log(action);
+                console.log(action.payload);
+                return action.payload;
+
             })
             .addCase(createTab.rejected, (state, action) => {
                 console.log(action);
@@ -430,6 +464,12 @@ const firestoreSlice = createSlice({
                 console.log(action)
             })
             .addCase(deleteWorkspace.rejected, (state, action) => {
+                console.log(action)
+            })
+            .addCase(deleteGroup.fulfilled, (state, action) => {
+                console.log(action)
+            })
+            .addCase(deleteGroup.rejected, (state, action) => {
                 console.log(action)
             })
     }
