@@ -2,73 +2,104 @@ import './SystemMemoryUsage.css';
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { PieChart } from "./PieChart";
-import { IconButton, List, ListItem, ListItemButton, Typography } from "@mui/material";
+import { IconButton, Typography } from "@mui/material";
 import { interpolateColorByIndex } from '../../utils/interpolateColor';
 import CircleIcon from '@mui/icons-material/Circle';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { createRandomUUID } from '../../utils/hash';
-import { fetchTabs } from '../../features/tabs/tabSlice';
+import EnergySavingsLeafOutlinedIcon from '@mui/icons-material/EnergySavingsLeafOutlined';
+import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined';
+import { fetchTabs, freezeChromeTab, closeChromeTab, reloadChromeTab } from '../../features/chromeTabs/chromeTabSlice';
+import { getGroupNameChain } from '../../utils/tabs';
 
 /*global chrome*/
 
 function SystemMemoryUsage() {
   const dispatch = useDispatch();
-  const state = useSelector(state => state.tab);
-  console.log(state);
-  const tabs = state.groups[state.currentGroupId]?.tabs || [];
+  const tabs = useSelector(state => state.chromeTabs).fetchTabs;
 
   useEffect(() => {
     const event = dispatch(fetchTabs());
     return event;
   }, [dispatch]);
 
-  function clickOnOpenedTab(event, windowIndex) {
-    chrome.tabs.highlight({ tabs: windowIndex })
-      .catch((err) => {
-        console.error(err);
-      });
+  function clickOnOpenedTab(event, currentTab) {
+    dispatch(reloadChromeTab(currentTab));
   }
 
-  function closeTab(event, windowIndex) {
-    chrome.tabs.query({ currentWindow: true, index: windowIndex })
-      .then((tabs) => {
-        chrome.tabs.remove(tabs[0].id);
-      })
-      .catch((err) => {
-        console.error(err);
-      })
+  function clickFreezeTab(event, currentTab) {
+    dispatch(freezeChromeTab(currentTab));
+  }
+
+  function clickCloseTab(event, currentTab) {
+    dispatch(closeChromeTab(currentTab));
   }
 
   return (
     <div className="SystemMemoryUsage">
       <div id="system-memeory-usage-title">Current Memory Usage</div>
 
-      <PieChart tabs={tabs}></PieChart>
+      <PieChart></PieChart>
 
-      <List className="tab-list">
+      <ul className="tab-list">
         {tabs.length === 0
-          ? <div id="no-tab-message">No Tabs</div>
-          : tabs.slice().reverse().map((tab, index) => {
+          ? <div id="no-tab-message">Loading...</div>
+          : tabs.filter(tab => tab.status !== "unloaded").reverse().map((tab, index) => {
             return (
-              <ListItem key={`${tab.tabName}-${createRandomUUID()}`} sx={{ columnGap: "3%" }}>
-                <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
-                <ListItemButton className="tab-item" onClick={(event) => clickOnOpenedTab(event, tab.windowIndex)}>
-                  <div className='tab-item-text'>
-                    <Typography variant='body1'>
-                      {tab.tabName}
+              <li key={`${tab.title}-${tab.windowId}-${tab.tabId}`} className='tab-list-item'>
+                <div className='tab-list-content' onClick={(event) => clickOnOpenedTab(event, tab)}>
+                  <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabs.length - 1 - index, tabs.length).join(", ") + ", 1)" }}></CircleIcon>
+                  <div className='tab-list-content-text'>
+                    <Typography variant='body1' noWrap={true}>{tab.alias}</Typography>
+                    <Typography variant="body2" noWrap={true}>
+                      {getGroupNameChain(tab.group).join(" / ")}
                     </Typography>
-                    <div>
-                      {`${state.currentWorkspaceId}/${state.currentGroupId}`}
-                    </div>
                   </div>
-                </ListItemButton>
-                <IconButton onClick={(event) => closeTab(event, tab.windowIndex)}>
-                  <DeleteIcon></DeleteIcon>
-                </IconButton>
-              </ListItem>
+                </div>
+
+                <div className='tab-list-freeze-button-container'>
+                  <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
+                    <PauseOutlinedIcon></PauseOutlinedIcon>
+                  </IconButton>
+                </div>
+
+                <div className='tab-list-delete-button-container'>
+                  <IconButton onClick={(event) => clickCloseTab(event, tab)}>
+                    <DeleteIcon></DeleteIcon>
+                  </IconButton>
+                </div>
+              </li>
             );
           })}
-      </List>
+        {tabs.find(tab => tab.status === "unloaded") === undefined
+          ? <></>
+          : tabs.filter(tab => tab.status === "unloaded").map((tab) => {
+            return (
+              <li key={`${tab.title}-${tab.windowId}-${tab.tabId}`} className='tab-list-item'>
+                <div className='tab-list-content-unload' onClick={(event) => clickOnOpenedTab(event, tab)}>
+                  <EnergySavingsLeafOutlinedIcon sx={{ color: "#53af2e" }}></EnergySavingsLeafOutlinedIcon>
+                  <div className='tab-list-content-text'>
+                    <Typography variant='body1' noWrap={true}>{tab.alias}</Typography>
+                    <Typography variant='body2' noWrap={true}>
+                      {getGroupNameChain(tab.group).join(" / ")}
+                    </Typography>
+                  </div>
+                </div>
+
+                <div className='tab-list-freeze-button-container'>
+                  <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
+                    <PauseOutlinedIcon></PauseOutlinedIcon>
+                  </IconButton>
+                </div>
+
+                <div className='tab-list-delete-button-container'>
+                  <IconButton onClick={(event) => clickCloseTab(event, tab)}>
+                    <DeleteIcon></DeleteIcon>
+                  </IconButton>
+                </div>
+              </li>
+            );
+          })}
+      </ul>
     </div>
   );
 }

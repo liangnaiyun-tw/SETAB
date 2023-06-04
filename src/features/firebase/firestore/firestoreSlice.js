@@ -4,6 +4,8 @@ import {
     collection,
     addDoc,
     query,
+    where,
+    getDocs,
     updateDoc,
     deleteDoc,
     where,
@@ -15,7 +17,6 @@ import app from "../../../shared/Firebase"
 
 import { v4 as uuidv4 } from "uuid";
 import axios from 'axios';
-import { async } from '@firebase/util';
 
 
 const db = getFirestore(app());
@@ -24,8 +25,9 @@ const UNSAVED_WORKSPACE = "Unsaved";
 const unSaveWorkSpace = {
     googleDriveFolderId: "",     // unused
     groups: [],                  // unused
-    id: "",
+    id: uuidv4(),
     name: UNSAVED_WORKSPACE,
+    tabs: [],
     note: [],                    // unused
     uid: ""                     // unused
 }
@@ -35,10 +37,92 @@ const initialState = {
     groups: [],
     tabs: [],
     historys: [],
-    rootDirectory: "",
-    currentWorkspace: "",
-    currentGroup: [],
+    currentWorkspace: unSaveWorkSpace.id,
+    currentGroup: ""
 }
+
+/*Fake Data*/
+// const initialState = {
+//     workspaces: [unSaveWorkSpace,
+//         {
+//             id: "cd363797-b823-4714-aebc-606c1b27f434",
+//             name: "Test Workspace",
+//             googleDriveFolderId: "",
+//             groups: [
+//                 "d35c907e-7757-4185-90ec-695680557414"
+//             ],
+//             notes: [],
+//             uid: ""
+//         }
+//     ],
+//     groups: [
+//         {
+//             id: "d35c907e-7757-4185-90ec-695680557414",
+//             name: "Test Group",
+//             googleDriveFolderId: "",
+//             groups: [
+//                 "2aec38cd-c8f9-49c5-8aa9-88331f5076bb"
+//             ],
+//             histories: [],
+//             notes: [],
+//             tabs: [
+//                 "72c7b6b7-2706-419c-9e09-ab33ac092942",
+//             ],
+//             uid: "",
+//             workspace: "cd363797-b823-4714-aebc-606c1b27f434"
+//         },
+//         {
+//             id: "2aec38cd-c8f9-49c5-8aa9-88331f5076bb",
+//             name: "Dependency Injection",
+//             groups: [],
+//             histories: [],
+//             notes: [],
+//             tabs: [
+//                 "1e72e6a4-7a98-4444-9681-bdd48f2e2197"
+//             ],
+//             uid: "",
+//             workspace: "cd363797-b823-4714-aebc-606c1b27f434"
+//         }
+//     ],
+//     tabs: [
+//         {
+//             id: "72c7b6b7-2706-419c-9e09-ab33ac092942",
+//             title: "SETab - Cloud Firestore - Firebase 控制台",
+//             alias: "SETab - Cloud Firestore - Firebase 控制台",
+//             group: "d35c907e-7757-4185-90ec-695680557414",
+//             status: "complete",
+//             tabIconUrl: "https://www.gstatic.com/mobilesdk/160503_mobilesdk/logo/favicon.ico",
+//             tabUrl: "https://console.firebase.google.com/project/setab-388009/firestore/data/~2Fgroups~2FNfeSrDFueAczGQpFuvqX",
+//             uid: "",
+//             windowId: [
+//                 424340572
+//             ],
+//             tabId: [
+//                 424340932
+//             ]
+//         },
+//         {
+//             id: "1e72e6a4-7a98-4444-9681-bdd48f2e2197",
+//             title: "API reference - Chrome Developers",
+//             alias: "API reference - Chrome Developers",
+//             group: "2aec38cd-c8f9-49c5-8aa9-88331f5076bb",
+//             status: "complete",
+//             tabIconUrl: "https://developer.chrome.com/images/meta/favicon-32x32.png",
+//             tabUrl: "https://developer.chrome.com/docs/extensions/reference/",
+//             uid: "",
+//             windowId: [
+//                 424340572
+//             ],
+//             tabId: [
+//                 424343144
+//             ]
+//         }
+//     ],
+//     historys: [],
+//     rootDirectory: "",
+//     currentWorkspace: "",
+//     currentGroup: [],
+// }
 
 export const loadStructureByUser = createAsyncThunk('firestore/loadStructureByUser', async (_, thunkAPI) => {
 
@@ -383,22 +467,38 @@ export const createTab = createAsyncThunk('firestore/createTab', async (tab, thu
         ...newTab,
     });
 })
-export const moveTabToOtherGroup = createAsyncThunk('firestore/moveTabToOtherGroup', async ({tabId, newGroupId}, thunkAPI) => {
-    try{
-        const {groups, tabs} = thunkAPI.getState().firestore;
+
+export const updateTab = createAsyncThunk('firestore/updateTab', async (tab, thunkAPI) => {
+    const user = thunkAPI.getState().auth.user;
+
+    let q = query(collection(db, "tabs"), where("id", "==", tab.id), where("uid", "==", user.uid));
+    const querySnapshot = await getDocs(q);
+
+    await updateDoc(querySnapshot.docs[0].ref, {
+        ...tab
+    });
+
+    await thunkAPI.dispatch(loadStructureByUser());
+
+    return "Update tab successfully";
+});
+
+export const moveTabToOtherGroup = createAsyncThunk('firestore/moveTabToOtherGroup', async ({ tabId, newGroupId }, thunkAPI) => {
+    try {
+        const { groups, tabs } = thunkAPI.getState().firestore;
 
         const tab = tabs.filter(tab => tab.id === tabId)[0];
-        const originGroup = groups.filter(group => group.id===tabs.group)[0];
-        const newGroup = groups.filter(group => group.id===newGroupId)[0];
-    
+        const originGroup = groups.filter(group => group.id === tabs.group)[0];
+        const newGroup = groups.filter(group => group.id === newGroupId)[0];
+
         let tabQuery = query(collection(db, "tabs"), where("id", "==", tabId));
         let originGroupQuery = query(collection(db, "groups", where("id", "==", tab.group)));
         let newGroupQuery = query(collection(db, "groups"), where("id", "==", newGroupId));
-        
+
         const tabQuerySnapshot = await getDocs(tabQuery);
         const originGroupQuerySnapshot = await getDocs(originGroupQuery);
         const newGroupQuerySnapshot = await getDocs(newGroupQuery);
-    
+
         await updateDoc(tabQuerySnapshot.docs[0].ref, {
             ...tab,
             group: newGroup.id
@@ -411,13 +511,13 @@ export const moveTabToOtherGroup = createAsyncThunk('firestore/moveTabToOtherGro
             ...newGroup,
             tabs: [tabId, ...newGroup.tabs]
         })
-    
+
         await thunkAPI.dispatch(loadStructureByUser());
 
-    } catch(e) {
+    } catch (e) {
         return e.response;
     }
-    
+
 })
 
 const firestoreSlice = createSlice({
@@ -439,6 +539,10 @@ const firestoreSlice = createSlice({
         },
         setCurrentGroup: (state, action) => {
             state.currentGroup = action.payload;
+        },
+        updateUnsavedWorkspace: (state, action) => {
+            /*The first workspace should be always "Unsaved"*/
+            state.workspaces[0].tabs = action.payload.tabs;
         }
     },
     extraReducers: (builder) => {
@@ -482,6 +586,12 @@ const firestoreSlice = createSlice({
             .addCase(createTab.fulfilled, (state, action) => {
                 console.log(action);
             })
+            .addCase(updateTab.fulfilled, (state, action) => {
+                console.log(action);
+            })
+            .addCase(updateTab.rejected, (state, action) => {
+                console.log(action);
+            })
             .addCase(updateUserWorkspaces.fulfilled, (state, action) => {
                 console.log(action)
             })
@@ -515,5 +625,5 @@ const firestoreSlice = createSlice({
     }
 })
 
-export const { addAllStructure, setCurrentWorkspace, setRootDirectory, setCurrentGroup } = firestoreSlice.actions
+export const { addAllStructure, setCurrentWorkspace, setRootDirectory, setCurrentGroup, updateUnsavedWorkspace } = firestoreSlice.actions
 export default firestoreSlice.reducer

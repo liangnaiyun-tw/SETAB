@@ -1,4 +1,74 @@
-.tab-modal-title {
+#modal-box {
+  overflow-y: auto;
+}
+
+.modal-title {
   display: flex;
   column-gap: 2%;
+}
+
+.modal-title canvas {
+  width: 140px !important;
+  min-width: 140px;
+  max-width: 175px;
+  height: 140px !important;
+  cursor: pointer;
+}
+
+.group-name-chain-breadcrumb-item {
+  border-radius: 80px;
+  padding-left: 10px;
+  padding-right: 10px;
+  transition-duration: 0.2s;
+  cursor: pointer;
+}
+
+.group-name-chain-breadcrumb-item:hover {
+  background-color: darkgray;
+}
+
+.modal-group-item,
+.modal-tab-item {
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  column-gap: 2%;
+  margin-bottom: 1%;
+}
+
+.modal-list-content {
+  display: flex;
+  align-items: center;
+  column-gap: 2%;
+  width: 99%;
+  min-width: 500px;
+  border: 2px solid darkgray;
+  border-radius: 0.5rem;
+  transition-duration: 0.2s;
+}
+
+.modal-list-content-unload {
+  display: flex;
+  align-items: center;
+  column-gap: 2%;
+  width: 99%;
+  min-width: 500px;
+  border: 2px solid darkgray;
+  border-radius: 0.5rem;
+  background-color: beige;
+  filter: brightness(0.6);
+  transition-duration: 0.2s;
+}
+
+.modal-list-content:hover,
+.modal-list-content-unload:hover {
+  border: 2px solid black;
+  cursor: pointer
+}
+
+.modal-list-content-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 90%;
 }

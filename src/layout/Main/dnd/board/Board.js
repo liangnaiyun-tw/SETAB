@@ -26,7 +26,7 @@ const InitSturctureList = {
           id: '4',
           content: "Haven't slept for a solid 83 hours, but, yeah, I'm good.",
           author: "Shang",
-        },{
+        }, {
           id: '5',
           content: "Haven't slept for a solid 83 hours, but, yeah, I'm good.",
           author: "Shang",
@@ -37,7 +37,7 @@ const InitSturctureList = {
       id: '2',
       content: "Haven't slept for a solid 83 hours, but, yeah, I'm good.",
       author: "Shang",
-    },{
+    }, {
       id: '3',
       content: "Haven't slept for a solid 83 hours, but, yeah, I'm good.",
       author: "Shang",
@@ -69,12 +69,12 @@ const Board = ({
   withScrollableColumns
 }) => {
   const { currentWorkspace, currentGroup, workspaces, groups, tabs } = useSelector((store) => store.firestore)
-  
+
   const [structureList, setStructureList] = useState(InitSturctureList);
 
   const [columns, setColumns] = useState(initial);
-  
-  
+
+
   console.log('columns', columns)
 
   const [ordered, setOrdered] = useState(Object.keys(initial));
@@ -145,16 +145,16 @@ const Board = ({
 
   useEffect(() => {
     const newColumns = {};
-    if(currentWorkspace){
+    if (currentWorkspace) {
       let workspaceGroups = groups.filter(group => group.workspace === currentWorkspace);
       workspaceGroups.forEach(g => {
-        newColumns[g.name] = [{id: g.id, content: '123'}];
+        newColumns[g.name] = [{ id: g.id, content: '123' }];
       });
       console.log('newColumns', newColumns)
       setColumns(newColumns);
       setOrdered(Object.keys(newColumns))
     }
-  }, [workspaces, currentWorkspace])
+  }, [workspaces, groups, currentWorkspace])
 
   return (
     <>

@@ -7,7 +7,7 @@ import dndReducer from '../features/dnd/DndSlice';
 
 const store = configureStore({
   reducer: {
-    tab: tabReducer,
+    chromeTabs: chromeTabReducer,
     note: noteReducer,
     auth: authReducer,
     firestore: firestoreReducer,

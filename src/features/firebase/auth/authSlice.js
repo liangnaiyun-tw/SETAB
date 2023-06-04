@@ -1,5 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, getRedirectResult } from "firebase/auth";
+import axios from 'axios';
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
+import User from '../../../interface/User';
+
+/*global chrome*/
 
 const initialState = {
     isLoading: false,
@@ -21,31 +25,61 @@ export const initLogin = createAsyncThunk('auth/initLogin', async (_, thunkAPI) 
     const auth = getAuth();
 
     onAuthStateChanged(auth, (user) => {
+        chrome.identity.getAccounts((account) => {
+            console.log(account);
+        })
         if (user) {
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    const credential = GoogleAuthProvider.credentialFromResult(result);
-                    const accessToken = credential?.accessToken;
-                    const user = result.user;
-                    console.log(user);
-                    console.log(accessToken);
+            let accessToken;
+            chrome.identity.getAuthToken({ interactive: true }, function (token) {
+                console.log(token);
+                accessToken = token;
+                console.log(user);
+                console.log(accessToken);
+                thunkAPI.dispatch(setAuth({ user, accessToken }));
+                thunkAPI.dispatch(setLoginStatus(true));
+            });
+            axios.get('https://people.googleapis.com/v1/people/me', {
+                headers: {
+                    "Authorization": "Bearer " + accessToken,
+                    "Content-Type": "application/json"
+                }
+            }).then((response) => {
+                let data = response.data;
+                user.uid = data.metadata.source[0].id;
+                user.uid = data.names[0].displayName;
+                user.uid = data.photos[0].url;
+            }).catch((err) => {
+                console.error(err);
+            });
+        } else {
+            let accessToken;
+            let user = User;
+            chrome.identity.getAuthToken({ interactive: true }, function (token) {
+                accessToken = token;
+                axios.get('https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses,metadata,photos', {
+                    headers: {
+                        "Authorization": "Bearer " + accessToken,
+                    }
+                }).then((response) => {
+                    let data = response.data;
+                    console.log(data);
+                    user = {
+                        ...User,
+                        uid: data.metadata.sources[0].id,
+                        displayName: data.names[0].displayName,
+                        photoUrl: data.photos[0].url
+                    };
+                    console.log(user, accessToken);
                     thunkAPI.dispatch(setAuth({ user, accessToken }));
                     thunkAPI.dispatch(setLoginStatus(true));
 
-                })
-                .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    const email = error.email;
-                    thunkAPI.dispatch(setLoginStatus(false));
-                    const credential = GoogleAuthProvider.credentialFromError(error);
-                })
-                .finally(() => {
-                    thunkAPI.dispatch(setLoadingStatus(false));
-                })
-        } else {
-            thunkAPI.dispatch(setLoginStatus(false))
-            thunkAPI.dispatch(setAuth({ user: undefined, accessToken: undefined }))
+                }).catch((err) => {
+                    console.error(err);
+                    thunkAPI.dispatch(setLoginStatus(false))
+                    thunkAPI.dispatch(setAuth({ user: undefined, accessToken: undefined }))
+                });
+
+            });
         }
     });
 })
@@ -56,7 +90,7 @@ export const login = createAsyncThunk('auth/login', async (_, thunkAPI) => {
     thunkAPI.dispatch(setLoadingStatus(true));
 
     if (!thunkAPI.getState().auth.isLogin) {
-        signInWithPopup(auth, provider)
+        await signInWithPopup(auth, provider)
             .then((result) => {
                 const credential = GoogleAuthProvider.credentialFromResult(result);
                 const accessToken = credential?.accessToken;
@@ -65,7 +99,6 @@ export const login = createAsyncThunk('auth/login', async (_, thunkAPI) => {
                 console.log(accessToken);
                 thunkAPI.dispatch(setAuth({ user, accessToken }));
                 thunkAPI.dispatch(setLoginStatus(true));
-
             })
             .catch((error) => {
                 const errorCode = error.code;

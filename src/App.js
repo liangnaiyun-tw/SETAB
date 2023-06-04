@@ -72,12 +72,15 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(initLogin());
-  }, [])
+    if (!user) {
+      dispatch(initLogin());
+    }
+  }, [dispatch, user])
 
   useEffect(() => {
     dispatch(loadStructureByUser());
-  }, [user])
+  }, [dispatch, user])
+
 
   return (
     <>

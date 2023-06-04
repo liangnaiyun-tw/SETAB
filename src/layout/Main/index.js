@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import MainTab from "../Component/MainTab/MainTab"
 import "./index.css"
 
-import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import { useSelector, useDispatch } from "react-redux";
@@ -47,7 +46,7 @@ const Main = ({ cssMain, styleMain, token }) => {
     <>
       <div className={cssMain} style={styleMain}>
         <div role="presentation" onClick={handleClick}>
-          <Breadcrumbs aria-label="breadcrumb" className="Breadcrumbs" style={{color: "whitesmoke", fontSize: "large", marginBottom: "1rem"}}>
+          <Breadcrumbs aria-label="breadcrumb" className="Breadcrumbs" style={{ color: "whitesmoke", fontSize: "large", marginBottom: "1rem" }}>
             {
 
               <Link onClick={() => { handleBreadCrumbClick(currentWorkspace, true) }} underline="hover" color="white" href="/">

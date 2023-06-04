@@ -5,8 +5,6 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { CardHeader } from '@mui/material';
-import { Draggable } from "react-beautiful-dnd";
 import MainList from '../MainList';
 
 const bull = (

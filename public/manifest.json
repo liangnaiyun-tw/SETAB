@@ -8,7 +8,18 @@
   },
   "action": {},
   "options_page": "index.html",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkUoxULC5+lJDmYBj1+QSWRIO5oXXNSAwCwu+IyCmFlLrVJVNTZUc5RXnQbZt8U/ogATlk+/S5ojKMnVdyzd/ydNmK0JyaYXkowWALCp4yixIPC4foxwl6OijAjXUpE2+qPzDUOWJkZ+ujlpchOuNtrLy9xocG+A/04z7kjUdSU//cBuFjMi+UM+SlWMjsF0YalfhETiZGM6H+wJJCwcPglknlvWXXWeYiP7g+6o0acscWVjfSP6AxxoSJBYNQZcLSyJoorit4NwhyGCfbkcZoqH6L67DFCMnX4y7v1pV1i7U2vltajCyJPkIMbFJdVr5mvuMDkXPoWrw5BXfCKa8AwIDAQAB",
+  "oauth2": {
+    "client_id": "1001399891070-hrc7bo6os79o9id3uin7lctonplghk5q.apps.googleusercontent.com",
+    "scopes": [
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/drive",
+      "https://www.googleapis.com/auth/contacts.readonly"
+    ]
+  },
   "permissions": [
+    "identity",
     "processes",
     "tabs",
     "activeTab"

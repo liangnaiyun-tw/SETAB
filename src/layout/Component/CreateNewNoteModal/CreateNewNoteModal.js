@@ -5,7 +5,7 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { styled } from '@mui/material/styles';
 import MuiGrid from '@mui/material/Grid';
-import { Dialog, Button, Modal, Box, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Divider } from "@mui/material";
+import { Dialog, Button, Modal, Box, DialogContent, DialogContentText, DialogTitle, TextField, Divider } from "@mui/material";
 import ButtonGroup from '@mui/material/ButtonGroup';
 import ArticleIcon from '@mui/icons-material/Article';
 import SlideshowIcon from '@mui/icons-material/Slideshow';
@@ -157,6 +157,5 @@ const CreateNewNoteModal = ({ token, onPickNewNote }) => {
         </div>
     );
 };
-
 
 export default CreateNewNoteModal;

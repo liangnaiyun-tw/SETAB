@@ -22,11 +22,11 @@ export default function Note() {
 
     useEffect(() => {
         dispatch(getNotes(accessToken));
-    }, [])
+    }, [accessToken, dispatch])
 
     useEffect(() => {
         dispatch(getNotes(accessToken));
-    }, [currentWorkspace, currentGroup])
+    }, [currentWorkspace, currentGroup, accessToken, dispatch])
 
     const onEdit = (alternateLink) => {
         dispatch(handleEdit(alternateLink));
@@ -36,7 +36,7 @@ export default function Note() {
         dispatch(pickNewNote({ newNoteDetail, accessToken }));
     }
 
-    
+
 
     return (
 

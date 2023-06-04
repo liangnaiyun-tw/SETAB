@@ -1,39 +1,275 @@
+import { Pie } from 'react-chartjs-2';
+import { interpolateColorByIndex } from '../../utils/interpolateColor';
+import { getGroupIdChain, getGroupNameChain } from '../../utils/tabs';
 import './GroupModal.css';
-import { Box, Modal, Typography } from "@mui/material";
+import { Box, IconButton, Modal, Typography } from "@mui/material";
+import CircleIcon from '@mui/icons-material/Circle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EnergySavingsLeafOutlinedIcon from '@mui/icons-material/EnergySavingsLeafOutlined';
+import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined';
+import Breadcrumb from '@mui/material/Breadcrumbs';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { v4 as uuidv4 } from 'uuid';
+import { closeChromeTab, freezeChromeTab, reloadChromeTab } from '../../features/chromeTabs/chromeTabSlice';
+
+/*global chrome*/
+
 
 function GroupModal(props) {
+  const dispatch = useDispatch();
+  const fetchTabs = useSelector(state => state.chromeTabs).fetchTabs;
+  const firestore = useSelector(state => state.firestore);
+
   const modalOpen = props.modalOpen;
   const selectedItem = props.selectedItem;
+  const [items, setItems] = useState([]);
+  const [tabsInGroup, setTabsInGroup] = useState([]);
 
-  let renderItem;
-  if (selectedItem?.tabs) {
+  useEffect(() => {
+    const newItems = [];
+    const newTabs = [];
+    if (firestore.workspaces.find(workspace => workspace.id === selectedItem)
+      || firestore.groups.find(group => group.id === selectedItem)) {
 
-  } else if (selectedItem?.groups) {
+      fetchTabs.forEach((tab) => {
+        let groupIdChain = getGroupIdChain(tab.group);
+        let groupNameChain = getGroupNameChain(tab.group);
+        if (groupIdChain.length >= props.chartLevel && groupIdChain[props.chartLevel - 1] === selectedItem) {
+          if (groupIdChain.length === props.chartLevel) {
+            newItems.push({
+              ...tab,
+              totalMemory: tab.privateMemory
+            });
+          } else {
+            if (!newItems.find((item) => item.name === groupNameChain[props.chartLevel])) {
+              newItems.push({
+                id: groupIdChain[props.chartLevel],
+                name: groupNameChain[props.chartLevel],
+                tabs: [],
+                totalMemory: 0
+              });
+            }
+            newItems.find((item) => item.id === groupIdChain[props.chartLevel]).totalMemory += tab.privateMemory;
+            newItems.find((item) => item.id === groupIdChain[props.chartLevel]).tabs.push(tab);
+          }
+          newTabs.push(tab);
+        }
+      });
+    }
+    newItems.sort((a, b) => a.totalMemory - b.totalMemory);
+    newTabs.sort((a, b) => a.privateMemory - b.privateMemory);
 
-  } else if (selectedItem) {
+    const backgroundColors = newItems.map((item, index) => {
+      return "rgba(" + interpolateColorByIndex(index, newItems.length).join(", ") + ", 1)";
+    });
+    const borderColors = newItems.map(() => {
+      return "rgb(255, 255, 255)";
+    });
+
+    setTabsInGroup(newTabs);
+    setItems(newItems);
+    setBackgroundColors(backgroundColors);
+    setBorderColors(borderColors);
+  }, [fetchTabs, firestore, selectedItem, props.chartLevel]);
+
+
+  const totalMemory = items.reduce((sum, item) => sum + item.totalMemory, 0);
+  const [backgroundColors, setBackgroundColors] = useState([]);
+  const [borderColors, setBorderColors] = useState([]);
+  let groupNameChain = [];
+  if (tabsInGroup.length > 0) {
+    groupNameChain = getGroupNameChain(tabsInGroup[0].group).slice(0, props.chartLevel);
+  }
+
+  const chartData = {
+    datasets: [
+      {
+        data: items.map((item) => item.totalMemory / totalMemory),
+        borderWidth: 2,
+        backgroundColor: backgroundColors,
+        borderColor: borderColors,
+      }
+    ]
+  };
+
+  function switchToTab(currentTab) {
+    dispatch(reloadChromeTab(currentTab));
+  }
+
+  function selectItem(itemId) {
+    let newHistory = [...props.selectedItemHistory];
+    let newChartLevel = props.chartLevel + 1;
+    if (props.selectedItemHistory.length < newChartLevel) {
+      newHistory.push(itemId);
+    } else {
+      newHistory[newChartLevel - 1] = itemId;
+    }
+    props.setSelectedItem(itemId);
+    props.setSelectedItemHistory(newHistory);
+    props.setChartLevel(newChartLevel)
+  }
+
+  function clickFreezeTab(event, currentTab) {
+    dispatch(freezeChromeTab(currentTab));
+  }
+
+  function clickCloseTab(event, currentTab) {
+    dispatch(closeChromeTab(currentTab));
+  }
+
+  function modalClickEvent(event, elements) {
+    if (elements.length > 0) {
+      const item = items[elements[0].index];
+      if (fetchTabs.find(tab => tab.id === item.id)) {
+        let tab = fetchTabs.find(tab => tab.id === item.id);
+        switchToTab(tab);
+      } else {
+        selectItem(item.id);
+      }
+    }
+  }
+
+  function breadcrumbClickEvent(event, index) {
+    props.setSelectedItem(props.selectedItemHistory[index]);
+    props.setChartLevel(index + 1);
+  }
+
+  let renderItem = <></>;
+  if (selectedItem &&
+    (firestore.workspaces.find(workspace => workspace.id === selectedItem)
+      || firestore.groups.find(group => group.id === selectedItem))) {
     renderItem =
       <>
-        <div className="tab-modal-title">
-          {selectedItem.tabIconURL
-            ? <img src={selectedItem.tabIconURL} alt="tab icon"></img>
-            : <></>}
-          <Typography variant="h6">
-            {selectedItem.tabName}
-          </Typography>
+        <div className='modal-title'>
+          <Pie id="modal-pie-chart"
+            data={chartData}
+            options={{
+              onClick: modalClickEvent,
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    label: (context) => {
+                      const dataIndex = context.dataIndex;
+                      const item = items[dataIndex];
+                      const label = item.name ? item.name : item.alias ? item.alias : item.title;
+                      const value = (context.formattedValue * 100).toFixed(1);
+
+                      const maxLabelLength = 15;
+                      if (label.length > maxLabelLength) {
+                        const words = label.split("");
+                        let line = "";
+                        const wrappedLabel = words.reduce((result, letter) => {
+                          if (line.length + 1 <= maxLabelLength) {
+                            line += letter;
+                          } else {
+                            result.push(line);
+                            line = letter;
+                          }
+                          return result;
+                        }, []);
+                        wrappedLabel.push(line + `: ${value}%`);
+                        return wrappedLabel;
+                      }
+                      return `${label}: ${value}%`;
+                    }
+                  }
+                }
+              }
+            }}
+          />
+
+          <div className='modal-title-text'>
+            <Breadcrumb aria-label="breadcrumb" variant="h6" separator="/">
+              {groupNameChain.map((name, index) => {
+                return (
+                  <Typography className='group-name-chain-breadcrumb-item' variant='h6' noWrap={false} key={`${name}-${uuidv4()}`} onClick={(event) => breadcrumbClickEvent(event, index)}>
+                    {name}
+                  </Typography>
+                );
+              })}
+            </Breadcrumb>
+            <Typography variant='subtitle1'>
+              Memory Usage: {`${Math.round(totalMemory / 1024)} KB`}
+            </Typography>
+          </div>
         </div>
 
-        <div className="tab-modal-text">
+        <div className='modal-item-list'>
+          <Typography variant='h5'>Groups</Typography>
           <ul>
-            <li>
-              <Typography variant='subtitle1'>
-                URL: {selectedItem.tabURL}
-              </Typography>
-            </li>
-            <li>
-              <Typography variant="subtitle1">
-                Memory Usage: {`${Math.round(selectedItem.privateMemory / 1024)} KB`}
-              </Typography>
-            </li>
+            {items.filter((item) => item.name).slice().reverse().map((group, index) => {
+              return (
+                <li className='modal-group-item' key={`${group.name}-${uuidv4()}`}>
+                  <div className='modal-list-content' onClick={(e) => { selectItem(group.id) }}>
+                    <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(items.length - 1 - index, items.length).join(", ") + ", 1)" }}></CircleIcon>
+                    <div className='modal-list-content-text'>
+                      <Typography variant='h6' noWrap={true}>{group.name}</Typography>
+                      <Typography variant='body2' noWrap={true}>Memory Usage: {(group.totalMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(group.totalMemory / 1024)} KB)</Typography>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <Typography variant='h5'>Tabs</Typography>
+          <ul>
+            {tabsInGroup.filter(tab => tab.status === "complete").reverse().map((tab, index) => {
+              return (
+                <li className='modal-tab-item' key={`${tab.title}-${tab.windowId}-${tab.tabId}`}>
+                  <div className='modal-list-content' onClick={(e) => { switchToTab(tab) }}>
+                    <CircleIcon sx={{ color: "rgba(" + interpolateColorByIndex(tabsInGroup.length - 1 - index, tabsInGroup.length).join(", ") + ", 1)" }}></CircleIcon>
+                    <div className='modal-list-content-text'>
+                      <Typography variant='h6' noWrap={true}>{tab.alias}</Typography>
+                      <Typography variant="subtitle2" noWrap={true}>
+                        {getGroupNameChain(tab.group).join(" / ")}
+                      </Typography>
+                      <Typography variant='body2'>Memory Usage: {(tab.privateMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(tab.privateMemory / 1024)} KB)</Typography>
+                    </div>
+                  </div>
+
+                  <div className='modal-freeze-button-container'>
+                    <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
+                      <PauseOutlinedIcon></PauseOutlinedIcon>
+                    </IconButton>
+                  </div>
+
+                  <div className='modal-delete-button-container'>
+                    <IconButton onClick={(event) => clickCloseTab(event, tab)}>
+                      <DeleteIcon></DeleteIcon>
+                    </IconButton>
+                  </div>
+                </li>
+              );
+            })}
+            {tabsInGroup.filter(tab => tab.status !== "complete").reverse().map((tab, index) => {
+              return (
+                <li className='modal-tab-item' key={`${tab.title}-${tab.windowId}-${tab.tabId}`}>
+                  <div className='modal-list-content-unload' onClick={(e) => { switchToTab(tab) }}>
+                    <EnergySavingsLeafOutlinedIcon sx={{ color: "#53af2e" }}></EnergySavingsLeafOutlinedIcon>
+                    <div className='modal-list-content-text'>
+                      <Typography variant='h6' noWrap={true}>{tab.alias}</Typography>
+                      <Typography variant="subtitle2" noWrap={true}>
+                        {getGroupNameChain(tab.group).join(" / ")}
+                      </Typography>
+                      <Typography variant='body2'>Memory Usage: {(tab.privateMemory / totalMemory * 100).toFixed(1)}% ({Math.floor(tab.privateMemory / 1024)} KB)</Typography>
+                    </div>
+                  </div>
+
+                  <div className='modal-freeze-button-container'>
+                    <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
+                      <PauseOutlinedIcon></PauseOutlinedIcon>
+                    </IconButton>
+                  </div>
+
+                  <div className='modal-delete-button-container'>
+                    <IconButton onClick={(event) => clickCloseTab(event, tab)}>
+                      <DeleteIcon></DeleteIcon>
+                    </IconButton>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </>
@@ -42,21 +278,26 @@ function GroupModal(props) {
   return (
     <Modal
       open={modalOpen}
-      onClose={() => props.setModalOpen(false)}
+      onClose={() => {
+        props.setModalOpen(false);
+        props.setSelectedItem(null);
+      }}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-      <Box sx={{
-        position: 'absolute',
-        width: '80%',
-        height: '80%',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        bgcolor: 'beige',
-        boxShadow: 24,
-        p: 4
-      }}>
+      <Box
+        id='modal-box'
+        sx={{
+          position: 'absolute',
+          width: '80%',
+          height: '80%',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          bgcolor: 'beige',
+          boxShadow: 24,
+          p: 4
+        }}>
         {selectedItem && (
           <div className="tab-modal-content">
             {renderItem}
