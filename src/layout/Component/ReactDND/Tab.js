@@ -7,7 +7,7 @@ import { setStructure } from "../../../features/dnd/DndSlice";
 import { useSelector, useDispatch } from 'react-redux';
 
 
-const Tab = ({tab}) => {
+const Tab = ({ tab }) => {
 
     const { structure } = useSelector(store => store.dnd);
 
@@ -16,7 +16,7 @@ const Tab = ({tab}) => {
 
     const [{ isDragging }, drag] = useDrag({
         type: ItemTypes.Tab,
-        item: () => ({...tab}),
+        item: () => ({ ...tab }),
         collect: (monitor) => ({
             isDragging: monitor.isDragging
         })
@@ -26,7 +26,7 @@ const Tab = ({tab}) => {
 
     const findElement = (id, parent) => {
 
-        
+
     }
 
     const [{ isOver, canDrop }, drop] = useDrop({
@@ -36,8 +36,8 @@ const Tab = ({tab}) => {
             let droppedTab = newStructure[tab.id];
             let currentGroup = newStructure[tab.group];
 
-            if(monitor.isOver({shallow: true})){
-                if(item.type === 'group'){
+            if (monitor.isOver({ shallow: true })) {
+                if (item.type === 'group') {
                     let originGroup = newStructure[item.parent];
                     let draggedGroup = newStructure[item.id];
                     
@@ -100,7 +100,7 @@ const Tab = ({tab}) => {
                 dispatch(setStructure(newStructure));
 
             }
-            
+
             // if(dropped) return;
             // case 1 item is tab
             // case 1-1 same group
@@ -129,8 +129,8 @@ const Tab = ({tab}) => {
 
 
     return (
-        <div className='TabCard' ref={attachRef} style={{backgroundColor: `${isDragging? "whitesmoke": "white"}`}}>
-            {isDragging?tab.title:"null"}
+        <div className='TabCard' ref={attachRef} style={{ backgroundColor: `${isDragging ? "whitesmoke" : "white"}` }}>
+            {isDragging ? tab.title : "null"}
         </div>
     );
 }
