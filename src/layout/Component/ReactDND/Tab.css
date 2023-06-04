@@ -1,6 +1,26 @@
-.TabCard{
-    /* height: 10vh; */
-    /* width: 100%; */
-    background-color: whitesmoke;
-    border-radius: 3px;
+.TabCard {
+    border-radius: 5px;
+}
+
+.TabCard[data-unsaved="true"] {
+    width: fit-content;
+    padding-right: 3vw;
+}
+
+.TabCard[data-status="freeze"] {
+    filter: brightness(0.6);
+}
+
+.TabCard[data-status="close"] {
+    filter: brightness(0.2);
+}
+
+.tab-card-content,
+.tab-card-content-2 {
+    display: flex;
+    column-gap: 5%;
+}
+
+.tab-card-content[data-unsaved="true"] {
+    white-space: nowrap;
 }

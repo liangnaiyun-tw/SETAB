@@ -35,8 +35,8 @@ async function getMemory(thunkAPI) {
       group: tabInFirebase ? tabInFirebase.group : thunkAPI.getState().firestore.workspaces[0].id,
       tabId: tab.id,
       windowId: tab.windowId,
-      tabUrl: tab.url ? tab.url : tab.pendingUrl,
-      tabIconUrl: tab.favIconUrl,
+      tabUrl: tab.url && tab.url.length > 0 ? tab.url : tab.pendingUrl,
+      tabIconUrl: tab.favIconUrl && tab.favIconUrl.length > 0 ? tab.favIconUrl : "",
       privateMemory: 0,
       windowIndex: tab.index,
       uid: thunkAPI.getState().firestore.user // TODO: Change user to uid
