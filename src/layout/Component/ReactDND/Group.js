@@ -13,6 +13,7 @@ import { ItemTypes } from './ItemType';
 import { useSelector, useDispatch } from 'react-redux';
 import { setStructure } from '../../../features/dnd/DndSlice';
 import { backgroundColor } from '@xstyled/styled-components';
+import { moveTabToOtherGroup } from '../../../features/firebase/firestore/firestoreSlice';
 // import { TroubleshootTwoTone } from '@mui/icons-material';
 
 export const Group = ({ group, allExpaned }) => {
@@ -39,7 +40,7 @@ export const Group = ({ group, allExpaned }) => {
 
     const [{ isOver, canDrop }, drop] = useDrop({
         accept: [ItemTypes.Tab, ItemTypes.Group],
-        drop: (item, monitor) => {
+        drop: async  (item, monitor) => {
 
             let newStructure = JSON.parse(JSON.stringify(structure));
             let droppedGroup = newStructure[group.id];
@@ -74,6 +75,7 @@ export const Group = ({ group, allExpaned }) => {
                         for (let i=0; i<droppedGroup.childs.length; i++){
                             newStructure[droppedGroup.childs[i]].index = i;
                         }
+                        // await dispatch(updateGroupToGroup());
                     }
 
                 } else {
@@ -104,6 +106,9 @@ export const Group = ({ group, allExpaned }) => {
                         for (let i=0; i<droppedGroup.childs.length; i++){
                             newStructure[droppedGroup.childs[i]].index = i;
                         }
+                        let tabId = draggedTab.id;
+                        let newGroupId = droppedGroup.id
+                        dispatch(moveTabToOtherGroup({tabId, newGroupId}));
                     }
                 }
                 dispatch(setStructure(newStructure));
@@ -128,14 +133,14 @@ export const Group = ({ group, allExpaned }) => {
 
     return (
         <Paper ref={attachRef} index={group.index} className='Paper'>
-            <Accordion className='Column' onDragOver={() => { setExpaned(true) }} onDragLeave={() => { setExpaned(false) }} onMouseOver={() => { setExpaned(true) }} onMouseLeave={() => { setExpaned(false) }} expanded={expaned} sx={{ minHeight: `${group.childs.length * 50 + 80}` }} >
+            <Accordion className='Column' onDragOver={() => { setExpaned(true) }} onDragLeave={() => { setExpaned(false) }} onMouseOver={() => { setExpaned(true) }}  expanded={expaned} sx={{ minHeight: `${group.childs.length * 50 + 80}` }} >
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography>{group.name}</Typography>
                 </AccordionSummary>
                 <AccordionDetails style={{backgroundColor: "white"}}>
                     {
                         group.childs.map((child) =>
-                            structure[child].type === 'group' ?
+                            structure[child]?.type === 'group' ?
                                 <Group parentGroup={group} group={structure[child]} allExpaned={allExpaned} /> :
                                 <Tab group={group} tab={structure[child]} />
                         )

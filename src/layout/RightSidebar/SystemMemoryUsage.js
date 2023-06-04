@@ -87,13 +87,13 @@ function SystemMemoryUsage() {
 
                 <div className='tab-list-freeze-button-container'>
                   <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
-                    <PauseOutlinedIcon></PauseOutlinedIcon>
+                    <PauseOutlinedIcon color="action"></PauseOutlinedIcon>
                   </IconButton>
                 </div>
 
                 <div className='tab-list-delete-button-container'>
                   <IconButton onClick={(event) => clickCloseTab(event, tab)}>
-                    <DeleteIcon></DeleteIcon>
+                    <DeleteIcon color="error"></DeleteIcon>
                   </IconButton>
                 </div>
               </li>

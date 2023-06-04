@@ -66,9 +66,8 @@ const ReactDND = () => {
 
     newStructure.columns = newStructure[newRoot.id].groups.length;
     createStructure(newStructure, newStructure[newRoot.id]);
-    console.log(newStructure);
     dispatch(setStructure(newStructure));
-  }, [currentWorkspace, currentGroup])
+  }, [currentWorkspace, currentGroup, workspaces, groups, tabs]);
 
   useEffect(() => {
     let newRoot = {};
@@ -142,28 +141,29 @@ const ReactDND = () => {
           let originParentGroup = newStructure[item.parent];
           let draggedGroup = newStructure[item.id];
 
-          if (originParentGroup.id === newStructure.id) {
-            newStructure.childs.splice(draggedGroup.index, 1);
-            newStructure.childs.splice(0, 0, draggedGroup);
-            for (let i = 0; i < newStructure.childs.length; i++) {
-              newStructure.childs[i].index = i;
+          if (originParentGroup.id === newStructure[newStructure.root].id) {
+            originParentGroup.childs.splice(draggedGroup.index, 1);
+            originParentGroup.childs.splice(0, 0, draggedGroup);
+            for (let i = 0; i < originParentGroup.childs.length; i++) {
+              originParentGroup.childs[i].index = i;
             }
           } else {
             originParentGroup.childs = originParentGroup.childs.filter(child => child !== item.id);
             originParentGroup.groups = originParentGroup.groups.filter(group => group !== item.id);
 
-            draggedGroup.parent = newStructure.id;
-            newStructure.childs = [draggedGroup.id, ...newStructure.childs];
+            draggedGroup.parent = newStructure[newStructure.root].id;
+            newStructure[newStructure.root].childs = [draggedGroup.id, ...newStructure[newStructure.root].childs];
             for (let i = 0; i < originParentGroup.childs.length; i++) {
-              originParentGroup.childs[i].index = i;
+              newStructure[originParentGroup.childs[i]].index = i;
             }
-            for (let i = 0; i < newStructure.childs.length; i++) {
-              newStructure.childs[i].index = i;
+            for (let i = 0; i < newStructure[newStructure.root].childs.length; i++) {
+              newStructure[newStructure[newStructure.root].childs[i]].index = i;
             }
           }
 
         }
         dispatch(setStructure(newStructure));
+        // await dispatch(updateGroupToGroup({originParentGroup, }));
       }
     },
     canDrop: (item, monitor) => {
@@ -186,7 +186,7 @@ const ReactDND = () => {
   return (
     <div className="wrapper">
       <div className="board">
-        <DndProvider backend={HTML5Backend} >
+        <DndProvider backend={HTML5Backend} style={{ width: `${structure.columns!==undefined? `${structure.columns * 275}px` : '100%'}` }}>
           <Masonry columns={structure.columns} spacing={1} useRef={drop}>
             {structure[structure.root]?.childs.map((child) => {
               return structure[child].type === 'group' ?
@@ -211,7 +211,7 @@ const ReactDND = () => {
               key={action.name}
               icon={action.icon}
               tooltipTitle={action.name}
-              onClick={() => { handleClose(); action.name === 'expaned' ? modalGlobalHandle(true) : modalGlobalHandle(false) }}
+              onClick={() => { handleClose(); action.name === 'expand' ? modalGlobalHandle(true) : modalGlobalHandle(false) }}
             />
           ))}
         </SpeedDial>
@@ -222,72 +222,3 @@ const ReactDND = () => {
 };
 
 export default ReactDND;
-
-
-
-// const style = {
-//     width: 400,
-//   }
-
-// const ReactDND = () => {
-//     const [cards, setCards] = useState([
-//         {
-//           id: 1,
-//           text: 'Write a cool JS library',
-//         },
-//         {
-//           id: 2,
-//           text: 'Make it generic enough',
-//         },
-//         {
-//           id: 3,
-//           text: 'Write README',
-//         },
-//         {
-//           id: 4,
-//           text: 'Create some examples',
-//         },
-//         {
-//           id: 5,
-//           text: 'Spam in Twitter and IRC to promote it (note that this element is taller than the others)',
-//         },
-//         {
-//           id: 6,
-//           text: '???',
-//         },
-//         {
-//           id: 7,
-//           text: 'PROFIT',
-//         },
-//       ])
-
-//     const moveCard = useCallback((dragIndex, hoverIndex) => {
-//         setCards((prevCards) =>
-//           update(prevCards, {
-//             $splice: [
-//               [dragIndex, 1],
-//               [hoverIndex, 0, prevCards[dragIndex]],
-//             ],
-//           }),
-//         )
-//       }, [])
-//       const renderCard = useCallback((card, index) => {
-//         return (
-//           <Card
-//             key={card.id}
-//             index={index}
-//             id={card.id}
-//             text={card.text}
-//             moveCard={moveCard}
-//           />
-//         )
-//       }, [])
-
-//     return (
-//         <DndProvider backend={HTML5Backend}>
-//             <div style={style}>{cards.map((card, i) => renderCard(card, i))}</div>
-//         </DndProvider>
-//     )
-// }
-
-// export default ReactDND

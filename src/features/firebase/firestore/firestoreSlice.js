@@ -401,38 +401,51 @@ export const updateTab = createAsyncThunk('firestore/updateTab', async (tab, thu
     return "Update tab successfully";
 });
 
+export const moveGroupToOtherGroup = createAsyncThunk('firestore/moveGroupToOtherGroup', async ({ groupId, newGroupId, originGroupId}, thunkAPI) => {
+
+})
+
 export const moveTabToOtherGroup = createAsyncThunk('firestore/moveTabToOtherGroup', async ({ tabId, newGroupId }, thunkAPI) => {
     try {
+
         const { groups, tabs } = thunkAPI.getState().firestore;
+        console.log(tabId);
+        console.log(newGroupId);
 
         const tab = tabs.filter(tab => tab.id === tabId)[0];
-        const originGroup = groups.filter(group => group.id === tabs.group)[0];
+        const originGroup = groups.filter(group => group.id === tab.group)[0];
         const newGroup = groups.filter(group => group.id === newGroupId)[0];
+        let originGroupId = originGroup.id;
 
         let tabQuery = query(collection(db, "tabs"), where("id", "==", tabId));
-        let originGroupQuery = query(collection(db, "groups", where("id", "==", tab.group)));
         let newGroupQuery = query(collection(db, "groups"), where("id", "==", newGroupId));
+        let originGroupQuery = query(collection(db, "groups"), where("id", "==", originGroupId));
+
 
         const tabQuerySnapshot = await getDocs(tabQuery);
-        const originGroupQuerySnapshot = await getDocs(originGroupQuery);
         const newGroupQuerySnapshot = await getDocs(newGroupQuery);
+        const originGroupQuerySnapshot = await getDocs(originGroupQuery);
 
         await updateDoc(tabQuerySnapshot.docs[0].ref, {
             ...tab,
             group: newGroup.id
         })
+
         await updateDoc(originGroupQuerySnapshot.docs[0].ref, {
             ...originGroup,
-            tabs: tabs.filter(tab => tab.id !== tabId)
+            tabs: originGroup.tabs.filter(tab => tab !== tabId)
         })
+
         await updateDoc(newGroupQuerySnapshot.docs[0].ref, {
             ...newGroup,
             tabs: [tabId, ...newGroup.tabs]
         })
 
+
         await thunkAPI.dispatch(loadStructureByUser());
 
     } catch (e) {
+        console.log(e.message);
         return e.response;
     }
 

@@ -97,7 +97,7 @@ export default function BasicTabs({ token }) {
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example" indicatorColor='#282828' >
-                    <Tab label="ReactDND" style={{ color: 'whitesmoke', backgroundColor: `${value === 0 ? "#282828" : "#202020"}` }} {...a11yProps(0)} />
+                    <Tab label="Structure" style={{ color: 'whitesmoke', backgroundColor: `${value === 0 ? "#282828" : "#202020"}` }} {...a11yProps(0)} />
                     {
                         workspaceName !== "Unsaved" &&
                         <Tab label="Note" style={{ color: 'whitesmoke', backgroundColor: `${value === 1 ? "#282828" : "#202020"}` }} {...a11yProps(1)} />
