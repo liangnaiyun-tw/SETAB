@@ -85,7 +85,7 @@ export default function BasicTabs({ token }) {
 
     useEffect(() => {
         const workspace = workspaces.filter(workspace => workspace.id === currentWorkspace)[0];
-        if (workspace && workspace.name === "Unsaved") {
+        if (workspace && workspace.name === "Unsaved" && value >= 2) {
             setValue(0);
         }
         if (workspace) {
@@ -106,17 +106,18 @@ export default function BasicTabs({ token }) {
 
                 </Tabs>
             </Box>
-            <TabPanel value={value} index={0} style={{ backgroundColor: `${value === 0 ? "#282828" : "#202020"}`, height: '87vh' }}>
+            <TabPanel value={value} index={0} style={{ backgroundColor: `${value === 0 ? "#282828" : "#202020"}` }}>
                 <DndProvider backend={HTML5Backend}>
                     <div id='trello'>
                         <ReactDND />
                     </div>
                 </DndProvider>
             </TabPanel>
+
             {
                 workspaceName !== "Unsaved" &&
 
-                <TabPanel value={value} index={1} style={{ backgroundColor: `${value === 1 ? "#282828" : "#202020"}`, height: '87vh' }}>
+                <TabPanel value={value} index={1} style={{ backgroundColor: `${value === 1 ? "#282828" : "#202020"}` }}>
                     <Note token={token} />
                 </TabPanel>
 

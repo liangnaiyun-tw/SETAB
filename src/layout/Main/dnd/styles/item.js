@@ -147,7 +147,7 @@ function QuoteItem(props) {
   const { quote, isDragging, isGroupedOver, provided, style, isClone, index } = props;
 
   return (
-    
+
     <Container
       // href={quote.author.url}
       isDragging={isDragging}
@@ -161,7 +161,7 @@ function QuoteItem(props) {
       data-is-dragging={isDragging}
       data-testid={quote.id}
       data-index={index}
-      // aria-label={`${quote.author.name} quote ${quote.content}`}
+    // aria-label={`${quote.author.name} quote ${quote.content}`}
     >
       {/* <Avatar src={quote.author.avatarUrl} alt={quote.author.name} /> */}
       {/* {isClone ? <CloneBadge>Clone</CloneBadge> : null} */}
