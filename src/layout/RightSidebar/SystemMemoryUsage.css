@@ -58,9 +58,9 @@
   border: 2px solid darkgray;
   border-radius: 7px;
   cursor: pointer;
-  background-color: beige;
-  filter: brightness(0.6);
   transition-duration: 0.2s;
+  transition: background-color .3s cubic-bezier(0.42, 0, 0.64, 0.42);
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .tab-list-content:hover,

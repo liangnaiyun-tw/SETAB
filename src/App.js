@@ -59,7 +59,6 @@ function App() {
   const styleRightSidebar = {
     // width: 500 - positionSecond.positionSecondX,
     width: 500,
-    overflowY: 'hidden',
     background: '-o-radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)',
     background: 'radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)'
   };
