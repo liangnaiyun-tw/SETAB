@@ -37,7 +37,7 @@ const initialState = {
     tabs: [],
     historys: [],
     currentWorkspace: unSaveWorkSpace.id,
-    currentGroup: "",
+    currentGroup: [],
     rootDirectory: "",
     user: {}
 }
@@ -214,8 +214,8 @@ export const createWorkSpace = createAsyncThunk('firestore/createWorkSpace', asy
         });
 
         // set current workspace to created workspace
-        thunkAPI.dispatch(setCurrentWorkspace(newWorkSpace.id));
         await thunkAPI.dispatch(loadStructureByUser());
+        await thunkAPI.dispatch(setCurrentWorkspace(newWorkSpace.id));
 
         return "create workspace sucessfully";
     } catch (e) {
