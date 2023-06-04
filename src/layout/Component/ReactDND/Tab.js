@@ -31,11 +31,6 @@ const Tab = ({ tab }) => {
 
   const dispatch = useDispatch();
 
-  const findElement = (id, parent) => {
-
-
-  }
-
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: [ItemTypes.Tab, ItemTypes.Group],
     drop: (item, monitor) => {

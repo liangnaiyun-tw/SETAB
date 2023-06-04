@@ -42,7 +42,7 @@ const Main = ({ cssMain, styleMain, token }) => {
     }
     console.log("CURRENT GROUP");
     console.log(currentGroup);
-  }, [currentWorkspace, workspaces])
+  }, [currentWorkspace, workspaces, currentGroup])
 
   return (
     <>

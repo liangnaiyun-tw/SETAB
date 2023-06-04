@@ -13,8 +13,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import { closeChromeTab, freezeChromeTab, reloadChromeTab } from '../../features/chromeTabs/chromeTabSlice';
 
-/*global chrome*/
-
 
 function GroupModal(props) {
   const dispatch = useDispatch();

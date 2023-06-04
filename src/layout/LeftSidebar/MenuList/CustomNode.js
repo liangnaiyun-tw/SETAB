@@ -20,7 +20,8 @@ export const CustomNode = (props) => {
 
     const handleNodeClick = (e) => {
         e.stopPropagation();
-        console.log('handleNodeClick')
+        console.log('handleNodeClick');
+        console.log(props.node);
         if (props.node.nodeType === 0 || props.node.nodeType === 1) {
             setCurrentWorkspace(props.node.id)
         } else if (props.node.nodeType === 2) {

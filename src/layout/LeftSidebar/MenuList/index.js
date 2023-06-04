@@ -11,6 +11,7 @@ import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import {
+  CssBaseline,
   Dialog,
   Button,
   DialogActions,
@@ -18,24 +19,14 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
-  IconButton,
+  ThemeProvider,
   Divider,
-  ListItem,
-  ListItemText,
-  ListItemButton,
-  List
 } from "@mui/material";
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 import Group from "../../../interface/Group";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from '@mui/icons-material/Edit';
 import Workspace from '../../../interface/Workspace';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { PropaneSharp } from '@mui/icons-material';
 import SearchBar from '../SearchBar';
 import {
   Tree,
@@ -45,9 +36,7 @@ import {
 import { DndProvider } from "react-dnd";
 import { CustomDragPreview } from "./CustomDragPreview";
 import { CustomNode } from "./CustomNode";
-import { ThemeProvider, CssBaseline } from "@mui/material";
 import { theme } from "./theme";
-import { height } from '@xstyled/styled-components';
 
 export default function MenuList() {
   // To retrieve the workspaces of the current user.
@@ -347,7 +336,7 @@ export default function MenuList() {
 
     } else {
       // group to workspace
-      if (dragSource.nodeType === nodeType.Group && dropTarget.nodeType == nodeType.Workspace) {
+      if (dragSource.nodeType === nodeType.Group && dropTarget.nodeType === nodeType.Workspace) {
         dispatch(setCurrentWorkspace(dropTarget.id))
         dispatch(updateWorkspaceGroups({ workspaceId: dropTarget.id, groups: dropTarget.groups.push(dragSource.id) }))
         dispatch(updateGroup({ id: dragSource.id, name: dragSource.text, groups: dragSource.groups.filter(gid => gid !== dragSource.id) }))
