@@ -11,7 +11,6 @@ import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined';
 import { fetchTabs, freezeChromeTab, closeChromeTab, reloadChromeTab } from '../../features/chromeTabs/chromeTabSlice';
 import { getGroupNameChain } from '../../utils/tabs';
 
-/*global chrome*/
 
 function SystemMemoryUsage() {
   const dispatch = useDispatch();
