@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Typography from "@mui/material/Typography";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import styles from "./CustomNode.module.css";
@@ -9,9 +9,10 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { setCurrentWorkspace, setCurrentGroup } from "../../../features/firebase/firestore/firestoreSlice";
 
 export const CustomNode = (props) => {
-    const { currentGroup } = useSelector((store) => store.firestore);
+    const { currentGroup, currentWorkspace } = useSelector((store) => store.firestore);
     const { droppable, data } = props.node;
     const indent = props.depth * 24;
+    const dispatch = useDispatch();
 
     const handleToggle = (e) => {
         e.stopPropagation();
@@ -19,14 +20,12 @@ export const CustomNode = (props) => {
     };
 
     const handleNodeClick = (e) => {
-        e.stopPropagation();
+        handleToggle(e);
         console.log('handleNodeClick')
         if (props.node.nodeType === 0 || props.node.nodeType === 1) {
-            setCurrentWorkspace(props.node.id)
+            dispatch(setCurrentWorkspace(props.node.id));
         } else if (props.node.nodeType === 2) {
-            let currGroup = [...currentGroup];
-            currGroup.push(props.node.id);
-            setCurrentGroup([...currGroup]);
+            dispatch(setCurrentGroup([...currentGroup, props.node.id]));
         }
     }
 
@@ -55,7 +54,7 @@ export const CustomNode = (props) => {
 
 
     return (
-        <div onClick={(e) => { handleToggle(e); handleNodeClick(e) }}
+        <div onClick={(e) => handleNodeClick(e)}
             className={`tree-node ${styles.root}`}
             style={{ paddingInlineStart: indent }}
         >

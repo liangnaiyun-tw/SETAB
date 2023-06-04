@@ -10,7 +10,7 @@ import LeftSidebar from "./layout/LeftSidebar";
 import Main from "./layout/Main";
 import RightSidebar from "./layout/RightSidebar";
 import ViewDrawer from "./layout/ViewDrawer";
-import styled from "@xstyled/styled-components";
+import styled, { background, backgroundColor } from "@xstyled/styled-components";
 
 // Roboto font
 import '@fontsource/roboto/300.css';
@@ -57,10 +57,11 @@ function App() {
     color: "white"
   };
   const styleRightSidebar = {
-    backgroundColor: 'rgba(108, 101, 133, 1)',
     // width: 500 - positionSecond.positionSecondX,
     width: 500,
-    overflowY: 'hidden'
+    overflowY: 'hidden',
+    background: '-o-radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)',
+    background: 'radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)'
   };
   const styleFooter = {
     height: "5vh",
@@ -87,6 +88,7 @@ function App() {
     <>
       <div className="app">
         <LeftSidebar cssLeftSidebar="leftSidebar" styleLeftSidebar={styleLeftSidebar} />
+
         {/* <Draggable
           defaultPosition={{ x: 0, y: 0 }}
           position={{ x: positionFirst.positionFirstX }}
@@ -108,6 +110,7 @@ function App() {
             <ViewDrawer cssDrawer="drawerSecond" cssHandle="handleSecond" />
           </div>
         </Draggable> */}
+
         <RightSidebar
           cssRightSidebar="rightSidebar"
           styleRightSidebar={styleRightSidebar}
