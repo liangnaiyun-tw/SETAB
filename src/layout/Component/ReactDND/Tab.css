@@ -1,3 +1,11 @@
+.tab-card-container[data-status="freeze"] {
+    filter: brightness(0.6);
+}
+
+.tab-card-container[data-status="close"] {
+    filter: brightness(0.2);
+}
+
 .TabCard {
     border-radius: 5px;
 }
@@ -5,14 +13,6 @@
 .TabCard[data-unsaved="true"] {
     width: fit-content;
     padding-right: 3vw;
-}
-
-.TabCard[data-status="freeze"] {
-    filter: brightness(0.6);
-}
-
-.TabCard[data-status="close"] {
-    filter: brightness(0.2);
 }
 
 .tab-card-content,
