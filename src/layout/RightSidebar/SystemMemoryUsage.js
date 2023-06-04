@@ -27,10 +27,12 @@ function SystemMemoryUsage() {
   }
 
   function clickFreezeTab(event, currentTab) {
+    event.stopPropagation();
     dispatch(freezeChromeTab(currentTab));
   }
 
   function clickCloseTab(event, currentTab) {
+    event.stopPropagation();
     dispatch(closeChromeTab(currentTab));
   }
 

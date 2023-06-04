@@ -22,7 +22,7 @@
   list-style-type: none;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   column-gap: 2%;
   margin-bottom: 3%;
   margin-left: auto;
