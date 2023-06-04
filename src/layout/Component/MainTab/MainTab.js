@@ -10,8 +10,11 @@ import Note from '../Note/Note';
 import Structure from '../Structure/Structure'
 import Board from '../../Main/dnd/board/Board'
 import { generateQuoteMap } from "../../Main/dnd/mockData"
-import styled from "@xstyled/styled-components";
+import styled, { backgroundColor, height } from "@xstyled/styled-components";
 import { useSelector } from 'react-redux';
+import ReactDND from '../ReactDND/ReactDND';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 
 function TabPanel(props) {
@@ -93,35 +96,43 @@ export default function BasicTabs({ token }) {
     return (
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                    <Tab label="Info" {...a11yProps(0)} />
+                <Tabs value={value} onChange={handleChange} aria-label="basic tabs example" indicatorColor='#282828' >
+                    <Tab label="Info" style={{color:'whitesmoke', backgroundColor: `${value===0?"#282828":"#202020"}`}} {...a11yProps(0)} />
+                    <Tab label="ReactDND" style={{color:'whitesmoke', backgroundColor: `${value===1?"#282828":"#202020"}`}} {...a11yProps(1)} />
                     {
                         workspaceName !== "Unsaved" &&
-                        <Tab label="Structure" {...a11yProps(1)} />
+                        <Tab label="Structure" style={{color:'whitesmoke', backgroundColor: `${value===2?"#282828":"#202020"}`}} {...a11yProps(2)} />
 
                     }
                     {
                         workspaceName !== "Unsaved" &&
-                        <Tab label="Note" {...a11yProps(2)} />
+                        <Tab label="Note" style={{color:'whitesmoke', backgroundColor: `${value===3?"#282828":"#202020"}`}} {...a11yProps(3)} />
                     }
 
 
                 </Tabs>
             </Box>
-            <TabPanel value={value} index={0}>
-
+            <TabPanel value={value} index={0} style={{backgroundColor: `${value===0?"#282828":"#202020"}`, height: '87vh'}}>
+                Info
+            </TabPanel>
+            <TabPanel value={value} index={1} style={{backgroundColor: `${value===1?"#282828":"#202020"}`, height: '87vh'}}>
+                <DndProvider backend={HTML5Backend}>
+                    <div id='trello'>
+                        <ReactDND />
+                    </div>
+                </DndProvider>
             </TabPanel>
             {
                 workspaceName !== "Unsaved" &&
 
-                <TabPanel value={value} index={1}>
+                <TabPanel value={value} index={2} style={{backgroundColor: `${value===2?"#282828":"#202020"}`, height: '87vh'}}>
                     <SwitchStructure />
                 </TabPanel>
             }
             {
                 workspaceName !== "Unsaved" &&
 
-                <TabPanel value={value} index={2}>
+                <TabPanel value={value} index={3} style={{backgroundColor: `${value===3?"#282828":"#202020"}`, height: '87vh'}}>
                     <Note token={token} />
                 </TabPanel>
 

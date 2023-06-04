@@ -47,10 +47,10 @@ const Main = ({ cssMain, styleMain, token }) => {
     <>
       <div className={cssMain} style={styleMain}>
         <div role="presentation" onClick={handleClick}>
-          <Breadcrumbs aria-label="breadcrumb" className="Breadcrumbs">
+          <Breadcrumbs aria-label="breadcrumb" className="Breadcrumbs" style={{color: "whitesmoke", fontSize: "large", marginBottom: "1rem"}}>
             {
 
-              <Link onClick={() => { handleBreadCrumbClick(currentWorkspace, true) }} underline="hover" color="inherit" href="/">
+              <Link onClick={() => { handleBreadCrumbClick(currentWorkspace, true) }} underline="hover" color="white" href="/">
                 {
                   workspaceName
                 }
@@ -60,7 +60,7 @@ const Main = ({ cssMain, styleMain, token }) => {
               currentGroup.length !== 0 ?
                 currentGroup.map((groupId) => groups.filter(group => group.id === groupId)[0])
                   .map((group) =>
-                  (<Link key={group.id} onClick={() => { handleBreadCrumbClick(group.id, false) }} underline="hover" color="inherit" href="/">
+                  (<Link key={group.id} onClick={() => { handleBreadCrumbClick(group.id, false) }} underline="hover" color="white" href="/">
                     {group.name}
                   </Link>)
                   ) : null
