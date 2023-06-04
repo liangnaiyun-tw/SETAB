@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { updateUnsavedWorkspace } from "../firebase/firestore/firestoreSlice";
+import { closeTab, updateTab, updateUnsavedWorkspace } from "../firebase/firestore/firestoreSlice";
 import { v4 as uuidv4 } from "uuid";
 
 /*global chrome*/
@@ -18,10 +18,8 @@ async function getMemory(thunkAPI) {
   let tabs = await Promise.allSettled(Object.values(tabsInWindows).map(async (tab) => {
     let tabInFirebase = thunkAPI.getState().firestore.tabs.find((tabInformation) => {
       if (tabInformation.alias === tab.title || tabInformation.title === tab.title) {
-        for (let i = 0; i < tabInformation.tabId.length; ++i) {
-          if (tab.windowId === tabInformation.windowId[i] && tab.id === tabInformation.tabId[i]) {
-            return true;
-          }
+        if (tab.windowId === tabInformation.windowId && tab.id === tabInformation.tabId) {
+          return true;
         }
       }
       return false;
@@ -29,7 +27,7 @@ async function getMemory(thunkAPI) {
 
     return {
       id: tabInFirebase ? tabInFirebase.id : uuidv4(),
-      alias: tab.title,
+      alias: tabInFirebase ? tabInFirebase.alias : tab.title,
       title: tab.title,
       status: tab.status === "unloaded" ? "unloaded" : "complete",
       group: tabInFirebase ? tabInFirebase.group : thunkAPI.getState().firestore.workspaces[0].id,
@@ -39,7 +37,7 @@ async function getMemory(thunkAPI) {
       tabIconUrl: tab.favIconUrl && tab.favIconUrl.length > 0 ? tab.favIconUrl : "",
       privateMemory: 0,
       windowIndex: tab.index,
-      uid: thunkAPI.getState().firestore.user // TODO: Change user to uid
+      uid: thunkAPI.getState().firestore.user.uid // TODO: Change user to uid
     };
   }));
   tabs = tabs.map(tab => tab.value);
@@ -68,6 +66,10 @@ async function getMemory(thunkAPI) {
     thunkAPI.dispatch(setDataModified(false));
   } else {
     console.log(tabs);
+
+    tabs.filter(tab => tab.group !== thunkAPI.getState().firestore.workspaces[0].id).forEach(tab => {
+      thunkAPI.dispatch(updateTab(tab));
+    });
     thunkAPI.dispatch(updateUnsavedWorkspace({
       tabs: tabs.filter((tab) => tab.group === thunkAPI.getState().firestore.workspaces[0].id)
     }));
@@ -101,6 +103,12 @@ const freezeChromeTab = createAsyncThunk('chromeTabs/clickFreezeTab', async (cur
         newTab: tab
       }));
     }
+    if (currentTab.group !== thunkAPI.getState().firestore.workspaces[0].id) {
+      thunkAPI.dispatch(updateTab({
+        currentTab,
+        status: "unloaded"
+      }));
+    }
   } catch (err) {
     console.error(err);
   }
@@ -119,6 +127,12 @@ const reloadChromeTab = createAsyncThunk('chromeTabs/reloadChromeTab', async (cu
       tabs: currentTab.windowIndex
     });
     thunkAPI.dispatch(reloadTab(currentTab));
+    if (currentTab.group !== thunkAPI.getState().firestore.workspaces[0].id) {
+      thunkAPI.dispatch(updateTab({
+        ...currentTab,
+        status: "complete"
+      }));
+    }
   } catch (err) {
     console.error(err);
   }
@@ -128,6 +142,28 @@ const closeChromeTab = createAsyncThunk('chromeTabs/closeChromeTab', async (curr
   try {
     await chrome.tabs.remove(currentTab.tabId);
     thunkAPI.dispatch(deleteTab(currentTab));
+    if (currentTab.group !== thunkAPI.getState().firestore.workspaces[0].id) {
+      thunkAPI.dispatch(closeTab(currentTab));
+    }
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+const createChromeTab = createAsyncThunk('chromeTabs/createChromeTab', async (currentTab, thunkAPI) => {
+  try {
+    let newTab = await chrome.tabs.create({
+      url: currentTab.tabUrl
+    });
+    if (newTab) {
+      thunkAPI.dispatch({
+        ...currentTab,
+        status: "complete",
+        tabId: newTab.tabId,
+        windowId: newTab.windowId,
+        windowIndex: newTab.windowIndex
+      })
+    }
   } catch (err) {
     console.error(err);
   }
@@ -207,10 +243,16 @@ const chromeTabSlice = createSlice({
       })
       .addCase(reloadChromeTab.rejected, (state, action) => {
         console.log(action);
+      })
+      .addCase(createChromeTab.fulfilled, (state, action) => {
+        console.log(action);
+      })
+      .addCase(createChromeTab.rejected, (state, action) => {
+        console.log(action);
       });
   }
 });
 
 export const { setFetchLoadingStatus, setDataModified, updateChromeTabs, reloadTab, freezeTab, switchGroup, deleteTab } = chromeTabSlice.actions;
-export { fetchTabs, freezeChromeTab, reloadChromeTab, closeChromeTab };
+export { fetchTabs, freezeChromeTab, reloadChromeTab, closeChromeTab, createChromeTab };
 export default chromeTabSlice.reducer;

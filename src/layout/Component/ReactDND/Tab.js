@@ -4,8 +4,13 @@ import { useDrag, useDrop } from 'react-dnd';
 import { ItemTypes } from './ItemType';
 import { setStructure } from "../../../features/dnd/DndSlice";
 import { useSelector, useDispatch } from 'react-redux';
-import { Card, CardContent, CardHeader, Paper } from '@mui/material';
+import { Card, CardContent, CardActions, IconButton } from '@mui/material';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined';
+import DeleteIcon from '@mui/icons-material/Delete';
 import WindowIcon from '@mui/icons-material/Window';
+import { closeChromeTab, createChromeTab, freezeChromeTab, reloadChromeTab } from '../../../features/chromeTabs/chromeTabSlice';
+import { createTab } from '../../../features/firebase/firestore/firestoreSlice';
 
 
 const Tab = ({ tab }) => {
@@ -134,14 +139,13 @@ const Tab = ({ tab }) => {
         drop(el)
     }
 
-    function getTabStatus() {
-        if (tab.status === "unloaded") {
-            return "freeze";
-        } else if (tab.tabId.length === 0) {
-            return "close";
-        } else {
-            return "open"
-        }
+  function getTabStatus() {
+    if (tab.status === "unloaded") {
+      return "freeze";
+    } else if (tab.tabId === -1) {
+      return "close";
+    } else {
+      return "open"
     }
 
     function getStatusElement() {
@@ -167,24 +171,54 @@ const Tab = ({ tab }) => {
         }
     }
 
+  function openNewTabEvent() {
+    if (tab.tabId !== -1) {
+      dispatch(reloadChromeTab(tab));
+    } else {
+      dispatch(createChromeTab(tab));
+    }
+  }
 
-    return (
-        <div className='tab-card-container' ref={attachRef} data-status={getTabStatus()}>
-            <Card className='TabCard' data-unsaved={tab.group === firestore.workspaces[0].id} sx={{ backgroundColor: "#606060", color: "white" }}>
-                <CardContent>
-                    <div className='tab-card-content' data-unsaved={tab.group === firestore.workspaces[0].id}>
-                        {tab.tabIconUrl.length > 0
-                            ? <img src={tab.tabIconUrl} alt="tab icon" width="24" height="24"></img>
-                            : <WindowIcon sx={{ color: "#ccccd7" }}></WindowIcon>}
-                        <div className='tab-card-content-text'>{tab.alias}</div>
-                    </div>
-                    <div className='tab-card-content-2'>
-                        {getStatusElement()}
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-    );
+  function freezeTabEvent() {
+    dispatch(freezeChromeTab(tab));
+  }
+
+  function closeTabEvent() {
+    dispatch(closeChromeTab(tab));
+  }
+
+
+  return (
+    <div className='tab-card-container' ref={attachRef} data-status={getTabStatus()}>
+      <Card className='TabCard' data-unsaved={tab.group === firestore.workspaces[0].id} sx={{ backgroundColor: "#606060", color: "white" }}>
+        <CardContent>
+          <div className='tab-card-content' data-unsaved={tab.group === firestore.workspaces[0].id}>
+            {tab.tabIconUrl.length > 0
+              ? <img src={tab.tabIconUrl} alt="tab icon" width="24" height="24"></img>
+              : <WindowIcon sx={{ color: "#ccccd7" }}></WindowIcon>}
+            <div className='tab-card-content-text'>{tab.alias}</div>
+          </div>
+          <div className='tab-card-content-2'>
+            {getStatusElement()}
+          </div>
+        </CardContent>
+
+        <CardActions disableSpacing>
+          <IconButton onClick={openNewTabEvent}>
+            <OpenInNewIcon sx={{ color: "#ccccd7" }}></OpenInNewIcon>
+          </IconButton>
+
+          <IconButton onClick={freezeTabEvent}>
+            <PauseOutlinedIcon sx={{ color: "#ccccd7" }}></PauseOutlinedIcon>
+          </IconButton>
+
+          <IconButton onClick={closeTabEvent}>
+            <DeleteIcon sx={{ color: "#ccccd7" }}></DeleteIcon>
+          </IconButton>
+        </CardActions>
+      </Card>
+    </div>
+  );
 }
 
 export default Tab;
