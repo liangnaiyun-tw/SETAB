@@ -156,7 +156,7 @@ const createChromeTab = createAsyncThunk('chromeTabs/createChromeTab', async (cu
       url: currentTab.tabUrl
     });
     if (newTab) {
-      thunkAPI.dispatch(createTab({
+      thunkAPI.dispatch(updateTab({
         ...currentTab,
         status: "complete",
         tabId: newTab.tabId,
