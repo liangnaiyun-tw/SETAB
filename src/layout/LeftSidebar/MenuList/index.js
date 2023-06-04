@@ -118,62 +118,6 @@ export default function MenuList() {
     }
   }
 
-  const onDrop = (items, target) => {
-    console.log('items', items)
-    console.log('target', target)
-
-    items.forEach(i => {
-
-      updateItemParent(i);
-      if ('targetItem' in target) {
-
-        if (target.targetItem !== 'root') {
-          let targetItem = treeEnvironment.current.items[target.targetItem];
-          let newGroups = targetItem.children.filter(x => x !== "");
-          if (i.nodeType === nodeType.Workspace) {
-
-            dispatch(deleteWorkspace(i.index));
-            dispatch(createGroup({ name: i.data, groups: i.children, workspace: targetItem.index }))
-            newGroups = newGroups.filter(x => x !== i.index);
-          }
-          if (targetItem.nodeType === nodeType.Workspace) {
-            dispatch(updateWorkspaceGroups({ workspaceId: targetItem.index, groups: newGroups }))
-          } else {
-            dispatch(updateGroup({ name: targetItem.data, groups: newGroups }))
-          }
-        } else {
-          let newUserWorkspaces = [...treeEnvironment.current.items.root.children];
-          if (i.nodeType === nodeType.Group) {
-            dispatch(deleteGroup(i.index))
-            dispatch(createWorkSpace({ name: i.data, groups: i.children }));
-            newUserWorkspaces = newUserWorkspaces.filter(x => x !== "" && x !== i.index);
-          }
-
-          dispatch(updateUserWorkspaces(newUserWorkspaces));
-        }
-      } else if ('parentItem' in target && target.parentItem === 'root') {
-        let newUserWorkspaces = [...treeEnvironment.current.items.root.children];
-        if (i.nodeType === nodeType.Group) {
-          dispatch(deleteGroup(i.index))
-          dispatch(createWorkSpace({ name: i.data, groups: i.children }));
-          newUserWorkspaces = newUserWorkspaces.filter(x => x !== "" && x !== i.index);
-        }
-        dispatch(updateUserWorkspaces(newUserWorkspaces));
-      } else if ('parentItem' in target && target.parentItem !== 'root') {
-        let targetItem = treeEnvironment.current.items[target.parentItem];
-        let newGroups = targetItem.children;
-        if (targetItem.nodeType === nodeType.Workspace) {
-          dispatch(updateWorkspaceGroups({ workspaceId: targetItem.index, groups: newGroups }))
-        } else {
-          dispatch(updateGroup({ name: targetItem.data, groups: newGroups }))
-        }
-      }
-
-    })
-
-
-  };
-
   const handleNodeMoreClose = () => {
     setAnchorEl(null);
   };
@@ -245,7 +189,7 @@ export default function MenuList() {
       console.log(data);
       const returnGroup = data.payload;
       if (currnetNode.nodeType === nodeType.Group) {
-        let group = groups.filter(g => g.id === currnetNode.index)[0];
+        let group = groups.filter(g => g.id === currnetNode.id)[0];
         let groupOfGroups = group.groups;
         let newGroup = Group;
         newGroup.name = group.name;
