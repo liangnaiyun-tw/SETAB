@@ -18,7 +18,8 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
-  IconButton
+  IconButton,
+  Divider
 } from "@mui/material";
 import Group from "../../../interface/Group";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -26,6 +27,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import Workspace from '../../../interface/Workspace';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { PropaneSharp } from '@mui/icons-material';
+import SearchBar from '../SearchBar';
 
 export default function MenuList() {
   // To retrieve the workspaces of the current user.
@@ -357,34 +359,31 @@ export default function MenuList() {
   const cx = (...classNames) =>
     classNames.filter(cn => !!cn).join(' ');
 
+  const handleSearch = (searchStr) => {
+    const expandTargets = [];
+
+    Object.entries(items).forEach(entry => {
+      const [key, value] = entry;
+      if (value.data.includes(searchStr)) {
+        expandTargets.push(key);
+      }
+    })
+
+    setExpandedItems([...expandTargets])
+
+    treeEnvironment.current.viewState['tree-1'].expandedItems = [...expandTargets]
+    treeEnvironment.current.viewState['tree-1'].selectedItems = [...expandTargets]
+  }
+
   return (
     <>
+      <SearchBar handleSearch={handleSearch} />
+      <Divider light />
       <UncontrolledTreeEnvironment
         ref={treeEnvironment}
         dataProvider={new StaticTreeDataProvider(items, (item, newName) => ({ ...item, data: newName }))}
         getItemTitle={(item) => item.data}
         renderItemTitle={({ title, item }) => getCustomItemTitle(item)}
-        // getItemTitle={(item) => item.data}
-        // renderItem={props => (
-        //   <li
-        //     className='rct-tree-item-li'
-        //     {...(props.context.itemContainerWithChildrenProps)}
-        //   >
-        //     <div
-        //       className='rct-tree-item-title-container'
-        //       {...(props.context.itemContainerWithoutChildrenProps)}
-        //       {...(props.context.interactiveElementProps)}
-        //     >
-
-        //       <div className='rct-tree-item-arrow'>{props.arrow}</div>
-
-        //       <button className='rct-tree-item-button'>
-        //         <CustomItemTitle node={props.item} />
-        //       </button>
-        //     </div>
-        //     {props.children}
-        //   </li>
-        // )}
 
         viewState={{
           'tree-1': {

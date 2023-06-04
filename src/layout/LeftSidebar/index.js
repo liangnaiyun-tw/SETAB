@@ -31,7 +31,7 @@ import { useDispatch } from "react-redux";
 
 
 const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
-    
+
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -47,12 +47,12 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
 
     const { user } = useSelector((store) => store.auth)
     const [newWorkSpaceName, setNewWorkSpaceName] = useState("")
-    
+
     const dispatch = useDispatch();
 
     const handleCreateWorkSpace = async () => {
         handleDialogClose();
-        let workspace =  Workspace;
+        let workspace = Workspace;
         workspace.name = newWorkSpaceName;
         dispatch(createWorkSpace(workspace));
     }
@@ -154,8 +154,7 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                     </Toolbar>
                 </AppBar>
                 <Divider light />
-                <SearchBar />
-                <Divider light />
+
                 <MenuList></MenuList>
                 <div className="loginBlock">
                     {user === undefined || user === null ?
@@ -185,13 +184,13 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                         variant="standard"
                         onChange={(e) => {
                             setNewWorkSpaceName(e.target.value);
-                          }}
+                        }}
                         value={newWorkSpaceName}
                     />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose}>Cancel</Button>
-                    <Button disabled={newWorkSpaceName.length===0} onClick={handleCreateWorkSpace}>Create</Button>
+                    <Button disabled={newWorkSpaceName.length === 0} onClick={handleCreateWorkSpace}>Create</Button>
                 </DialogActions>
             </Dialog>
         </>
