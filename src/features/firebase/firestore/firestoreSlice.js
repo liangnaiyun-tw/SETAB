@@ -37,7 +37,7 @@ const initialState = {
     tabs: [],
     historys: [],
     currentWorkspace: unSaveWorkSpace.id,
-    currentGroup: "",
+    currentGroup: [],
     rootDirectory: "",
     user: {}
 }
