@@ -326,7 +326,7 @@ export default function MenuList() {
         const g = groups[index];
         if (g.groups.length > 0) {
           g.groups.forEach(gid => {
-            prev[prev.indexOf(p => p.id === gid)].parent = g.id;
+            prev.filter(p => p.id === gid)[0].parent = g.id;
           })
         }
 
