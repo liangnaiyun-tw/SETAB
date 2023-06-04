@@ -15,129 +15,130 @@ import { createTab } from '../../../features/firebase/firestore/firestoreSlice';
 
 const Tab = ({ tab }) => {
 
-    const { structure } = useSelector(store => store.dnd);
-    const firestore = useSelector(store => store.firestore);
+  const { structure } = useSelector(store => store.dnd);
+  const firestore = useSelector(store => store.firestore);
 
-    const index = tab.index;
-    const id = tab.id;
+  const index = tab.index;
+  const id = tab.id;
 
-    const [{ isDragging }, drag] = useDrag({
-        type: ItemTypes.Tab,
-        item: () => ({ ...tab }),
-        collect: (monitor) => ({
-            isDragging: monitor.isDragging
-        })
+  const [{ isDragging }, drag] = useDrag({
+    type: ItemTypes.Tab,
+    item: () => ({ ...tab }),
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging
     })
+  })
 
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-    const findElement = (id, parent) => {
-
-
-    }
-
-    const [{ isOver, canDrop }, drop] = useDrop({
-        accept: [ItemTypes.Tab, ItemTypes.Group],
-        drop: (item, monitor) => {
-            let newStructure = JSON.parse(JSON.stringify(structure));
-            let droppedTab = newStructure[tab.id];
-            let currentGroup = newStructure[tab.group];
-
-            if (monitor.isOver({ shallow: true })) {
-                if (item.type === 'group') {
-                    let originGroup = newStructure[item.parent];
-                    let draggedGroup = newStructure[item.id];
+  const findElement = (id, parent) => {
 
 
-                    if (currentGroup.id === originGroup.id) {
-                        currentGroup.childs.splice(draggedGroup.index, 0);
-                        for (let i = 0; i < currentGroup.childs.length; i++) {
-                            newStructure[currentGroup.childs[i]].index = i
-                        }
-                        currentGroup.childs.splice(droppedTab.index, 0, draggedGroup);
-                        for (let i = 0; i < currentGroup.childs.length; i++) {
-                            newStructure[currentGroup.childs[i]].index = i
-                        }
+  }
 
-                    } else {
-                        originGroup.childs = originGroup.childs.filter(child => child !== item.id);
-                        originGroup.groups = originGroup.groups.filter(group => group !== item.id);
+  const [{ isOver, canDrop }, drop] = useDrop({
+    accept: [ItemTypes.Tab, ItemTypes.Group],
+    drop: (item, monitor) => {
+      let newStructure = JSON.parse(JSON.stringify(structure));
+      let droppedTab = newStructure[tab.id];
+      let currentGroup = newStructure[tab.group];
 
-                        draggedGroup.parent = currentGroup.id;
-                        currentGroup.childs = [...currentGroup.childs.slice(0, index), draggedGroup.id, ...currentGroup.childs.slice(index)];
+      if (monitor.isOver({ shallow: true })) {
+        if (item.type === 'group') {
+          let originGroup = newStructure[item.parent];
+          let draggedGroup = newStructure[item.id];
 
-                        for (let i = 0; i < originGroup.childs.length; i++) {
-                            newStructure[originGroup.childs[i]].index = i;
-                        }
-                        for (let i = 0; i < currentGroup.childs.length; i++) {
-                            newStructure[currentGroup.childs[i]].index = i;
-                        }
 
-                        // await dispatch(updateGroupToGroup())
-                    }
-
-                } else {
-
-                    let originGroup = newStructure[item.group];
-                    let draggedTab = newStructure[item.id];
-
-                    if (currentGroup.id === originGroup.id) {
-                        if (currentGroup.childs.length !== 1) {
-                            currentGroup.childs.splice(draggedTab.index, 0);
-                            for (let i = 0; i < currentGroup.childs.length; i++) {
-                                newStructure[currentGroup.childs[i]].index = i
-                            }
-                            currentGroup.childs.splice(droppedTab.index, 0, draggedTab);
-                            for (let i = 0; i < currentGroup.childs.length; i++) {
-                                newStructure[currentGroup.childs[i]].index = i
-                            }
-                        }
-
-                    } else {
-                        originGroup.childs = originGroup.childs.filter(child => child !== item.id);
-                        originGroup.tabs = originGroup.tabs.filter(tab => tab !== item.id);
-
-                        draggedTab.group = currentGroup.id;
-                        currentGroup.childs = [...currentGroup.childs.slice(0, droppedTab.index), draggedTab.id, ...currentGroup.childs.slice(droppedTab.index)];
-
-                        for (let i = 0; i < originGroup.childs.length; i++) {
-                            newStructure[originGroup.childs[i]].index = i;
-                        }
-                        for (let i = 0; i < currentGroup.childs.length; i++) {
-                            newStructure[currentGroup.childs[i]].index = i;
-                        }
-                        // await dispatch(updateTabToGroup())
-                    }
-                }
-                dispatch(setStructure(newStructure));
-
+          if (currentGroup.id === originGroup.id) {
+            currentGroup.childs.splice(draggedGroup.index, 0);
+            for (let i = 0; i < currentGroup.childs.length; i++) {
+              newStructure[currentGroup.childs[i]].index = i
+            }
+            currentGroup.childs.splice(droppedTab.index, 0, draggedGroup);
+            for (let i = 0; i < currentGroup.childs.length; i++) {
+              newStructure[currentGroup.childs[i]].index = i
             }
 
-            // if(dropped) return;
-            // case 1 item is tab
-            // case 1-1 same group
-            // case 1-2 different group => 
+          } else {
+            originGroup.childs = originGroup.childs.filter(child => child !== item.id);
+            originGroup.groups = originGroup.groups.filter(group => group !== item.id);
 
-            // case 2 item is group
-            // case 2-1 same group
-            // case 2-2 different group
-            // console.log(dropped);
-            // dispatch(setDroppedStatus(true));
-            // console.log(monitor.isOver());
-        },
-        canDrop: (item, monitor) => {
-            return true;
-        },
-        isOver: monitor => {
-            isOver: monitor.isOver();
-            canDrop: monitor.canDrop();
+            draggedGroup.parent = currentGroup.id;
+            currentGroup.childs = [...currentGroup.childs.slice(0, index), draggedGroup.id, ...currentGroup.childs.slice(index)];
+
+            for (let i = 0; i < originGroup.childs.length; i++) {
+              newStructure[originGroup.childs[i]].index = i;
+            }
+            for (let i = 0; i < currentGroup.childs.length; i++) {
+              newStructure[currentGroup.childs[i]].index = i;
+            }
+
+            // await dispatch(updateGroupToGroup())
+          }
+
+        } else {
+
+          let originGroup = newStructure[item.group];
+          let draggedTab = newStructure[item.id];
+
+          if (currentGroup.id === originGroup.id) {
+            if (currentGroup.childs.length !== 1) {
+              currentGroup.childs.splice(draggedTab.index, 0);
+              for (let i = 0; i < currentGroup.childs.length; i++) {
+                newStructure[currentGroup.childs[i]].index = i
+              }
+              currentGroup.childs.splice(droppedTab.index, 0, draggedTab);
+              for (let i = 0; i < currentGroup.childs.length; i++) {
+                newStructure[currentGroup.childs[i]].index = i
+              }
+            }
+
+          } else {
+            originGroup.childs = originGroup.childs.filter(child => child !== item.id);
+            originGroup.tabs = originGroup.tabs.filter(tab => tab !== item.id);
+
+            draggedTab.group = currentGroup.id;
+            currentGroup.childs = [...currentGroup.childs.slice(0, droppedTab.index), draggedTab.id, ...currentGroup.childs.slice(droppedTab.index)];
+
+            for (let i = 0; i < originGroup.childs.length; i++) {
+              newStructure[originGroup.childs[i]].index = i;
+            }
+            for (let i = 0; i < currentGroup.childs.length; i++) {
+              newStructure[currentGroup.childs[i]].index = i;
+            }
+            // await dispatch(updateTabToGroup())
+          }
         }
-    })
+        dispatch(setStructure(newStructure));
 
-    function attachRef(el) {
-        drag(el)
-        drop(el)
+      }
+
+      // if(dropped) return;
+      // case 1 item is tab
+      // case 1-1 same group
+      // case 1-2 different group => 
+
+      // case 2 item is group
+      // case 2-1 same group
+      // case 2-2 different group
+      // console.log(dropped);
+      // dispatch(setDroppedStatus(true));
+      // console.log(monitor.isOver());
+    },
+    canDrop: (item, monitor) => {
+      return true;
+    },
+    isOver: monitor => {
+      isOver: monitor.isOver();
+      canDrop: monitor.canDrop();
     }
+  })
+
+  function attachRef(el) {
+    drag(el)
+    drop(el)
+  }
+
 
   function getTabStatus() {
     if (tab.status === "unloaded") {
@@ -147,29 +148,30 @@ const Tab = ({ tab }) => {
     } else {
       return "open"
     }
+  }
 
-    function getStatusElement() {
-        let status = getTabStatus();
-        if (status === "freeze") {
-            return (
-                <>
-                    <div>Freezed</div>
-                </>
-            );
-        } else if (status === "close") {
-            return (
-                <>
-                    <div>Closed</div>
-                </>
-            );
-        } else {
-            return (
-                <>
-                    <div>Opened</div>
-                </>
-            );
-        }
+  function getStatusElement() {
+    let status = getTabStatus();
+    if (status === "freeze") {
+      return (
+        <>
+          <div>Freezed</div>
+        </>
+      );
+    } else if (status === "close") {
+      return (
+        <>
+          <div>Closed</div>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <div>Opened</div>
+        </>
+      );
     }
+  }
 
   function openNewTabEvent() {
     if (tab.tabId !== -1) {
