@@ -375,7 +375,7 @@ export const createTab = createAsyncThunk('firestore/createTab', async (tab, thu
 
     const newTab = {
         ...tab,
-        group: thunkAPI.getState().firestore.currentGroup,
+        group: thunkAPI.getState().firestore.currentGroup[thunkAPI.getState().firestore.currentGroup.length - 1],
         id: uuidv4(),
         uid: user.uid,
         status: "complete"
@@ -400,6 +400,24 @@ export const updateTab = createAsyncThunk('firestore/updateTab', async (tab, thu
 
     return "Update tab successfully";
 });
+
+export const closeTab = createAsyncThunk('firestore/closeTab', async (tab, thunkAPI) => {
+    const user = thunkAPI.getState().auth.user;
+
+    let q = query(collection(db, "tabs"), where("id", "==", tab.id), where("uid", "==", user.uid));
+    const querySnapshot = await getDocs(q);
+
+    await updateDoc(querySnapshot.docs[0].ref, {
+        ...tab,
+        tabId: -1,
+        windowId: -1,
+        windowIndex: -1
+    });
+
+    await thunkAPI.dispatch(loadStructureByUser());
+
+    return "Close tab successfully";
+})
 
 export const moveTabToOtherGroup = createAsyncThunk('firestore/moveTabToOtherGroup', async ({ tabId, newGroupId }, thunkAPI) => {
     try {
@@ -512,6 +530,12 @@ const firestoreSlice = createSlice({
                 console.log(action);
             })
             .addCase(updateTab.rejected, (state, action) => {
+                console.log(action);
+            })
+            .addCase(closeTab.fulfilled, (state, action) => {
+                console.log(action);
+            })
+            .addCase(closeTab.rejected, (state, action) => {
                 console.log(action);
             })
             .addCase(updateUserWorkspaces.fulfilled, (state, action) => {

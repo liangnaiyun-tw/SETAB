@@ -4,8 +4,13 @@ import { useDrag, useDrop } from 'react-dnd';
 import { ItemTypes } from './ItemType';
 import { setStructure } from "../../../features/dnd/DndSlice";
 import { useSelector, useDispatch } from 'react-redux';
-import { Card, CardContent, CardHeader, Paper } from '@mui/material';
+import { Card, CardContent, CardActions, IconButton } from '@mui/material';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined';
+import DeleteIcon from '@mui/icons-material/Delete';
 import WindowIcon from '@mui/icons-material/Window';
+import { closeChromeTab, createChromeTab, freezeChromeTab, reloadChromeTab } from '../../../features/chromeTabs/chromeTabSlice';
+import { createTab } from '../../../features/firebase/firestore/firestoreSlice';
 
 
 const Tab = ({ tab }) => {
@@ -132,7 +137,7 @@ const Tab = ({ tab }) => {
   function getTabStatus() {
     if (tab.status === "unloaded") {
       return "freeze";
-    } else if (tab.tabId.length === 0) {
+    } else if (tab.tabId === -1) {
       return "close";
     } else {
       return "open"
@@ -162,6 +167,22 @@ const Tab = ({ tab }) => {
     }
   }
 
+  function openNewTabEvent() {
+    if (tab.tabId !== -1) {
+      dispatch(reloadChromeTab(tab));
+    } else {
+      dispatch(createChromeTab(tab));
+    }
+  }
+
+  function freezeTabEvent() {
+    dispatch(freezeChromeTab(tab));
+  }
+
+  function closeTabEvent() {
+    dispatch(closeChromeTab(tab));
+  }
+
 
   return (
     <div className='tab-card-container' ref={attachRef} data-status={getTabStatus()}>
@@ -177,6 +198,20 @@ const Tab = ({ tab }) => {
             {getStatusElement()}
           </div>
         </CardContent>
+
+        <CardActions disableSpacing>
+          <IconButton onClick={openNewTabEvent}>
+            <OpenInNewIcon sx={{ color: "#ccccd7" }}></OpenInNewIcon>
+          </IconButton>
+
+          <IconButton onClick={freezeTabEvent}>
+            <PauseOutlinedIcon sx={{ color: "#ccccd7" }}></PauseOutlinedIcon>
+          </IconButton>
+
+          <IconButton onClick={closeTabEvent}>
+            <DeleteIcon sx={{ color: "#ccccd7" }}></DeleteIcon>
+          </IconButton>
+        </CardActions>
       </Card>
     </div>
   );

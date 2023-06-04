@@ -42,7 +42,7 @@ function App() {
   };
 
   const Container = styled.div`
-    overflow-x: scroll;
+    overflow-x: auto;
     display: grid;
     width: 100%;
   `;
