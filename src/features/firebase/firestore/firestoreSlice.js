@@ -30,6 +30,7 @@ const unSaveWorkSpace = {
     uid: ""                     // unused
 }
 
+/*The first workspace should be always "Unsaved"*/
 const initialState = {
     workspaces: [unSaveWorkSpace],
     groups: [],
@@ -539,8 +540,12 @@ const firestoreSlice = createSlice({
             state.currentGroup = action.payload;
         },
         updateUnsavedWorkspace: (state, action) => {
-            /*The first workspace should be always "Unsaved"*/
-            state.workspaces[0].tabs = action.payload.tabs;
+            let newTabs = state.tabs;
+            state.workspaces[0].tabs.forEach(removeTabId => {
+                newTabs = newTabs.filter(tab => tab.id !== removeTabId);
+            });
+            state.tabs = newTabs.concat(action.payload.tabs);
+            state.workspaces[0].tabs = action.payload.tabs.map(tab => tab.id);
         }
     },
     extraReducers: (builder) => {
