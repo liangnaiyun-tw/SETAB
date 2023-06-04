@@ -414,6 +414,7 @@ export const closeTab = createAsyncThunk('firestore/closeTab', async (tab, thunk
 
     await updateDoc(querySnapshot.docs[0].ref, {
         ...tab,
+        status: "complete",
         tabId: -1,
         windowId: -1,
         windowIndex: -1

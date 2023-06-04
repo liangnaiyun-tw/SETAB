@@ -105,7 +105,7 @@ const freezeChromeTab = createAsyncThunk('chromeTabs/clickFreezeTab', async (cur
     }
     if (currentTab.group !== thunkAPI.getState().firestore.workspaces[0].id) {
       thunkAPI.dispatch(updateTab({
-        currentTab,
+        ...currentTab,
         status: "unloaded"
       }));
     }
