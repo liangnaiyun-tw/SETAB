@@ -39,7 +39,7 @@ async function getMemory(thunkAPI) {
       tabIconUrl: tab.favIconUrl,
       privateMemory: 0,
       windowIndex: tab.index,
-      uid: ""
+      uid: thunkAPI.getState().firestore.user // TODO: Change user to uid
     };
   }));
   tabs = tabs.map(tab => tab.value);
@@ -71,6 +71,7 @@ async function getMemory(thunkAPI) {
     thunkAPI.dispatch(updateUnsavedWorkspace({
       tabs: tabs.filter((tab) => tab.group === thunkAPI.getState().firestore.workspaces[0].id)
     }));
+
 
     tabs.sort(function (a, b) {
       return a.privateMemory - b.privateMemory;

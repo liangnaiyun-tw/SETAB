@@ -8,7 +8,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EnergySavingsLeafOutlinedIcon from '@mui/icons-material/EnergySavingsLeafOutlined';
 import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined';
-import { freezeTab, deleteTab, fetchTabs, freezeChromeTab, closeChromeTab, reloadChromeTab } from '../../features/chromeTabs/chromeTabSlice';
+import { fetchTabs, freezeChromeTab, closeChromeTab, reloadChromeTab } from '../../features/chromeTabs/chromeTabSlice';
 import { getGroupNameChain } from '../../utils/tabs';
 
 /*global chrome*/

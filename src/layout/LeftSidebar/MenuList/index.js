@@ -270,7 +270,7 @@ export default function MenuList() {
 
       for (let i = 0; i < workspaces.length; i++) {
         let type = nodeType.Workspace;
-        if (workspaces[i].id === "") {
+        if (i === 0) {
           type = nodeType.UnsavedWorkspace
         }
         prev[workspaces[i].id] = {

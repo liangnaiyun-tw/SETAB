@@ -436,6 +436,21 @@ export const createTab = createAsyncThunk('firestore/createTab', async (tab, thu
     });
 })
 
+export const updateTab = createAsyncThunk('firestore/updateTab', async (tab, thunkAPI) => {
+    const user = thunkAPI.getState().auth.user;
+
+    let q = query(collection(db, "tabs"), where("id", "==", tab.id), where("uid", "==", user.uid));
+    const querySnapshot = await getDocs(q);
+
+    await updateDoc(querySnapshot.docs[0].ref, {
+        ...tab
+    });
+
+    await thunkAPI.dispatch(loadStructureByUser());
+
+    return "Update tab successfully";
+});
+
 
 const firestoreSlice = createSlice({
     name: 'firestore',
@@ -498,6 +513,12 @@ const firestoreSlice = createSlice({
                 console.log(action);
             })
             .addCase(createTab.fulfilled, (state, action) => {
+                console.log(action);
+            })
+            .addCase(updateTab.fulfilled, (state, action) => {
+                console.log(action);
+            })
+            .addCase(updateTab.rejected, (state, action) => {
                 console.log(action);
             })
             .addCase(updateUserWorkspaces.fulfilled, (state, action) => {
