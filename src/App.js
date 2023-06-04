@@ -59,7 +59,8 @@ function App() {
   const styleRightSidebar = {
     backgroundColor: 'rgba(108, 101, 133, 1)',
     // width: 500 - positionSecond.positionSecondX,
-    width: 500
+    width: 500,
+    overflowY: 'hidden'
   };
   const styleFooter = {
     height: "5vh",
