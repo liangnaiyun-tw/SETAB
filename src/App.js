@@ -60,7 +60,7 @@ function App() {
     backgroundColor: 'rgba(108, 101, 133, 1)',
     // width: 500 - positionSecond.positionSecondX,
     width: 500,
-    overflowY: hidden
+    overflowY: "hidden"
   };
   const styleFooter = {
     height: "5vh",
