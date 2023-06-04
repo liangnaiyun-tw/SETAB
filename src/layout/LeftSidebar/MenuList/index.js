@@ -70,7 +70,7 @@ export default function MenuList() {
   const [expandedItems, setExpandedItems] = useState([])
   const [focusedItem, setFocusedItem] = useState()
   const [selectedItems, setSelectedItems] = useState([])
-  const [treeData, setTreeData] = useState(initialData);
+  const [treeData, setTreeData] = useState([]);
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
 
