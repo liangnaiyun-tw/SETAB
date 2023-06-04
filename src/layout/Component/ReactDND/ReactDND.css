@@ -7,11 +7,4 @@
     padding: 1%; 
     height: 100%;
 
-    position:relative
-}
-
-.speedDial{
-    position: absolute;
-    left: 5vw;
-    top: 80vh;
 }

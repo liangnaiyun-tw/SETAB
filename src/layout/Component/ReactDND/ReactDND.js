@@ -27,7 +27,7 @@ import { useRef } from 'react';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import { Box, SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
-
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 
 const actions = [
   { icon: <UnfoldMoreIcon />, name: 'expaned' },
@@ -46,7 +46,6 @@ const ReactDND = () => {
 
 
   useEffect(() => {
-
     let newRoot = {};
     currentGroup.length === 0 ?
       newRoot = workspaces.filter(workspace => workspace.id === currentWorkspace)[0] :
@@ -55,11 +54,7 @@ const ReactDND = () => {
 
     let newStructure = {
       root: newRoot.id,
-      // id: newRoot.id,
-      // name: newRoot.name,
       columns: 0
-      // tabs: newRoot.tabs,
-      // childs: []
     }
     newStructure[newRoot.id] = {
       ...newRoot
@@ -74,7 +69,33 @@ const ReactDND = () => {
     createStructure(newStructure, newStructure[newRoot.id]);
     console.log(newStructure);
     dispatch(setStructure(newStructure));
-  }, [currentWorkspace, currentGroup, workspaces, groups])
+  }, [currentWorkspace, currentGroup])
+
+  useEffect(() => {
+    let newRoot = {};
+    currentGroup.length === 0 ?
+      newRoot = workspaces.filter(workspace => workspace.id === currentWorkspace)[0] :
+      newRoot = groups.filter(group => group.id === currentGroup[currentGroup.length - 1])[0];
+
+
+    let newStructure = {
+      root: newRoot.id,
+      columns: 0
+    }
+    newStructure[newRoot.id] = {
+      ...newRoot
+    }
+    if (newRoot.tabs) {
+      newStructure[newRoot.id].childs = [...newRoot.tabs, ...newRoot.groups];
+    } else {
+      newStructure[newRoot.id].childs = [...newRoot.groups];
+    }
+
+    newStructure.columns = newStructure[newRoot.id].groups.length;
+    createStructure(newStructure, newStructure[newRoot.id]);
+    console.log(newStructure);
+    dispatch(setStructure(newStructure));
+  }, [])
 
   const createStructure = (newStructure, parent) => {
     if (parent.tabs) {
@@ -174,11 +195,11 @@ const ReactDND = () => {
         </DndProvider>
 
       </div>
-      {/* <Box className="speedDial" sx={{ height: 320, transform: 'translateZ(0px)', flexGrow: 1 }}> */}
+      <Box sx={{ height: 320, transform: 'translateZ(0px)', flexGrow: 1 }}>
         <SpeedDial
           ariaLabel="SpeedDial controlled open example"
           sx={{ position: 'absolute', bottom: 16, right: 16 }}
-          icon={<SpeedDialIcon />}
+          icon={<OpenInFullIcon />}
           onClose={handleClose}
           onOpen={handleOpen}
           open={open}
@@ -192,7 +213,7 @@ const ReactDND = () => {
             />
           ))}
         </SpeedDial>
-      {/* </Box> */}
+      </Box>
     </div>
 
   );

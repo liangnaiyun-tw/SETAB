@@ -100,12 +100,7 @@ export default function BasicTabs({ token }) {
                     <Tab label="ReactDND" style={{ color: 'whitesmoke', backgroundColor: `${value === 0 ? "#282828" : "#202020"}` }} {...a11yProps(0)} />
                     {
                         workspaceName !== "Unsaved" &&
-                        <Tab label="Structure" style={{ color: 'whitesmoke', backgroundColor: `${value === 1 ? "#282828" : "#202020"}` }} {...a11yProps(1)} />
-
-                    }
-                    {
-                        workspaceName !== "Unsaved" &&
-                        <Tab label="Note" style={{ color: 'whitesmoke', backgroundColor: `${value === 2 ? "#282828" : "#202020"}` }} {...a11yProps(2)} />
+                        <Tab label="Note" style={{ color: 'whitesmoke', backgroundColor: `${value === 1 ? "#282828" : "#202020"}` }} {...a11yProps(1)} />
                     }
 
 
@@ -122,13 +117,6 @@ export default function BasicTabs({ token }) {
                 workspaceName !== "Unsaved" &&
 
                 <TabPanel value={value} index={1} style={{ backgroundColor: `${value === 1 ? "#282828" : "#202020"}`, height: '87vh' }}>
-                    <SwitchStructure />
-                </TabPanel>
-            }
-            {
-                workspaceName !== "Unsaved" &&
-
-                <TabPanel value={value} index={2} style={{ backgroundColor: `${value === 2 ? "#282828" : "#202020"}`, height: '87vh' }}>
                     <Note token={token} />
                 </TabPanel>
 
