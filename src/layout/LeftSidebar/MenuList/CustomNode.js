@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Typography from "@mui/material/Typography";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import styles from "./CustomNode.module.css";
-import { IconButton } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { setCurrentWorkspace, setCurrentGroup } from "../../../features/firebase/firestore/firestoreSlice";
 
@@ -77,13 +77,12 @@ export const CustomNode = (props) => {
                         switch (props.node.nodeType) {
                             case 0:
                             case 3:
-                                return <div>{props.node.text}</div>;
+                                return <Tooltip title={props.node.text}><div className={styles.nodeTitle}>{props.node.text}</div></Tooltip>;
                             case 1:
                             case 2:
                                 return (
                                     <>
-                                        <div>{props.node.text}</div>
-
+                                        <Tooltip title={props.node.text}><div className={styles.nodeTitle}>{props.node.text}</div></Tooltip>
                                         <div className="node-icon-container">
                                             <IconButton
                                                 aria-label="create group"

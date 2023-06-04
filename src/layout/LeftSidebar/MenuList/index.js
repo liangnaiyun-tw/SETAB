@@ -212,10 +212,11 @@ export default function MenuList() {
           prev.push({
             id: ws.id,
             parent: 0,
-            droppable: true,
+            droppable: false,
             text: ws.name,
             nodeType: nodeType.Workspace,
             groups: ws.groups
+
           })
         } else {
           prev.push({
@@ -246,7 +247,7 @@ export default function MenuList() {
         prev.push({
           id: g.id,
           parent: g.workspace,
-          droppable: false,
+          droppable: true,
           text: g.name,
           nodeType: nodeType.Group,
           groups: g.groups,
