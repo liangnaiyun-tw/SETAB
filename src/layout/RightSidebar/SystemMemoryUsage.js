@@ -27,10 +27,12 @@ function SystemMemoryUsage() {
   }
 
   function clickFreezeTab(event, currentTab) {
+    event.stopPropagation();
     dispatch(freezeChromeTab(currentTab));
   }
 
   function clickCloseTab(event, currentTab) {
+    event.stopPropagation();
     dispatch(closeChromeTab(currentTab));
   }
 
@@ -54,18 +56,18 @@ function SystemMemoryUsage() {
                       {getGroupNameChain(tab.group).join(" / ")}
                     </Typography>
                   </div>
-                </div>
 
-                <div className='tab-list-freeze-button-container'>
-                  <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
-                    <PauseOutlinedIcon></PauseOutlinedIcon>
-                  </IconButton>
-                </div>
+                  <div className='tab-list-freeze-button-container'>
+                    <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
+                      <PauseOutlinedIcon></PauseOutlinedIcon>
+                    </IconButton>
+                  </div>
 
-                <div className='tab-list-delete-button-container'>
-                  <IconButton onClick={(event) => clickCloseTab(event, tab)}>
-                    <DeleteIcon></DeleteIcon>
-                  </IconButton>
+                  <div className='tab-list-delete-button-container'>
+                    <IconButton onClick={(event) => clickCloseTab(event, tab)}>
+                      <DeleteIcon></DeleteIcon>
+                    </IconButton>
+                  </div>
                 </div>
               </li>
             );
@@ -83,18 +85,18 @@ function SystemMemoryUsage() {
                       {getGroupNameChain(tab.group).join(" / ")}
                     </Typography>
                   </div>
-                </div>
 
-                <div className='tab-list-freeze-button-container'>
-                  <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
-                    <PauseOutlinedIcon color="action"></PauseOutlinedIcon>
-                  </IconButton>
-                </div>
+                  <div className='tab-list-freeze-button-container'>
+                    <IconButton onClick={(event) => clickFreezeTab(event, tab)}>
+                      <PauseOutlinedIcon color="action"></PauseOutlinedIcon>
+                    </IconButton>
+                  </div>
 
-                <div className='tab-list-delete-button-container'>
-                  <IconButton onClick={(event) => clickCloseTab(event, tab)}>
-                    <DeleteIcon color="error"></DeleteIcon>
-                  </IconButton>
+                  <div className='tab-list-delete-button-container'>
+                    <IconButton onClick={(event) => clickCloseTab(event, tab)}>
+                      <DeleteIcon color="error"></DeleteIcon>
+                    </IconButton>
+                  </div>
                 </div>
               </li>
             );

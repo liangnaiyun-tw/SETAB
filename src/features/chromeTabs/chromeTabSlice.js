@@ -105,7 +105,10 @@ const freezeChromeTab = createAsyncThunk('chromeTabs/clickFreezeTab', async (cur
     }
     if (currentTab.group !== thunkAPI.getState().firestore.workspaces[0].id) {
       thunkAPI.dispatch(updateTab({
-        currentTab,
+        ...currentTab,
+        tabId: tab.id,
+        windowId: tab.windowId,
+        windowIndex: tab.index,
         status: "unloaded"
       }));
     }
@@ -155,13 +158,15 @@ const createChromeTab = createAsyncThunk('chromeTabs/createChromeTab', async (cu
     let newTab = await chrome.tabs.create({
       url: currentTab.tabUrl
     });
+    console.log("NEWTAB");
+    console.log(newTab);
     if (newTab) {
       thunkAPI.dispatch(updateTab({
         ...currentTab,
         status: "complete",
-        tabId: newTab.tabId,
+        tabId: newTab.id,
         windowId: newTab.windowId,
-        windowIndex: newTab.windowIndex
+        windowIndex: newTab.index
       }));
     }
   } catch (err) {
