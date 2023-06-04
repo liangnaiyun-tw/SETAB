@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { closeTab, updateTab, updateUnsavedWorkspace } from "../firebase/firestore/firestoreSlice";
+import { closeTab, createTab, updateTab, updateUnsavedWorkspace } from "../firebase/firestore/firestoreSlice";
 import { v4 as uuidv4 } from "uuid";
 
 /*global chrome*/
@@ -156,13 +156,13 @@ const createChromeTab = createAsyncThunk('chromeTabs/createChromeTab', async (cu
       url: currentTab.tabUrl
     });
     if (newTab) {
-      thunkAPI.dispatch({
+      thunkAPI.dispatch(createTab({
         ...currentTab,
         status: "complete",
         tabId: newTab.tabId,
         windowId: newTab.windowId,
         windowIndex: newTab.windowIndex
-      })
+      }));
     }
   } catch (err) {
     console.error(err);
