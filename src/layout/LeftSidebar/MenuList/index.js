@@ -189,6 +189,7 @@ export default function MenuList() {
       }
     })
 
+    console.log(currentGroup);
     handleAddGroupDialogClose();
     setNewGroupName("");
   };

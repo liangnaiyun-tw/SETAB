@@ -331,10 +331,12 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
 
         // setCurrentGroup and reload all structure
         await thunkAPI.dispatch(loadStructureByUser());
+        console.log([...currentGroup, newGroup.id]);
         thunkAPI.dispatch(setCurrentGroup([...currentGroup, newGroup.id]));
 
         return newGroup;
     } catch (e) {
+        console.error(e);
         return e.response;
     }
 })
@@ -494,7 +496,9 @@ const firestoreSlice = createSlice({
             state.rootDirectory = action.payload;
         },
         setCurrentGroup: (state, action) => {
-            state.currentGroup = action.payload;
+            console.log("SET CURRENt GROUP");
+            console.log(action.payload);
+            state.currentGroup = JSON.parse(JSON.stringify(action.payload));
         },
         updateUnsavedWorkspace: (state, action) => {
             let newTabs = state.tabs;
