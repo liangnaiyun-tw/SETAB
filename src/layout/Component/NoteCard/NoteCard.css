@@ -2,6 +2,7 @@
     background-color: #F2F6FB;
     border-radius: 25px;
     overflow: hidden; 
+    color: whitesmoke;
 
     min-width: 0;
     max-width: 100%;
@@ -13,6 +14,7 @@
 
     &:hover{
         background-color: #d0d3d7;
+        color: white;
     }
 
     &:hover > .Preview {
