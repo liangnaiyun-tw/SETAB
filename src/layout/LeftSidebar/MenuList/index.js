@@ -11,6 +11,7 @@ import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import {
+  CssBaseline,
   Dialog,
   Button,
   DialogActions,
@@ -18,24 +19,14 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
-  IconButton,
+  ThemeProvider,
   Divider,
-  ListItem,
-  ListItemText,
-  ListItemButton,
-  List
 } from "@mui/material";
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 import Group from "../../../interface/Group";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from '@mui/icons-material/Edit';
 import Workspace from '../../../interface/Workspace';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { PropaneSharp } from '@mui/icons-material';
 import SearchBar from '../SearchBar';
 import {
   Tree,
@@ -45,9 +36,7 @@ import {
 import { DndProvider } from "react-dnd";
 import { CustomDragPreview } from "./CustomDragPreview";
 import { CustomNode } from "./CustomNode";
-import { ThemeProvider, CssBaseline } from "@mui/material";
 import { theme } from "./theme";
-import { height } from '@xstyled/styled-components';
 
 export default function MenuList() {
   // To retrieve the workspaces of the current user.
@@ -117,62 +106,6 @@ export default function MenuList() {
       dispatch(updateUserWorkspaces([...treeEnvironment.current.items.root.children]));
     }
   }
-
-  const onDrop = (items, target) => {
-    console.log('items', items)
-    console.log('target', target)
-
-    items.forEach(i => {
-
-      updateItemParent(i);
-      if ('targetItem' in target) {
-
-        if (target.targetItem !== 'root') {
-          let targetItem = treeEnvironment.current.items[target.targetItem];
-          let newGroups = targetItem.children.filter(x => x !== "");
-          if (i.nodeType === nodeType.Workspace) {
-
-            dispatch(deleteWorkspace(i.index));
-            dispatch(createGroup({ name: i.data, groups: i.children, workspace: targetItem.index }))
-            newGroups = newGroups.filter(x => x !== i.index);
-          }
-          if (targetItem.nodeType === nodeType.Workspace) {
-            dispatch(updateWorkspaceGroups({ workspaceId: targetItem.index, groups: newGroups }))
-          } else {
-            dispatch(updateGroup({ name: targetItem.data, groups: newGroups }))
-          }
-        } else {
-          let newUserWorkspaces = [...treeEnvironment.current.items.root.children];
-          if (i.nodeType === nodeType.Group) {
-            dispatch(deleteGroup(i.index))
-            dispatch(createWorkSpace({ name: i.data, groups: i.children }));
-            newUserWorkspaces = newUserWorkspaces.filter(x => x !== "" && x !== i.index);
-          }
-
-          dispatch(updateUserWorkspaces(newUserWorkspaces));
-        }
-      } else if ('parentItem' in target && target.parentItem === 'root') {
-        let newUserWorkspaces = [...treeEnvironment.current.items.root.children];
-        if (i.nodeType === nodeType.Group) {
-          dispatch(deleteGroup(i.index))
-          dispatch(createWorkSpace({ name: i.data, groups: i.children }));
-          newUserWorkspaces = newUserWorkspaces.filter(x => x !== "" && x !== i.index);
-        }
-        dispatch(updateUserWorkspaces(newUserWorkspaces));
-      } else if ('parentItem' in target && target.parentItem !== 'root') {
-        let targetItem = treeEnvironment.current.items[target.parentItem];
-        let newGroups = targetItem.children;
-        if (targetItem.nodeType === nodeType.Workspace) {
-          dispatch(updateWorkspaceGroups({ workspaceId: targetItem.index, groups: newGroups }))
-        } else {
-          dispatch(updateGroup({ name: targetItem.data, groups: newGroups }))
-        }
-      }
-
-    })
-
-
-  };
 
   const handleNodeMoreClose = () => {
     setAnchorEl(null);
@@ -245,7 +178,7 @@ export default function MenuList() {
       console.log(data);
       const returnGroup = data.payload;
       if (currnetNode.nodeType === nodeType.Group) {
-        let group = groups.filter(g => g.id === currnetNode.index)[0];
+        let group = groups.filter(g => g.id === currnetNode.id)[0];
         let groupOfGroups = group.groups;
         let newGroup = Group;
         newGroup.name = group.name;
@@ -347,22 +280,22 @@ export default function MenuList() {
 
     } else {
       // group to workspace
-      if (dragSource.nodeType === nodeType.Group && dropTarget.nodeType == nodeType.Workspace) {
+      if (dragSource.nodeType === nodeType.Group && dropTarget.nodeType === nodeType.Workspace) {
         dispatch(setCurrentWorkspace(dropTarget.id))
-        dispatch(updateWorkspaceGroups({ workspaceId: dropTarget.id, groups: dropTarget.groups.push(dragSource.id) }))
-        dispatch(updateGroup({ id: dragSource.id, name: dragSource.text, groups: dragSource.groups.filter(gid => gid !== dragSource.id) }))
+        dispatch(updateWorkspaceGroups({ workspaceId: dropTarget.id, groups: [...dropTarget.groups, dragSource.id] }))
+        dispatch(updateGroup({ id: dragSource.id, name: dragSource.text, groups: [...dragSource.groups.filter(gid => gid !== dragSource.id)] }))
       }
       // group to other group
       if (dragSource.nodeType === nodeType.Group && dropTarget.nodeType === nodeType.Group) {
         dispatch(setCurrentWorkspace(dropTarget.workspace))
         let dragSourceWS = workspaces.filter(ws => ws.id === dragSource.parent);
         if (dragSourceWS) {
-          dispatch(updateWorkspaceGroups({ workspaceId: dragSourceWS[0].id, groups: dragSourceWS[0].groups.filter(gid => gid !== dragSource.id) }))
+          dispatch(updateWorkspaceGroups({ workspaceId: dragSourceWS[0].id, groups: [...dragSourceWS[0].groups.filter(gid => gid !== dragSource.id)] }))
         } else {
           let dragSourceGroup = groups.filter(g => g.id === dragSource.parent)[0];
-          dispatch(updateGroup({ id: dragSourceGroup.id, name: dragSourceGroup.name, groups: dragSourceGroup.groups.filter(gid => gid !== dragSource.id) }))
+          dispatch(updateGroup({ id: dragSourceGroup.id, name: dragSourceGroup.name, groups: [...dragSourceGroup.groups.filter(gid => gid !== dragSource.id)] }))
         }
-        dispatch(updateGroup({ id: dropTarget.id, name: dropTarget.text, groups: dropTarget.groups.push(dragSource.id) }))
+        dispatch(updateGroup({ id: dropTarget.id, name: dropTarget.text, groups: [...dropTarget.groups, dragSource.id] }))
 
       }
     }

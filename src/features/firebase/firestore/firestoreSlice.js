@@ -237,6 +237,8 @@ export const deleteWorkspace = createAsyncThunk('firestore/deleteWorkspace', asy
     deleteQuerySnapshot.forEach(doc => batch.delete(doc.ref));
     batch.commit()
 
+    await thunkAPI.dispatch(setCurrentWorkspace(thunkAPI.getState().firestore.workspaces[0].id))
+    await thunkAPI.dispatch(setCurrentGroup([]));
     await thunkAPI.dispatch(loadStructureByUser());
     return 'delete workspace successfully';
 })
@@ -370,6 +372,8 @@ export const deleteGroup = createAsyncThunk('firestroe/deleteGroup', async (grou
         await deleteDoc(querySnapshot.docs[0].ref);
     }
 
+    await thunkAPI.dispatch(setCurrentWorkspace(thunkAPI.getState().firestore.workspaces[0].id))
+    await thunkAPI.dispatch(setCurrentGroup([]));
     await thunkAPI.dispatch(loadStructureByUser());
 
     return 'delete group successfully'
@@ -546,6 +550,7 @@ const firestoreSlice = createSlice({
         },
         setCurrentWorkspace: (state, action) => {
             state.currentWorkspace = action.payload;
+            state.currentGroup = [];
         },
         setRootDirectory: (state, action) => {
             state.rootDirectory = action.payload;

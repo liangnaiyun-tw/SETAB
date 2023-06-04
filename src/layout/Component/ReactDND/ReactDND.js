@@ -69,31 +69,31 @@ const ReactDND = () => {
     dispatch(setStructure(newStructure));
   }, [currentWorkspace, currentGroup, workspaces, groups, tabs]);
 
-  useEffect(() => {
-    let newRoot = {};
-    currentGroup.length === 0 ?
-      newRoot = workspaces.filter(workspace => workspace.id === currentWorkspace)[0] :
-      newRoot = groups.filter(group => group.id === currentGroup[currentGroup.length - 1])[0];
+  // useEffect(() => {
+  //   let newRoot = {};
+  //   currentGroup.length === 0 ?
+  //     newRoot = workspaces.filter(workspace => workspace.id === currentWorkspace)[0] :
+  //     newRoot = groups.filter(group => group.id === currentGroup[currentGroup.length - 1])[0];
 
 
-    let newStructure = {
-      root: newRoot.id,
-      columns: 0
-    }
-    newStructure[newRoot.id] = {
-      ...newRoot
-    }
-    if (newRoot.tabs) {
-      newStructure[newRoot.id].childs = [...newRoot.tabs, ...newRoot.groups];
-    } else {
-      newStructure[newRoot.id].childs = [...newRoot.groups];
-    }
+  //   let newStructure = {
+  //     root: newRoot.id,
+  //     columns: 0
+  //   }
+  //   newStructure[newRoot.id] = {
+  //     ...newRoot
+  //   }
+  //   if (newRoot.tabs) {
+  //     newStructure[newRoot.id].childs = [...newRoot.tabs, ...newRoot.groups];
+  //   } else {
+  //     newStructure[newRoot.id].childs = [...newRoot.groups];
+  //   }
 
-    newStructure.columns = newStructure[newRoot.id].groups.length;
-    createStructure(newStructure, newStructure[newRoot.id]);
-    console.log(newStructure);
-    dispatch(setStructure(newStructure));
-  }, [])
+  //   newStructure.columns = newStructure[newRoot.id].groups.length;
+  //   createStructure(newStructure, newStructure[newRoot.id]);
+  //   console.log(newStructure);
+  //   dispatch(setStructure(newStructure));
+  // }, [currentGroup, currentWorkspace])
 
   const createStructure = (newStructure, parent) => {
     if (parent.tabs) {
@@ -186,7 +186,7 @@ const ReactDND = () => {
   return (
     <div className="wrapper">
       <div className="board">
-        <DndProvider backend={HTML5Backend} style={{ width: `${structure.columns!==undefined? `${structure.columns * 275}px` : '100%'}` }}>
+        <DndProvider backend={HTML5Backend} style={{ width: `${structure.columns !== undefined ? `${structure.columns * 275}px` : '100%'}` }}>
           <Masonry columns={structure.columns} spacing={1} useRef={drop}>
             {structure[structure.root]?.childs.map((child) => {
               return structure[child].type === 'group' ?
