@@ -219,6 +219,7 @@ export const createWorkSpace = createAsyncThunk('firestore/createWorkSpace', asy
 
         return "create workspace sucessfully";
     } catch (e) {
+        console.error(e.message);
         return e.response;
     }
 
@@ -281,6 +282,10 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
                 return parent.googleDriveFolderId;
             })()
 
+        console.log("WORKSPACES");
+        console.log(group.workspace, currentWorkspace);
+        console.log("PARENT FOLDERID");
+        console.log(parentFolderId);
         const groupFolderData = {
             "name": group.name,
             "mimeType": "application/vnd.google-apps.folder",

@@ -180,6 +180,13 @@ export default function MenuList() {
 
   const handleNodeMoreOpen = (event, node) => {
     event.stopPropagation();
+
+    if (node.nodeType === nodeType.Workspace) {
+      dispatch(setCurrentWorkspace(node.id));
+    } else if (node.nodeType === nodeType.Group) {
+      dispatch(setCurrentGroup([...currentGroup, node.id]));
+    }
+
     setCurrentNode(node);
     setRename(node.text);
 
@@ -235,6 +242,7 @@ export default function MenuList() {
     newGroup.name = newGroupName;
 
     dispatch(createGroup(newGroup)).then((data) => {
+      console.log(data);
       const returnGroup = data.payload;
       if (currnetNode.nodeType === nodeType.Group) {
         let group = groups.filter(g => g.id === currnetNode.index)[0];

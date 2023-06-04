@@ -68,7 +68,7 @@ const ReactDND = () => {
     createStructure(newStructure, newStructure[newRoot.id]);
     console.log(newStructure);
     dispatch(setStructure(newStructure));
-  }, [currentWorkspace, currentGroup])
+  }, [currentWorkspace, currentGroup, workspaces, groups, tabs]);
 
   useEffect(() => {
     let newRoot = {};

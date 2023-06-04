@@ -40,6 +40,8 @@ const Main = ({ cssMain, styleMain, token }) => {
     if (workspace) {
       setWorkspaceName(workspace.name)
     }
+    console.log("CURRENT GROUP");
+    console.log(currentGroup);
   }, [currentWorkspace, workspaces])
 
   return (
