@@ -7,7 +7,7 @@ const initialState = {
         groups: [],
         tabs: [],
         childs: []
-    }
+    },
 }
 
 
@@ -19,10 +19,9 @@ const dndSlice = createSlice({
             state.structure = {
                 ...action.payload
             }
-        }
-    },
-
+        },
+    }
 })
 
-export const { setStructure } = dndSlice.actions
+export const { setStructure  } = dndSlice.actions
 export default dndSlice.reducer

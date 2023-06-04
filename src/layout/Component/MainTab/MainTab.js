@@ -97,25 +97,21 @@ export default function BasicTabs({ token }) {
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example" indicatorColor='#282828' >
-                    <Tab label="Info" style={{ color: 'whitesmoke', backgroundColor: `${value === 0 ? "#282828" : "#202020"}` }} {...a11yProps(0)} />
-                    <Tab label="ReactDND" style={{ color: 'whitesmoke', backgroundColor: `${value === 1 ? "#282828" : "#202020"}` }} {...a11yProps(1)} />
+                    <Tab label="ReactDND" style={{ color: 'whitesmoke', backgroundColor: `${value === 0 ? "#282828" : "#202020"}` }} {...a11yProps(0)} />
                     {
                         workspaceName !== "Unsaved" &&
-                        <Tab label="Structure" style={{ color: 'whitesmoke', backgroundColor: `${value === 2 ? "#282828" : "#202020"}` }} {...a11yProps(2)} />
+                        <Tab label="Structure" style={{ color: 'whitesmoke', backgroundColor: `${value === 1 ? "#282828" : "#202020"}` }} {...a11yProps(1)} />
 
                     }
                     {
                         workspaceName !== "Unsaved" &&
-                        <Tab label="Note" style={{ color: 'whitesmoke', backgroundColor: `${value === 3 ? "#282828" : "#202020"}` }} {...a11yProps(3)} />
+                        <Tab label="Note" style={{ color: 'whitesmoke', backgroundColor: `${value === 2 ? "#282828" : "#202020"}` }} {...a11yProps(2)} />
                     }
 
 
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0} style={{ backgroundColor: `${value === 0 ? "#282828" : "#202020"}` }}>
-                Info
-            </TabPanel>
-            <TabPanel value={value} index={1} style={{ backgroundColor: `${value === 1 ? "#282828" : "#202020"}` }}>
                 <DndProvider backend={HTML5Backend}>
                     <div id='trello'>
                         <ReactDND />
@@ -125,14 +121,14 @@ export default function BasicTabs({ token }) {
             {
                 workspaceName !== "Unsaved" &&
 
-                <TabPanel value={value} index={2} style={{ backgroundColor: `${value === 2 ? "#282828" : "#202020"}` }}>
+                <TabPanel value={value} index={1} style={{ backgroundColor: `${value === 1 ? "#282828" : "#202020"}` }}>
                     <SwitchStructure />
                 </TabPanel>
             }
             {
                 workspaceName !== "Unsaved" &&
 
-                <TabPanel value={value} index={3} style={{ backgroundColor: `${value === 3 ? "#282828" : "#202020"}` }}>
+                <TabPanel value={value} index={2} style={{ backgroundColor: `${value === 2 ? "#282828" : "#202020"}` }}>
                     <Note token={token} />
                 </TabPanel>
 

@@ -159,7 +159,7 @@ const LeftSidebar = ({ cssLeftSidebar, styleLeftSidebar }) => {
                             <Login />
                         </> :
                         <>
-                            <img className="userImage" src={user?.photoURL} alt="" />
+                            <img className="userImage" src={user?.photoUrl} alt="" />
                             <span className="userDisplayName">&nbsp; {user?.displayName}</span>
                         </>
                     }

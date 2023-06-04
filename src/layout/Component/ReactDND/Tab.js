@@ -42,33 +42,64 @@ const Tab = ({ tab }) => {
         if (item.type === 'group') {
           let originGroup = newStructure[item.parent];
           let draggedGroup = newStructure[item.id];
-          let index = tab.index + 1;
 
-          originGroup.childs = originGroup.childs.filter(child => child !== item.id);
-          originGroup.groups = originGroup.groups.filter(group => group !== item.id);
 
-          draggedGroup.parent = currentGroup.id;
-          draggedGroup.index = index;
-          currentGroup.childs = [...currentGroup.childs.slice(0, index), draggedGroup.id, ...currentGroup.childs.slice(index)];
-          // currentGroup.group = [draggedGroup.id]
+          if (currentGroup.id === originGroup.id) {
+            currentGroup.childs.splice(draggedGroup.index, 0);
+            for (let i = 0; i < currentGroup.childs.length; i++) {
+              newStructure[currentGroup.childs[i]].index = i
+            }
+            currentGroup.childs.splice(droppedTab.index, 0, draggedGroup);
+            for (let i = 0; i < currentGroup.childs.length; i++) {
+              newStructure[currentGroup.childs[i]].index = i
+            }
 
-          dispatch(setStructure(newStructure));
-          // for(let i=0; i<group.childs.length; i++){
-          //     if(group.childs[i].index>tab.index) group.childs[i].index = group.childs[i].index+1;
-          // }
-          // item.index = tab.index+1;
-          // item.parnet = group.id;
-          // group.childs = [...group.childs.slice(0, tab.index+1), item, group.childs.slice(tab.index+1)];
-          // const originGroupId = item.parent;
-          // const newGroupId = tab.group;
-          // if(originGroupId === newGroupId) {
-          //     // same group, change index
+          } else {
+            originGroup.childs = originGroup.childs.filter(child => child !== item.id);
+            originGroup.groups = originGroup.groups.filter(group => group !== item.id);
 
-          // }
+            draggedGroup.parent = currentGroup.id;
+            currentGroup.childs = [...currentGroup.childs.slice(0, index), draggedGroup.id, ...currentGroup.childs.slice(index)];
+
+            for (let i = 0; i < originGroup.childs.length; i++) {
+              newStructure[originGroup.childs[i]].index = i;
+            }
+            for (let i = 0; i < currentGroup.childs.length; i++) {
+              newStructure[currentGroup.childs[i]].index = i;
+            }
+          }
+
         } else {
-          const newGroupId = item.group;
+
+          let originGroup = newStructure[item.group];
+          let draggedTab = newStructure[item.id];
+
+          if (currentGroup.id === originGroup.id) {
+            currentGroup.childs.splice(draggedTab.index, 0);
+            for (let i = 0; i < currentGroup.childs.length; i++) {
+              newStructure[currentGroup.childs[i]].index = i
+            }
+            currentGroup.childs.splice(droppedTab.index, 0, draggedTab);
+            for (let i = 0; i < currentGroup.childs.length; i++) {
+              newStructure[currentGroup.childs[i]].index = i
+            }
+
+          } else {
+            originGroup.childs = originGroup.childs.filter(child => child !== item.id);
+            originGroup.tabs = originGroup.tabs.filter(tab => tab !== item.id);
+
+            draggedTab.group = currentGroup.id;
+            currentGroup.childs = [...currentGroup.childs.slice(0, droppedTab.index), draggedTab.id, ...currentGroup.childs.slice(droppedTab.index)];
+
+            for (let i = 0; i < originGroup.childs.length; i++) {
+              newStructure[originGroup.childs[i]].index = i;
+            }
+            for (let i = 0; i < currentGroup.childs.length; i++) {
+              newStructure[currentGroup.childs[i]].index = i;
+            }
+          }
         }
-        console.log("Drop on group", item, tab);
+        dispatch(setStructure(newStructure));
 
       }
 
