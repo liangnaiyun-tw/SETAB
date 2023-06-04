@@ -237,6 +237,8 @@ export const deleteWorkspace = createAsyncThunk('firestore/deleteWorkspace', asy
     deleteQuerySnapshot.forEach(doc => batch.delete(doc.ref));
     batch.commit()
 
+    await thunkAPI.dispatch(setCurrentWorkspace(thunkAPI.workspaces[0]))
+    await thunkAPI.dispatch(setCurrentGroup([]));
     await thunkAPI.dispatch(loadStructureByUser());
     return 'delete workspace successfully';
 })
