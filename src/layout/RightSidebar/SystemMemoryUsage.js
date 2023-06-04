@@ -2,7 +2,7 @@ import './SystemMemoryUsage.css';
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { PieChart } from "./PieChart";
-import { IconButton, Typography } from "@mui/material";
+import { IconButton, Typography, Divider } from "@mui/material";
 import { interpolateColorByIndex } from '../../utils/interpolateColor';
 import CircleIcon from '@mui/icons-material/Circle';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -37,10 +37,10 @@ function SystemMemoryUsage() {
 
   return (
     <div className="SystemMemoryUsage">
-      <div id="system-memeory-usage-title">Current Memory Usage</div>
+      <div id="system-memeory-usage-title" style={{ font: 'inherit', fontSize: '24px' }}>Current Memory Usage</div>
 
       <PieChart></PieChart>
-
+      <Divider style={{ marginBottom: 16 }} />
       <ul className="tab-list">
         {tabs.length === 0
           ? <div id="no-tab-message">Loading...</div>

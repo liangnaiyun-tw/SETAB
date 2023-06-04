@@ -338,20 +338,20 @@ export default function MenuList() {
       // group to workspace
       if (dragSource.nodeType === nodeType.Group && dropTarget.nodeType === nodeType.Workspace) {
         dispatch(setCurrentWorkspace(dropTarget.id))
-        dispatch(updateWorkspaceGroups({ workspaceId: dropTarget.id, groups: dropTarget.groups.push(dragSource.id) }))
-        dispatch(updateGroup({ id: dragSource.id, name: dragSource.text, groups: dragSource.groups.filter(gid => gid !== dragSource.id) }))
+        dispatch(updateWorkspaceGroups({ workspaceId: dropTarget.id, groups: [...dropTarget.groups, dragSource.id] }))
+        dispatch(updateGroup({ id: dragSource.id, name: dragSource.text, groups: [...dragSource.groups.filter(gid => gid !== dragSource.id)] }))
       }
       // group to other group
       if (dragSource.nodeType === nodeType.Group && dropTarget.nodeType === nodeType.Group) {
         dispatch(setCurrentWorkspace(dropTarget.workspace))
         let dragSourceWS = workspaces.filter(ws => ws.id === dragSource.parent);
         if (dragSourceWS) {
-          dispatch(updateWorkspaceGroups({ workspaceId: dragSourceWS[0].id, groups: dragSourceWS[0].groups.filter(gid => gid !== dragSource.id) }))
+          dispatch(updateWorkspaceGroups({ workspaceId: dragSourceWS[0].id, groups: [...dragSourceWS[0].groups.filter(gid => gid !== dragSource.id)] }))
         } else {
           let dragSourceGroup = groups.filter(g => g.id === dragSource.parent)[0];
-          dispatch(updateGroup({ id: dragSourceGroup.id, name: dragSourceGroup.name, groups: dragSourceGroup.groups.filter(gid => gid !== dragSource.id) }))
+          dispatch(updateGroup({ id: dragSourceGroup.id, name: dragSourceGroup.name, groups: [...dragSourceGroup.groups.filter(gid => gid !== dragSource.id)] }))
         }
-        dispatch(updateGroup({ id: dropTarget.id, name: dropTarget.text, groups: dropTarget.groups.push(dragSource.id) }))
+        dispatch(updateGroup({ id: dropTarget.id, name: dropTarget.text, groups: [...dropTarget.groups, dragSource.id] }))
 
       }
     }

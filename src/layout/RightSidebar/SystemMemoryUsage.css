@@ -1,9 +1,10 @@
 #system-memeory-usage-title {
   text-align: center;
-  font-size: 15px;
+  font-size: 24px;
   font-weight: bold;
   color: white;
   margin-top: 1rem;
+  font: inherit;
 }
 
 #no-tab-message {
@@ -39,9 +40,12 @@
   border: 2px solid darkgray;
   border-radius: 7px;
   cursor: pointer;
-  background-color: beige;
   transition-duration: 0.2s;
+  transition: background-color .3s cubic-bezier(0.42, 0, 0.64, 0.42);
+  background-color: rgba(255, 255, 255, 0);
 }
+
+
 
 .tab-list-content-unload {
   display: flex;
@@ -54,14 +58,15 @@
   border: 2px solid darkgray;
   border-radius: 7px;
   cursor: pointer;
-  background-color: beige;
-  filter: brightness(0.6);
   transition-duration: 0.2s;
+  transition: background-color .3s cubic-bezier(0.42, 0, 0.64, 0.42);
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .tab-list-content:hover,
 .tab-list-content-unload:hover {
-  border: 2px solid black;
+  border: 2px solid darkgray;
+  background: rgba(255, 255, 255, 1);
 }
 
 .tab-list-content-text {
