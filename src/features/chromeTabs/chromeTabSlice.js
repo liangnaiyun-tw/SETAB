@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 const initState = {
   isLoading: false,
   isDataModified: false,
+  canWriteToFirebase: true,
   fetchTabs: []
 };
 
@@ -67,13 +68,14 @@ async function getMemory(thunkAPI) {
   } else {
     console.log(tabs);
 
-    tabs.filter(tab => tab.group !== thunkAPI.getState().firestore.workspaces[0].id).forEach(tab => {
-      thunkAPI.dispatch(updateTab(tab));
-    });
+    if (thunkAPI.getState().chromeTabs.canWriteToFirebase) {
+      tabs.filter(tab => tab.group !== thunkAPI.getState().firestore.workspaces[0].id).forEach(tab => {
+        thunkAPI.dispatch(updateTab(tab));
+      });
+    }
     thunkAPI.dispatch(updateUnsavedWorkspace({
       tabs: tabs.filter((tab) => tab.group === thunkAPI.getState().firestore.workspaces[0].id)
     }));
-
 
     tabs.sort(function (a, b) {
       return a.privateMemory - b.privateMemory;
@@ -88,9 +90,16 @@ async function getMemory(thunkAPI) {
 const fetchTabs = createAsyncThunk('chromeTabs/fetchTabs', async (_, thunkAPI) => {
   const processesListener = (processes) => { getMemory(thunkAPI) };
   /*Must use onUpdateWithMemory to get the privateMemory*/
+  let id = setInterval(() => {
+    thunkAPI.dispatch(setCanWriteToFirebase(true));
+    setTimeout(() => {
+      thunkAPI.dispatch(setCanWriteToFirebase(false));
+    }, 2000);
+  }, 5000);
   chrome.processes.onUpdatedWithMemory.addListener(processesListener);
   return () => {
     chrome.processes.onUpdatedWithMemory.removeListener(processesListener);
+    clearInterval(id);
   }
 });
 
@@ -222,6 +231,9 @@ const chromeTabSlice = createSlice({
       state.fetchTabs.sort((a, b) => a.privateMemory - b.privateMemory);
       state.isDataModified = true;
     },
+    setCanWriteToFirebase: (state, action) => {
+      state.canWriteToFirebase = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -258,6 +270,6 @@ const chromeTabSlice = createSlice({
   }
 });
 
-export const { setFetchLoadingStatus, setDataModified, updateChromeTabs, reloadTab, freezeTab, switchGroup, deleteTab } = chromeTabSlice.actions;
+export const { setFetchLoadingStatus, setDataModified, updateChromeTabs, reloadTab, freezeTab, switchGroup, deleteTab, setCanWriteToFirebase } = chromeTabSlice.actions;
 export { fetchTabs, freezeChromeTab, reloadChromeTab, closeChromeTab, createChromeTab };
 export default chromeTabSlice.reducer;
