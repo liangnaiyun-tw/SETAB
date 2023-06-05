@@ -159,7 +159,9 @@ export const updateUserWorkspaces = createAsyncThunk('firestore/updateUserWorksp
 
     return "update User Workspaces sucessfully";
 })
-export const updateWorkspaceGroups = createAsyncThunk('firestore/updateWorkspaceGroups', async ({ groups, workspaceId }, thunkAPI) => {
+export const updateWorkspaceGroups = createAsyncThunk('firestore/updateWorkspaceGroups', async ({ workspaceId, groups }, thunkAPI) => {
+    console.log('updateWorkspaceGroups', workspaceId, groups)
+
     const user = thunkAPI.getState().auth.user;
 
     let q = query(collection(db, "workspaces"), where("id", "==", workspaceId), where("uid", "==", user.uid));
@@ -278,7 +280,7 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
             :
             (() => {
                 parent = workspaces.filter(workspace =>
-                    workspace.id === (group.workspace ? group.workspace : currentWorkspace)
+                    workspace.id === currentWorkspace
                 )[0]
                 parentIsWorkspace = true;
                 return parent.googleDriveFolderId;
@@ -309,7 +311,7 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
             id: uuidv4(),
             googleDriveFolderId: folder.id,
             uid: user.uid,
-            workspace: group.workspace ? group.workspace : currentWorkspace
+            workspace: currentWorkspace
         }
         await addDoc(collection(db, "groups"), {
             ...newGroup,
@@ -331,22 +333,52 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
 
         // setCurrentGroup and reload all structure
         await thunkAPI.dispatch(loadStructureByUser());
+        console.log('[...currentGroup, newGroup.id]', [...currentGroup, newGroup.id])
         thunkAPI.dispatch(setCurrentGroup([...currentGroup, newGroup.id]));
 
-        return newGroup;
+        return "create group successfully";
     } catch (e) {
         return e.response;
     }
 })
-export const updateGroup = createAsyncThunk('firestore/updateGroup', async (group, thunkAPI) => {
+export const updateGroupName = createAsyncThunk('firestore/updateGroupName', async (group, thunkAPI) => {
     const user = thunkAPI.getState().auth.user;
 
     let q = query(collection(db, "groups"), where("id", "==", group.id), where("uid", "==", user.uid));
     const querySnapshot = await getDocs(q);
     const data = querySnapshot.docs[0].data();
     await updateDoc(querySnapshot.docs[0].ref, {
-        name: group.name,
-        group: [...data.groups.concat(group.groups)]
+        name: group.name
+    })
+
+    await thunkAPI.dispatch(loadStructureByUser());
+
+    return 'update group successfully'
+
+})
+export const updateGroupGroups = createAsyncThunk('firestore/updateGroupGroups', async (group, thunkAPI) => {
+    const user = thunkAPI.getState().auth.user;
+
+    let q = query(collection(db, "groups"), where("id", "==", group.id), where("uid", "==", user.uid));
+    const querySnapshot = await getDocs(q);
+    const data = querySnapshot.docs[0].data();
+    await updateDoc(querySnapshot.docs[0].ref, {
+        groups: [...group.groups]
+    })
+
+    await thunkAPI.dispatch(loadStructureByUser());
+
+    return 'update group successfully'
+
+})
+export const updateGroupWorkspace = createAsyncThunk('firestore/updateGroupWorkspace', async (group, thunkAPI) => {
+    const user = thunkAPI.getState().auth.user;
+
+    let q = query(collection(db, "groups"), where("id", "==", group.id), where("uid", "==", user.uid));
+    const querySnapshot = await getDocs(q);
+    const data = querySnapshot.docs[0].data();
+    await updateDoc(querySnapshot.docs[0].ref, {
+        workspace: group.workspace
     })
 
     await thunkAPI.dispatch(loadStructureByUser());
@@ -528,16 +560,26 @@ const firestoreSlice = createSlice({
             .addCase(createGroup.rejected, (state, action) => {
                 console.log(action);
             })
-            .addCase(updateGroup.fulfilled, (state, action) => {
+            .addCase(updateGroupName.fulfilled, (state, action) => {
                 console.log(action);
             })
-            .addCase(updateGroup.rejected, (state, action) => {
+            .addCase(updateGroupName.rejected, (state, action) => {
+                console.log(action);
+            })
+            .addCase(updateGroupGroups.fulfilled, (state, action) => {
+                console.log(action);
+            })
+            .addCase(updateGroupGroups.rejected, (state, action) => {
+                console.log(action);
+            })
+            .addCase(updateGroupWorkspace.fulfilled, (state, action) => {
+                console.log(action);
+            })
+            .addCase(updateGroupWorkspace.rejected, (state, action) => {
                 console.log(action);
             })
             .addCase(createGroup.fulfilled, (state, action) => {
                 console.log(action);
-                console.log(action.payload);
-                return action.payload;
 
             })
             .addCase(createTab.rejected, (state, action) => {

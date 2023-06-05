@@ -1,9 +1,8 @@
 
 
-// import { UncontrolledTreeEnvironment, Tree, StaticTreeDataProvider, ControlledTreeEnvironment } from 'react-complex-tree';
 import 'react-complex-tree/lib/style-modern.css';
 import { useSelector, useDispatch } from 'react-redux';
-import { setCurrentWorkspace, createGroup, updateWorkspace, updateGroup, updateUserWorkspaces, updateWorkspaceGroups, deleteWorkspace, createWorkSpace, setCurrentGroup, deleteGroup } from '../../../features/firebase/firestore/firestoreSlice';
+import { setCurrentWorkspace, createGroup, updateWorkspace, updateGroupName, updateGroupGroups, updateGroupWorkspace, updateWorkspaceGroups, deleteWorkspace, setCurrentGroup, deleteGroup } from '../../../features/firebase/firestore/firestoreSlice';
 
 import React, { useEffect, useState, useRef } from "react";
 import Menu from "@mui/material/Menu";
@@ -55,25 +54,15 @@ export default function MenuList() {
   const handleAddGroupDialogOpen = () => setOpenAddGroupDialogDialog(true);
   const handleAddGroupDialogClose = () => setOpenAddGroupDialogDialog(false);
   const open = Boolean(anchorEl);
-  // tree state control
-  const [expandedItems, setExpandedItems] = useState([])
-  const [focusedItem, setFocusedItem] = useState()
-  const [selectedItems, setSelectedItems] = useState([])
   const [treeData, setTreeData] = useState([]);
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
-
-  const treeEnvironment = useRef();
-  const tree = useRef();
   const nodeType = {
     UnsavedWorkspace: 0,
     Workspace: 1,
     Group: 2,
     Tab: 3,
   };
-  const [showTree, setShowTree] = useState(false);
-
-
 
   const rootNode = {
     index: 'root',
@@ -90,22 +79,6 @@ export default function MenuList() {
   });
 
   const dispatch = useDispatch();
-
-  const updateItemParent = (item) => {
-
-    if (item.parent !== 'root') {
-      let parent = treeEnvironment.current.items[item.parent];
-      let newGroups = [...parent.children].filter(x => x !== "" && x !== item.index)
-      if (workspaces.filter(ws => ws.id === item.parent)) {
-        dispatch(updateWorkspaceGroups({ workspaceId: parent.index, groups: newGroups }))
-      } else {
-        dispatch(updateGroup({ name: parent.data, groups: newGroups }))
-      }
-    }
-    if (item.parent === 'root' && item.nodeType === nodeType.Workspace) {
-      dispatch(updateUserWorkspaces([...treeEnvironment.current.items.root.children]));
-    }
-  }
 
   const handleNodeMoreClose = () => {
     setAnchorEl(null);
@@ -137,28 +110,10 @@ export default function MenuList() {
       let group = Group;
       group.id = currnetNode.id;
       group.name = rename;
-      dispatch(updateGroup(group))
+      dispatch(updateGroupName(group))
     }
     handleRenameDialogClose();
 
-  }
-
-  const handleRenameItem = (item, newName) => {
-    setRename(newName);
-    if (item.nodeType === nodeType.Workspace) {
-      let workspace = Workspace;
-      workspace.id = item.index;
-      workspace.name = newName;
-      workspace.groups = item.children;
-      dispatch(updateWorkspace(workspace))
-    } else if (item.nodeType === nodeType.Group) {
-      let group = Group;
-      group.id = item.index;
-      group.name = newName;
-      group.groups = item.children;
-      dispatch(updateGroup(group))
-    }
-    setRename('')
   }
 
   const handleDelete = () => {
@@ -171,23 +126,9 @@ export default function MenuList() {
   }
 
   const handleCreateGroup = () => {
-    const newGroup = Group;
-    newGroup.name = newGroupName;
-
-    dispatch(createGroup(newGroup)).then((data) => {
-      console.log(data);
-      const returnGroup = data.payload;
-      if (currnetNode.nodeType === nodeType.Group) {
-        let group = groups.filter(g => g.id === currnetNode.id)[0];
-        let groupOfGroups = group.groups;
-        let newGroup = Group;
-        newGroup.name = group.name;
-        newGroup.groups = groupOfGroups.concat([returnGroup.id]);
-        newGroup.id = group.id;
-        newGroup.workspace = group.workspace;
-        dispatch(updateGroup(newGroup));
-      }
-    })
+    const group = Group;
+    group.name = newGroupName;
+    dispatch(createGroup(group));
 
     handleAddGroupDialogClose();
     setNewGroupName("");
@@ -215,8 +156,8 @@ export default function MenuList() {
             droppable: false,
             text: ws.name,
             nodeType: nodeType.Workspace,
-            groups: ws.groups
-
+            groups: ws.groups,
+            workspace: ws.id
           })
         } else {
           prev.push({
@@ -225,7 +166,8 @@ export default function MenuList() {
             droppable: false,
             text: ws.name,
             nodeType: nodeType.UnsavedWorkspace,
-            groups: []
+            groups: [],
+            workspace: ws.id
           })
           ws.tabs.forEach(tabid => {
             let tab = tabs.filter(t => t.id === tabid)[0];
@@ -235,7 +177,8 @@ export default function MenuList() {
               droppable: false,
               text: tab.alias,
               nodeType: nodeType.Tab,
-              groups: []
+              groups: [],
+              workspace: ws.id
             })
           })
         }
@@ -273,33 +216,79 @@ export default function MenuList() {
 
 
   const handleDrop = (newTree, { dragSourceId, dropTargetId, dragSource, dropTarget }) => {
-    setTreeData(newTree);
+
     console.log('handleDrop')
     console.log(dragSourceId, dropTargetId, dragSource, dropTarget)
-    if (dragSource.parent === dropTarget.parent) {
+    console.log(newTree)
+    // setTreeData(newTree);
+
+    // newTree.filter(x => x.nodeType === nodeType.Workspace).forEach(workspaceNode => {
+    //   dispatch(updateWorkspaceGroups({ workspaceId: workspaceNode.id, groups: [...newTree.filter(t => t.parent === workspaceNode.id)].map(x => x.id) }))
+    //   newTree.filter(t => t.parent === workspaceNode.id).forEach(n => {
+    //     if (n.workspace !== workspaceNode.id) {
+    //       dispatch(updateGroupWorkspace({ id: n.id, workspace: workspaceNode.id }))
+    //     }
+    //   })
+    // })
+
+    // newTree.filter(x => x.nodeType === nodeType.Group).forEach(groupNode => {
+    //   dispatch(updateGroupGroups({ id: groupNode.id, groups: [...newTree.filter(t => t.parent === groupNode.id)].map(x => x.id) }))
+    //   newTree.filter(t => t.parent === groupNode.id).forEach(n => {
+    //     if (n.workspace !== groupNode.workspace) {
+    //       dispatch(updateGroupWorkspace({ id: n.id, workspace: groupNode.id }))
+    //     }
+    //   })
+    // })
 
 
-    } else {
-      // group to workspace
-      if (dragSource.nodeType === nodeType.Group && dropTarget.nodeType === nodeType.Workspace) {
-        dispatch(setCurrentWorkspace(dropTarget.id))
-        dispatch(updateWorkspaceGroups({ workspaceId: dropTarget.id, groups: [...dropTarget.groups, dragSource.id] }))
-        dispatch(updateGroup({ id: dragSource.id, name: dragSource.text, groups: [...dragSource.groups.filter(gid => gid !== dragSource.id)] }))
-      }
-      // group to other group
-      if (dragSource.nodeType === nodeType.Group && dropTarget.nodeType === nodeType.Group) {
-        dispatch(setCurrentWorkspace(dropTarget.workspace))
-        let dragSourceWS = workspaces.filter(ws => ws.id === dragSource.parent);
-        if (dragSourceWS) {
-          dispatch(updateWorkspaceGroups({ workspaceId: dragSourceWS[0].id, groups: [...dragSourceWS[0].groups.filter(gid => gid !== dragSource.id)] }))
-        } else {
-          let dragSourceGroup = groups.filter(g => g.id === dragSource.parent)[0];
-          dispatch(updateGroup({ id: dragSourceGroup.id, name: dragSourceGroup.name, groups: [...dragSourceGroup.groups.filter(gid => gid !== dragSource.id)] }))
-        }
-        dispatch(updateGroup({ id: dropTarget.id, name: dropTarget.text, groups: [...dropTarget.groups, dragSource.id] }))
+    // console.log('handleDrop')
+    // console.log(dragSourceId, dropTargetId, dragSource, dropTarget)
+    // if (dragSource.parent === dropTarget.parent) {
+    //   if (dragSource.nodeType === nodeType.Group && dropTarget.nodeType === nodeType.Group) {
 
-      }
-    }
+    //     dispatch(updateGroupGroups({ id: dropTarget.id, groups: [...dropTarget.groups, dragSource.id] }))
+    //     const isWorkspace = workspaces.filter(ws => ws.id === dragSource.parent).length > 0;
+    //     if (isWorkspace) {
+    //       let parentWorkspace = workspaces.filter(ws => ws.id === dragSource.parent)[0]
+    //       dispatch(updateWorkspaceGroups({ workspaceId: parentWorkspace.id, groups: [...parentWorkspace.groups.filter(gid => gid !== dragSource.id)] }))
+    //     } else {
+    //       let parentGroup = groups.filter(gs => gs.id === dragSource.parent)[0];
+    //       dispatch(updateGroupGroups({ id: parentGroup.id, groups: [...parentGroup.groups.filter(pg => pg.id !== dragSource.id)] }))
+    //     }
+
+    //   }
+
+    // } else {
+    //   // group to workspace
+    //   if (dragSource.nodeType === nodeType.Group && dropTarget.nodeType === nodeType.Workspace) {
+    //     // dispatch(setCurrentWorkspace(dropTarget.id))
+    //     dispatch(updateGroupWorkspace({ id: dragSource.id, workspace: dropTarget.workspace }))
+    //     console.log('updateWorkspaceGroups', dropTarget.id, [...dropTarget.groups, dragSource.id])
+    //     dispatch(updateWorkspaceGroups({ workspaceId: dropTarget.id, groups: [...dropTarget.groups, dragSource.id] }))
+    //     const isWorkspace = workspaces.filter(ws => ws.id === dragSource.parent).length > 0;
+    //     if (isWorkspace) {
+    //       let parentWorkspace = workspaces.filter(ws => ws.id === dragSource.parent)[0]
+    //       dispatch(updateWorkspaceGroups({ workspaceId: parentWorkspace.id, groups: [...parentWorkspace.groups.filter(gid => gid !== dragSource.id)] }))
+    //     } else {
+    //       let parentGroup = groups.filter(gs => gs.id === dragSource.parent)[0];
+    //       dispatch(updateGroupGroups({ id: parentGroup.id, groups: [...parentGroup.groups.filter(pg => pg.id !== dragSource.id)] }))
+    //     }
+    //   }
+    //   // group to other group
+    //   if (dragSource.nodeType === nodeType.Group && dropTarget.nodeType === nodeType.Group) {
+    //     // dispatch(setCurrentWorkspace(dropTarget.workspace))
+    //     dispatch(updateGroupWorkspace({ id: dragSource.id, workspace: dropTarget.workspace }))
+    //     dispatch(updateGroupGroups({ id: dropTarget.id, groups: [...dropTarget.groups, dragSource.id] }))
+    //     let dragSourceWS = workspaces.filter(ws => ws.id === dragSource.parent);
+    //     if (dragSourceWS) {
+    //       dispatch(updateWorkspaceGroups({ workspaceId: dragSourceWS[0].id, groups: [...dragSourceWS[0].groups.filter(gid => gid !== dragSource.id)] }))
+    //     } else {
+    //       let dragSourceGroup = groups.filter(g => g.id === dragSource.parent)[0];
+    //       dispatch(updateGroupGroups({ id: dragSourceGroup.id, groups: [...dragSourceGroup.groups.filter(gid => gid !== dragSource.id)] }))
+    //     }
+
+    //   }
+    // }
 
   }
 
