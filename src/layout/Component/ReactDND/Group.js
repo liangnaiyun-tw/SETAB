@@ -12,8 +12,7 @@ import { useDrop, useDrag } from 'react-dnd';
 import { ItemTypes } from './ItemType';
 import { useSelector, useDispatch } from 'react-redux';
 import { setStructure } from '../../../features/dnd/DndSlice';
-import { backgroundColor } from '@xstyled/styled-components';
-import { moveTabToOtherGroup } from '../../../features/firebase/firestore/firestoreSlice';
+import { moveTabToOtherGroup, moveGroupToOtherGroup } from '../../../features/firebase/firestore/firestoreSlice';
 // import { TroubleshootTwoTone } from '@mui/icons-material';
 
 export const Group = ({ group, allExpaned }) => {
@@ -75,7 +74,10 @@ export const Group = ({ group, allExpaned }) => {
                         for (let i=0; i<droppedGroup.childs.length; i++){
                             newStructure[droppedGroup.childs[i]].index = i;
                         }
-                        // await dispatch(updateGroupToGroup());
+                        let draggedGroupId = draggedGroup.id;
+                        let droppedGroupId = droppedGroup.id;
+                        let originParentGroupId = originParentGroup.id;
+                        dispatch(moveGroupToOtherGroup({draggedGroupId, droppedGroupId, originParentGroupId}));
                     }
 
                 } else {

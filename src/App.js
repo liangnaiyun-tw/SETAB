@@ -27,7 +27,11 @@ import { loadStructureByUser } from "./features/firebase/firestore/firestoreSlic
 app();
 
 function App() {
-
+  const { currentGroup } = useSelector((store) => store.firestore);
+  useEffect(() => {
+    console.log("CURRENT GROUP HAS BEEN SET");
+    console.log(currentGroup);
+  }, [currentGroup]);
 
 
   const { user } = useSelector((store) => store.auth);

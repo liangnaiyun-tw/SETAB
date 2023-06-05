@@ -333,11 +333,12 @@ export const createGroup = createAsyncThunk('firestore/createGroup', async (grou
 
         // setCurrentGroup and reload all structure
         await thunkAPI.dispatch(loadStructureByUser());
-        console.log('[...currentGroup, newGroup.id]', [...currentGroup, newGroup.id])
+        console.log([...currentGroup, newGroup.id]);
         thunkAPI.dispatch(setCurrentGroup([...currentGroup, newGroup.id]));
 
         return "create group successfully";
     } catch (e) {
+        console.error(e);
         return e.response;
     }
 })
@@ -461,12 +462,74 @@ export const closeTab = createAsyncThunk('firestore/closeTab', async (tab, thunk
     return "Close tab successfully";
 })
 
+export const moveGroupToOtherGroup = createAsyncThunk('firestore/moveGroupToOtherGroup', async ({ draggedGroupId, droppedGroupId, originParentGroupId }, thunkAPI) => {
+    try {
+        const { groups, workspaces } = thunkAPI.getState().firestore;
+        let draggedGroup = groups.filter(group => group.id === draggedGroupId)[0];
+        let droppedGroup = groups.filter(group => group.id === droppedGroupId)[0];
+        let droppedWorkspace = workspaces.filter(workspace => workspace.id === droppedGroupId)[0]
+        let originParentGroup = groups.filter(group => group.id === originParentGroupId)[0];
+        let workspace = workspaces.filter(workspace => workspace.id === originParentGroupId)[0];
+        // let draggedGroupId = draggedGroup.id;
+        // let droppedGroupId = droppedGroup.id;
+        // let originParentGroupId = originParentGroup.id;
+
+        // let draggedGroupQuery = query(collection(db, "groups"), where("id", "==", draggedGroupId));
+        let droppedGroupQuery
+        if (droppedWorkspace === undefined)
+            droppedGroupQuery = query(collection(db, "groups"), where("id", "==", droppedGroupId));
+        else
+            droppedGroupQuery = query(collection(db, "workspaces"), where("id", "==", droppedWorkspace.id));
+
+        let originParentGroupQuery;
+        if (workspace === undefined)
+            originParentGroupQuery = query(collection(db, "groups"), where("id", "==", originParentGroupId));
+        else
+            originParentGroupQuery = query(collection(db, "workspaces"), where("id", "==", workspace.id));
+
+        // const draggedGroupQuerySnapshot = await getDocs(draggedGroupQuery);
+        const droppedGroupQuerySnapshot = await getDocs(droppedGroupQuery);
+        const originParentGroupQuerySnapshot = await getDocs(originParentGroupQuery);
+
+        // await updateDoc(draggedGroupQuerySnapshot.docs[0].ref, {
+        //     ...draggedGroup,
+        //     group: newGroup.id
+        // })
+        if (workspace === undefined)
+            await updateDoc(droppedGroupQuerySnapshot.docs[0].ref, {
+                ...droppedGroup,
+                groups: [draggedGroup.id, ...droppedGroup.groups]
+            })
+        else
+            await updateDoc(originParentGroupQuerySnapshot.docs[0].ref, {
+                ...workspace,
+                groups: [draggedGroup.id, ...workspace.groups]
+            })
+
+        if (workspace === undefined)
+            await updateDoc(originParentGroupQuerySnapshot.docs[0].ref, {
+                ...originParentGroup,
+                groups: originParentGroup.groups.filter(group => group !== draggedGroup.id)
+            })
+        else
+            await updateDoc(originParentGroupQuerySnapshot.docs[0].ref, {
+                ...workspace,
+                groups: workspace.groups.filter(group => group !== draggedGroup.id)
+            })
+
+        await thunkAPI.dispatch(loadStructureByUser());
+
+
+    } catch (e) {
+        console.log(e.message)
+    }
+})
+
 export const moveTabToOtherGroup = createAsyncThunk('firestore/moveTabToOtherGroup', async ({ tabId, newGroupId }, thunkAPI) => {
     try {
 
         const { groups, tabs } = thunkAPI.getState().firestore;
-        console.log(tabId);
-        console.log(newGroupId);
+
 
         const tab = tabs.filter(tab => tab.id === tabId)[0];
         const originGroup = groups.filter(group => group.id === tab.group)[0];
@@ -526,7 +589,9 @@ const firestoreSlice = createSlice({
             state.rootDirectory = action.payload;
         },
         setCurrentGroup: (state, action) => {
-            state.currentGroup = action.payload;
+            console.log("SET CURRENt GROUP");
+            console.log(action.payload);
+            state.currentGroup = JSON.parse(JSON.stringify(action.payload));
         },
         updateUnsavedWorkspace: (state, action) => {
             let newTabs = state.tabs;
@@ -628,6 +693,12 @@ const firestoreSlice = createSlice({
                 console.log(action)
             })
             .addCase(moveTabToOtherGroup.rejected, (state, action) => {
+                console.log(action)
+            })
+            .addCase(moveGroupToOtherGroup.fulfilled, (state, action) => {
+                console.log(action)
+            })
+            .addCase(moveGroupToOtherGroup.rejected, (state, action) => {
                 console.log(action)
             })
     }

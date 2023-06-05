@@ -130,6 +130,7 @@ export default function MenuList() {
     group.name = newGroupName;
     dispatch(createGroup(group));
 
+    console.log(currentGroup);
     handleAddGroupDialogClose();
     setNewGroupName("");
   };

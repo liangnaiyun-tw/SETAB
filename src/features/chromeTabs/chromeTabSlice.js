@@ -57,7 +57,7 @@ async function getMemory(thunkAPI) {
   }));
 
   processes.map(process => process.value).filter(process => process !== null).forEach(async (process) => {
-    let index = tabs.findIndex(tab => tab.tabId === process.tasks[0].tabId);
+    let index = tabs.findIndex(tab => tab.tabId === process.tasks.find(task => task.title.startsWith("分頁")).tabId);
     if (index >= 0) {
       tabs[index].privateMemory = process.privateMemory;
     }
